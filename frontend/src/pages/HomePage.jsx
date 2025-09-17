@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
 
 const HomePage = () => {
-  const { user, loading, isAuthenticated } = useAuth();
+  const { user, loading, isAuthenticated, logout } = useAuth();
 
   if (loading) {
     return (
@@ -30,6 +30,12 @@ const HomePage = () => {
             <span className="text-gray-600">안녕하세요, {user?.name}님!</span>
             <button className="text-blue-600 hover:text-blue-800">
               마이페이지
+            </button>
+            <button
+              onClick={logout}
+              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
+            >
+              로그아웃
             </button>
           </div>
         </div>
