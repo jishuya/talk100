@@ -3,11 +3,19 @@ const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
 const morgan = require('morgan');
+const session = require('express-session');
+const pgSession = require('connect-pg-simple')(session);
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
-// 라우트 import (추후 생성)
-// const authRoutes = require('./routes/auth');
-// const questionRoutes = require('./routes/questions');
+// 데이터베이스 연결
+const { db, testConnection } = require('./config/database');
+
+// Passport 설정
+const passport = require('./config/passport');
+
+// 라우트 import
+const authRoutes = require('./routes/auth');
 
 const app = express();
 
@@ -36,6 +44,27 @@ app.use(compression());
 app.use(morgan('combined'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+// 세션 설정 (PostgreSQL 저장)
+app.use(session({
+  store: new pgSession({
+    pool: db.$pool, // pg-promise 풀 사용
+    tableName: 'session' // 세션 테이블명 (자동 생성됨)
+  }),
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 30 * 24 * 60 * 60 * 1000 // 30일
+  }
+}));
+
+// Passport 미들웨어
+app.use(passport.initialize());
+app.use(passport.session());
 
 // 헬스 체크 엔드포인트
 app.get('/health', (req, res) => {
@@ -47,9 +76,8 @@ app.get('/health', (req, res) => {
   });
 });
 
-// API 라우트 (추후 활성화)
-// app.use('/auth', authRoutes);
-// app.use('/api/questions', questionRoutes);
+// API 라우트
+app.use('/auth', authRoutes);
 
 // 404 처리
 app.use((req, res) => {
