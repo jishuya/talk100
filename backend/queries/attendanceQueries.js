@@ -1,4 +1,4 @@
-const { db, safeQuery, safeQueryOne, safeQueryOneOrNone, withTransaction } = require('../config/database');
+const { db, safeQuery, safeQueryOneOrNone, withTransaction } = require('../config/database');
 
 /**
  * 출석 쿼리 함수들
@@ -26,7 +26,7 @@ async function createDailyAttendance(userId, attendanceData = {}) {
     RETURNING *
   `;
 
-  return safeQueryOne(query, [userId, date, startTime, categoriesStudied]);
+  return safeQueryOneOrNone(query, [userId, date, startTime, categoriesStudied]);
 }
 
 // 일일 출석 기록 업데이트
@@ -135,7 +135,7 @@ async function getWeeklyAttendanceRate(userId, weeksAgo = 0) {
       AND date < CURRENT_DATE - INTERVAL '${7 * weeksAgo} days'
   `;
 
-  return safeQueryOne(query, [userId]);
+  return safeQueryOneOrNone(query, [userId]);
 }
 
 // 월간 출석 통계
@@ -163,7 +163,7 @@ async function getMonthlyAttendanceStats(userId, year = null, month = null) {
       AND EXTRACT(MONTH FROM date) = $3
   `;
 
-  return safeQueryOne(query, [userId, targetYear, targetMonth]);
+  return safeQueryOneOrNone(query, [userId, targetYear, targetMonth]);
 }
 
 // 연속 학습일 계산
@@ -195,7 +195,7 @@ async function calculateStreak(userId) {
     WHERE group_id = 0
   `;
 
-  const result = await safeQueryOne(query, [userId]);
+  const result = await safeQueryOneOrNone(query, [userId]);
   return parseInt(result.current_streak);
 }
 
@@ -217,7 +217,7 @@ async function calculateLongestStreak(userId) {
     FROM streak_lengths
   `;
 
-  const result = await safeQueryOne(query, [userId]);
+  const result = await safeQueryOneOrNone(query, [userId]);
   return parseInt(result.longest_streak);
 }
 
@@ -267,7 +267,7 @@ async function getGoalAchievementRate(userId, days = 30) {
       AND date >= CURRENT_DATE - INTERVAL '${days} days'
   `;
 
-  return safeQueryOne(query, [userId]);
+  return safeQueryOneOrNone(query, [userId]);
 }
 
 // 카테고리별 학습 패턴

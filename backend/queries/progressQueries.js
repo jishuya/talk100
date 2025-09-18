@@ -1,4 +1,4 @@
-const { db, safeQuery, safeQueryOne, safeQueryOneOrNone, withTransaction } = require('../config/database');
+const { db, safeQuery, safeQueryOneOrNone, withTransaction } = require('../config/database');
 
 /**
  * 학습 진행상황 쿼리 함수들
@@ -222,7 +222,7 @@ async function getMasteredCount(userId, categoryId = null) {
     paramIndex++;
   }
 
-  const result = await safeQueryOne(query, params);
+  const result = await safeQueryOneOrNone(query, params);
   return parseInt(result.count);
 }
 
@@ -255,7 +255,7 @@ async function getAccuracyRate(userId, categoryId = null, days = null) {
     query += ` AND up.last_attempt_timestamp >= CURRENT_TIMESTAMP - INTERVAL '${days} days'`;
   }
 
-  return safeQueryOne(query, params);
+  return safeQueryOneOrNone(query, params);
 }
 
 // 학습 패턴 분석

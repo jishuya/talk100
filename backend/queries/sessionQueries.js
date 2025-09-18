@@ -1,4 +1,4 @@
-const { db, safeQuery, safeQueryOne, safeQueryOneOrNone, withTransaction } = require('../config/database');
+const { db, safeQuery, safeQueryOneOrNone, withTransaction } = require('../config/database');
 
 /**
  * 학습 세션 쿼리 함수들
@@ -20,7 +20,7 @@ async function startStudySession(userId, categoriesStudied = []) {
     ? categoriesStudied.reduce((acc, cat) => ({ ...acc, [cat]: 0 }), {})
     : {};
 
-  return safeQueryOne(query, [userId, JSON.stringify(categoriesJson)]);
+  return safeQueryOneOrNone(query, [userId, JSON.stringify(categoriesJson)]);
 }
 
 // 학습 세션 종료
@@ -95,7 +95,7 @@ async function logQuestionAttempt(sessionId, logData) {
     RETURNING *
   `;
 
-  return safeQueryOne(query, [
+  return safeQueryOneOrNone(query, [
     sessionId, questionId, userAnswer,
     correctAnswer, isCorrect, responseTime, difficulty
   ]);
@@ -190,7 +190,7 @@ async function getUserStudyStats(userId, days = 30) {
       AND ended_at IS NOT NULL
   `;
 
-  return safeQueryOne(query, [userId]);
+  return safeQueryOneOrNone(query, [userId]);
 }
 
 // 일별 학습 패턴 분석

@@ -105,19 +105,6 @@ async function safeQuery(query, params = null) {
   }
 }
 
-// 단일 결과 조회 함수
-async function safeQueryOne(query, params = null) {
-  try {
-    return await db.one(query, params);
-  } catch (error) {
-    if (error.code === 0) { // No data returned
-      return null;
-    }
-    console.error('Safe query one error:', error.message);
-    throw error;
-  }
-}
-
 // 선택적 단일 결과 조회 함수
 async function safeQueryOneOrNone(query, params = null) {
   try {
@@ -138,7 +125,6 @@ module.exports = {
   withTransaction,
   batchInsert,
   safeQuery,
-  safeQueryOne,
   safeQueryOneOrNone,
 
   // 유틸리티 함수들

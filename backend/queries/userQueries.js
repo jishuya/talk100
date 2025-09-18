@@ -1,4 +1,4 @@
-const { db, safeQuery, safeQueryOne, safeQueryOneOrNone, withTransaction } = require('../config/database');
+const { db, safeQuery, safeQueryOneOrNone, withTransaction } = require('../config/database');
 
 /**
  * 사용자 쿼리 함수들
@@ -28,7 +28,7 @@ async function createUser(userData) {
     RETURNING *
   `;
 
-  return safeQueryOne(query, [
+  return safeQueryOneOrNone(query, [
     uid, name, email, profile_image,
     voice_gender, default_difficulty
   ]);
@@ -131,7 +131,7 @@ async function updateUserSettings(uid, settings) {
     RETURNING *
   `;
 
-  return safeQueryOne(query, values);
+  return safeQueryOneOrNone(query, values);
 }
 
 // 사용자 통계 업데이트 (캐시)
@@ -157,7 +157,7 @@ async function updateUserStats(uid, stats) {
     RETURNING *
   `;
 
-  return safeQueryOne(query, [
+  return safeQueryOneOrNone(query, [
     uid,
     total_days_studied,
     current_streak,
@@ -296,7 +296,7 @@ async function getActiveUsersCount(days = 7) {
     WHERE last_login_at >= CURRENT_TIMESTAMP - INTERVAL '${days} days'
   `;
 
-  const result = await safeQueryOne(query);
+  const result = await safeQueryOneOrNone(query);
   return parseInt(result.active_users);
 }
 

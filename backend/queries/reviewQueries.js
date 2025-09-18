@@ -1,4 +1,4 @@
-const { db, safeQuery, safeQueryOne, safeQueryOneOrNone, withTransaction } = require('../config/database');
+const { db, safeQuery, safeQueryOneOrNone, withTransaction } = require('../config/database');
 
 /**
  * 복습 쿼리 함수들
@@ -25,7 +25,7 @@ async function addToReviewQueue(userId, questionId, categoryId, wrongCount = 1) 
     RETURNING *
   `;
 
-  return safeQueryOne(query, [userId, questionId, categoryId, wrongCount]);
+  return safeQueryOneOrNone(query, [userId, questionId, categoryId, wrongCount]);
 }
 
 // 복습 예정 문제들 조회
@@ -163,7 +163,7 @@ async function getReviewQueueStats(userId, categoryId = null) {
     paramIndex++;
   }
 
-  return safeQueryOne(query, params);
+  return safeQueryOneOrNone(query, params);
 }
 
 // 카테고리별 복습 현황

@@ -1,4 +1,4 @@
-const { db, safeQuery, safeQueryOne, safeQueryOneOrNone } = require('../config/database');
+const { db, safeQuery, safeQueryOneOrNone } = require('../config/database');
 
 /**
  * 문제 쿼리 함수들
@@ -42,7 +42,7 @@ async function getQuestionCountByCategory(categoryId) {
     WHERE category = $1
   `;
 
-  const result = await safeQueryOne(query, [categoryId]);
+  const result = await safeQueryOneOrNone(query, [categoryId]);
   return parseInt(result.count);
 }
 
