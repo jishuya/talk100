@@ -1,78 +1,217 @@
 const { db, safeQuery, safeQueryOneOrNone, withTransaction } = require('../config/database');
 
 /**
- * 복습 쿼리 함수들
- * review_queue 테이블 관련 함수들 (간격반복학습)
+ * 복습 관련 쿼리 함수들
+ * review_queue 테이블 관리 및 8단계 복습 주기 구현
  */
 
-// 복습 큐에 문제 추가
-async function addToReviewQueue(userId, questionId, categoryId, wrongCount = 1) {
+// 복습 간격 상수 (1→3→7→14→30→60→90→120일)
+const REVIEW_INTERVALS = [1, 3, 7, 14, 30, 60, 90, 120];
+
+// 사용자의 복습 대기 문제들 조회 (오늘 복습할 것들)
+async function getTodayReviewQuestions(userId) {
   const query = `
-    INSERT INTO review_queue (
-      user_id, question_id, category,
-      priority, wrong_count, scheduled_for, interval_days
-    ) VALUES (
-      $1, $2, $3,
-      $4, $4, CURRENT_TIMESTAMP + INTERVAL '1 day', 1
-    )
-    ON CONFLICT (user_id, question_id)
-    DO UPDATE SET
-      wrong_count = review_queue.wrong_count + 1,
-      priority = review_queue.wrong_count + 1,
-      scheduled_for = CURRENT_TIMESTAMP + INTERVAL '1 day',
-      interval_days = 1,
-      added_at = CURRENT_TIMESTAMP
-    RETURNING *
-  `;
-
-  return safeQueryOneOrNone(query, [userId, questionId, categoryId, wrongCount]);
-}
-
-// 복습 예정 문제들 조회
-async function getReviewQuestions(userId, categoryId = null, limit = 20) {
-  let query = `
     SELECT
-      rq.*,
+      rq.queue_id,
+      rq.user_id,
+      rq.question_id,
+      rq.interval_days,
+      rq.scheduled_for,
+      rq.wrong_count,
+      rq.added_at,
+      rq.review_type,
+      rq.source_day,
+      q.category,
+      q.day,
+      q.question_number,
+      q.question_type,
       q.korean_content,
       q.english_content,
       q.person_a_korean,
       q.person_a_english,
       q.person_b_korean,
       q.person_b_english,
-      q.question_type,
-      q.keywords,
-      q.audio_male_full,
-      q.audio_female_full,
-      q.audio_male_person_a,
-      q.audio_female_person_a,
-      q.audio_male_person_b,
-      q.audio_female_person_b
+      q.keywords
     FROM review_queue rq
     JOIN questions q ON rq.question_id = q.question_id
     WHERE rq.user_id = $1
       AND rq.scheduled_for <= CURRENT_TIMESTAMP
+    ORDER BY rq.scheduled_for, rq.review_type, q.category, q.day, q.question_number
   `;
 
-  const params = [userId];
-  let paramIndex = 2;
-
-  if (categoryId) {
-    query += ` AND rq.category = $${paramIndex}`;
-    params.push(categoryId);
-    paramIndex++;
-  }
-
-  query += `
-    ORDER BY rq.priority ASC, rq.scheduled_for ASC
-    LIMIT $${paramIndex}
-  `;
-  params.push(limit);
-
-  return safeQuery(query, params);
+  return safeQuery(query, [userId]);
 }
 
-// 복습 큐에서 문제 제거 (5회 연속 정답 시)
-async function removeFromReviewQueue(userId, questionId) {
+// 사용자의 모든 복습 스케줄 조회
+async function getAllReviewSchedule(userId) {
+  const query = `
+    SELECT
+      rq.queue_id,
+      rq.user_id,
+      rq.question_id,
+      rq.interval_days,
+      rq.scheduled_for,
+      rq.wrong_count,
+      rq.added_at,
+      rq.review_type,
+      rq.source_day,
+      q.category,
+      q.day,
+      q.question_number,
+      q.korean_content,
+      q.english_content
+    FROM review_queue rq
+    JOIN questions q ON rq.question_id = q.question_id
+    WHERE rq.user_id = $1
+    ORDER BY rq.scheduled_for, q.category, q.day, q.question_number
+  `;
+
+  return safeQuery(query, [userId]);
+}
+
+// 복습 타입별 조회
+async function getReviewsByType(userId, reviewType) {
+  const query = `
+    SELECT
+      rq.queue_id,
+      rq.user_id,
+      rq.question_id,
+      rq.interval_days,
+      rq.scheduled_for,
+      rq.wrong_count,
+      rq.added_at,
+      rq.review_type,
+      rq.source_day,
+      q.category,
+      q.day,
+      q.question_number,
+      q.korean_content,
+      q.english_content
+    FROM review_queue rq
+    JOIN questions q ON rq.question_id = q.question_id
+    WHERE rq.user_id = $1 AND rq.review_type = $2
+    ORDER BY rq.scheduled_for, q.category, q.day, q.question_number
+  `;
+
+  return safeQuery(query, [userId, reviewType]);
+}
+
+// 틀린 문제를 복습 큐에 추가
+async function addWrongAnswerToReview(userId, questionId) {
+  const query = `
+    INSERT INTO review_queue (
+      user_id, question_id, interval_days, scheduled_for,
+      wrong_count, review_type, added_at
+    ) VALUES (
+      $1, $2, 1, NOW() + INTERVAL '1 day',
+      1, 'wrong', CURRENT_TIMESTAMP
+    )
+    ON CONFLICT (user_id, question_id)
+    DO UPDATE SET
+      interval_days = 1,
+      scheduled_for = NOW() + INTERVAL '1 day',
+      wrong_count = review_queue.wrong_count + 1,
+      added_at = CURRENT_TIMESTAMP
+    RETURNING *
+  `;
+
+  return safeQueryOneOrNone(query, [userId, questionId]);
+}
+
+// Day 완료 복습 생성
+async function createDayCompleteReview(userId, dayNumber, category, questionIds) {
+  return withTransaction(async (t) => {
+    const results = [];
+
+    for (const questionId of questionIds) {
+      const result = await t.one(`
+        INSERT INTO review_queue (
+          user_id, question_id, interval_days, scheduled_for,
+          wrong_count, review_type, source_day, added_at
+        ) VALUES (
+          $1, $2, 1, NOW() + INTERVAL '1 day',
+          0, 'day_complete', $3, CURRENT_TIMESTAMP
+        )
+        ON CONFLICT (user_id, question_id)
+        DO UPDATE SET
+          interval_days = 1,
+          scheduled_for = NOW() + INTERVAL '1 day',
+          review_type = 'day_complete',
+          source_day = $3,
+          added_at = CURRENT_TIMESTAMP
+        RETURNING *
+      `, [userId, questionId, dayNumber]);
+
+      results.push(result);
+    }
+
+    return results;
+  });
+}
+
+// 복습 결과 업데이트 (8단계 간격 시스템)
+async function updateReviewResult(userId, questionId, isCorrect) {
+  return withTransaction(async (t) => {
+    // 현재 복습 정보 조회
+    const currentReview = await t.oneOrNone(
+      'SELECT * FROM review_queue WHERE user_id = $1 AND question_id = $2',
+      [userId, questionId]
+    );
+
+    if (!currentReview) {
+      throw new Error('Review item not found');
+    }
+
+    const currentInterval = currentReview.interval_days || 1;
+    const currentIndex = REVIEW_INTERVALS.indexOf(currentInterval);
+
+    if (isCorrect) {
+      if (currentIndex < REVIEW_INTERVALS.length - 1) {
+        // 다음 단계로 이동
+        const nextInterval = REVIEW_INTERVALS[currentIndex + 1];
+        const nextScheduledFor = new Date();
+        nextScheduledFor.setDate(nextScheduledFor.getDate() + nextInterval);
+
+        const result = await t.one(`
+          UPDATE review_queue SET
+            interval_days = $3,
+            scheduled_for = $4,
+            wrong_count = CASE WHEN $5 = false THEN wrong_count ELSE wrong_count END
+          WHERE user_id = $1 AND question_id = $2
+          RETURNING *
+        `, [userId, questionId, nextInterval, nextScheduledFor, isCorrect]);
+
+        return { action: 'updated', result };
+      } else {
+        // 120일 완료 - 복습 완료로 삭제
+        await t.none(
+          'DELETE FROM review_queue WHERE user_id = $1 AND question_id = $2',
+          [userId, questionId]
+        );
+
+        return { action: 'completed', result: null };
+      }
+    } else {
+      // 오답 - 처음으로 되돌리기
+      const nextScheduledFor = new Date();
+      nextScheduledFor.setDate(nextScheduledFor.getDate() + 1);
+
+      const result = await t.one(`
+        UPDATE review_queue SET
+          interval_days = 1,
+          scheduled_for = $3,
+          wrong_count = wrong_count + 1
+        WHERE user_id = $1 AND question_id = $2
+        RETURNING *
+      `, [userId, questionId, nextScheduledFor]);
+
+      return { action: 'reset', result };
+    }
+  });
+}
+
+// 복습 문제 삭제
+async function removeFromReview(userId, questionId) {
   const query = `
     DELETE FROM review_queue
     WHERE user_id = $1 AND question_id = $2
@@ -82,248 +221,138 @@ async function removeFromReviewQueue(userId, questionId) {
   return safeQueryOneOrNone(query, [userId, questionId]);
 }
 
-// 복습 일정 업데이트 (간격반복학습)
-async function updateReviewSchedule(userId, questionId, isCorrect) {
-  return withTransaction(async (t) => {
-    const current = await t.oneOrNone(
-      'SELECT * FROM review_queue WHERE user_id = $1 AND question_id = $2',
-      [userId, questionId]
-    );
-
-    if (!current) {
-      return null; // 복습 큐에 없음
-    }
-
-    if (isCorrect) {
-      // 정답 - 간격 증가
-      const newInterval = calculateNextInterval(current.interval_days, current.ease_factor, true);
-      const newEaseFactor = Math.max(1.3, current.ease_factor + 0.1);
-
-      const updated = await t.one(`
-        UPDATE review_queue SET
-          interval_days = $3,
-          scheduled_for = CURRENT_TIMESTAMP + INTERVAL '${newInterval} days',
-          ease_factor = $4,
-          priority = GREATEST(1, priority - 1)
-        WHERE user_id = $1 AND question_id = $2
-        RETURNING *
-      `, [userId, questionId, newInterval, newEaseFactor]);
-
-      return updated;
-    } else {
-      // 오답 - 간격 초기화
-      const newEaseFactor = Math.max(1.3, current.ease_factor - 0.2);
-
-      const updated = await t.one(`
-        UPDATE review_queue SET
-          interval_days = 1,
-          scheduled_for = CURRENT_TIMESTAMP + INTERVAL '1 day',
-          ease_factor = $3,
-          wrong_count = wrong_count + 1,
-          priority = wrong_count + 1
-        WHERE user_id = $1 AND question_id = $2
-        RETURNING *
-      `, [userId, questionId, newEaseFactor]);
-
-      return updated;
-    }
-  });
-}
-
-// 다음 복습 간격 계산 (SuperMemo 알고리즘 기반)
-function calculateNextInterval(currentInterval, easeFactor, isCorrect) {
-  if (!isCorrect) return 1;
-
-  if (currentInterval === 1) return 3;
-  if (currentInterval === 3) return 7;
-
-  return Math.ceil(currentInterval * easeFactor);
-}
-
-// 복습 대기열 통계
-async function getReviewQueueStats(userId, categoryId = null) {
-  let query = `
-    SELECT
-      COUNT(*) as total_review_questions,
-      COUNT(CASE WHEN scheduled_for <= CURRENT_TIMESTAMP THEN 1 END) as due_now,
-      COUNT(CASE WHEN scheduled_for <= CURRENT_TIMESTAMP + INTERVAL '1 day' THEN 1 END) as due_tomorrow,
-      COUNT(CASE WHEN wrong_count >= 5 THEN 1 END) as difficult_questions,
-      AVG(interval_days)::INTEGER as avg_interval,
-      MAX(wrong_count) as max_wrong_count
-    FROM review_queue rq
-    WHERE rq.user_id = $1
-  `;
-
-  const params = [userId];
-  let paramIndex = 2;
-
-  if (categoryId) {
-    query += ` AND rq.category = $${paramIndex}`;
-    params.push(categoryId);
-    paramIndex++;
-  }
-
-  return safeQueryOneOrNone(query, params);
-}
-
-// 카테고리별 복습 현황
-async function getReviewStatsByCategory(userId) {
+// 복습 통계 조회
+async function getReviewStats(userId) {
   const query = `
     SELECT
-      rq.category,
-      COUNT(*) as review_count,
-      COUNT(CASE WHEN rq.scheduled_for <= CURRENT_TIMESTAMP THEN 1 END) as due_now,
-      AVG(rq.wrong_count)::INTEGER as avg_wrong_count,
-      AVG(rq.interval_days)::INTEGER as avg_interval
-    FROM review_queue rq
-    WHERE rq.user_id = $1
-    GROUP BY rq.category
-    ORDER BY review_count DESC
+      COUNT(*) as total_reviews,
+      COUNT(CASE WHEN scheduled_for <= CURRENT_TIMESTAMP THEN 1 END) as due_today,
+      COUNT(CASE WHEN review_type = 'wrong' THEN 1 END) as wrong_answer_reviews,
+      COUNT(CASE WHEN review_type = 'day_complete' THEN 1 END) as day_complete_reviews,
+      COUNT(CASE WHEN interval_days = 1 THEN 1 END) as stage_1,
+      COUNT(CASE WHEN interval_days = 3 THEN 1 END) as stage_2,
+      COUNT(CASE WHEN interval_days = 7 THEN 1 END) as stage_3,
+      COUNT(CASE WHEN interval_days = 14 THEN 1 END) as stage_4,
+      COUNT(CASE WHEN interval_days = 30 THEN 1 END) as stage_5,
+      COUNT(CASE WHEN interval_days = 60 THEN 1 END) as stage_6,
+      COUNT(CASE WHEN interval_days = 90 THEN 1 END) as stage_7,
+      COUNT(CASE WHEN interval_days = 120 THEN 1 END) as stage_8,
+      AVG(wrong_count) as avg_wrong_count
+    FROM review_queue
+    WHERE user_id = $1
+  `;
+
+  const result = await safeQueryOneOrNone(query, [userId]);
+  return result || {
+    total_reviews: 0,
+    due_today: 0,
+    wrong_answer_reviews: 0,
+    day_complete_reviews: 0,
+    stage_1: 0, stage_2: 0, stage_3: 0, stage_4: 0,
+    stage_5: 0, stage_6: 0, stage_7: 0, stage_8: 0,
+    avg_wrong_count: 0
+  };
+}
+
+// 다가오는 복습 일정 조회 (향후 7일)
+async function getUpcomingReviews(userId, days = 7) {
+  const query = `
+    SELECT
+      DATE(scheduled_for) as review_date,
+      COUNT(*) as question_count,
+      COUNT(CASE WHEN review_type = 'wrong' THEN 1 END) as wrong_count,
+      COUNT(CASE WHEN review_type = 'day_complete' THEN 1 END) as day_complete_count
+    FROM review_queue
+    WHERE user_id = $1
+      AND scheduled_for >= CURRENT_TIMESTAMP
+      AND scheduled_for <= CURRENT_TIMESTAMP + INTERVAL '${days} days'
+    GROUP BY DATE(scheduled_for)
+    ORDER BY review_date
   `;
 
   return safeQuery(query, [userId]);
 }
 
-// 어려운 문제 식별 (자주 틀리는 문제)
-async function getDifficultQuestions(userId, minWrongCount = 3, limit = 10) {
+// 특정 interval 단계의 복습 문제들 조회
+async function getReviewsByInterval(userId, intervalDays) {
   const query = `
     SELECT
-      rq.*,
-      q.korean_content,
-      q.english_content,
-      q.keywords,
-      q.category
-    FROM review_queue rq
-    JOIN questions q ON rq.question_id = q.question_id
-    WHERE rq.user_id = $1
-      AND rq.wrong_count >= $2
-    ORDER BY rq.wrong_count DESC, rq.priority ASC
-    LIMIT $3
-  `;
-
-  return safeQuery(query, [userId, minWrongCount, limit]);
-}
-
-// 복습 세션용 문제 선택 (우선순위 기반)
-async function getReviewSessionQuestions(userId, sessionSize = 10, categoryId = null) {
-  let query = `
-    SELECT
-      rq.*,
-      q.korean_content,
-      q.english_content,
-      q.person_a_korean,
-      q.person_a_english,
-      q.person_b_korean,
-      q.person_b_english,
-      q.question_type,
-      q.keywords,
-      q.audio_male_full,
-      q.audio_female_full,
-      q.audio_male_person_a,
-      q.audio_female_person_a,
-      q.audio_male_person_b,
-      q.audio_female_person_b
-    FROM review_queue rq
-    JOIN questions q ON rq.question_id = q.question_id
-    WHERE rq.user_id = $1
-      AND rq.scheduled_for <= CURRENT_TIMESTAMP
-  `;
-
-  const params = [userId];
-  let paramIndex = 2;
-
-  if (categoryId) {
-    query += ` AND rq.category = $${paramIndex}`;
-    params.push(categoryId);
-    paramIndex++;
-  }
-
-  query += `
-    ORDER BY
-      CASE WHEN rq.scheduled_for < CURRENT_TIMESTAMP - INTERVAL '1 day' THEN 1 ELSE 2 END,
-      rq.priority ASC,
-      rq.wrong_count DESC,
-      rq.scheduled_for ASC
-    LIMIT $${paramIndex}
-  `;
-  params.push(sessionSize);
-
-  return safeQuery(query, params);
-}
-
-// 복습 완료 처리
-async function completeReview(userId, questionId, isCorrect, responseTime = null) {
-  return withTransaction(async (t) => {
-    // 복습 스케줄 업데이트
-    const updated = await updateReviewSchedule(userId, questionId, isCorrect);
-
-    // user_progress도 업데이트
-    if (updated) {
-      await t.any(`
-        UPDATE user_progress SET
-          total_attempts = total_attempts + 1,
-          correct_attempts = correct_attempts + CASE WHEN $3 THEN 1 ELSE 0 END,
-          wrong_attempts = wrong_attempts + CASE WHEN $3 THEN 0 ELSE 1 END,
-          last_attempt_timestamp = CURRENT_TIMESTAMP,
-          last_is_correct = $3,
-          last_time_taken = $4
-        WHERE user_id = $1 AND question_id = $2
-      `, [userId, questionId, isCorrect, responseTime]);
-    }
-
-    return updated;
-  });
-}
-
-// 복습 이력 조회
-async function getReviewHistory(userId, days = 7, limit = 50) {
-  const query = `
-    SELECT
+      rq.queue_id,
+      rq.user_id,
       rq.question_id,
-      rq.category,
-      q.korean_content,
-      q.english_content,
-      rq.wrong_count,
       rq.interval_days,
       rq.scheduled_for,
-      up.last_attempt_timestamp,
-      up.last_is_correct
+      rq.wrong_count,
+      rq.review_type,
+      rq.source_day,
+      q.category,
+      q.day,
+      q.question_number,
+      q.korean_content,
+      q.english_content
     FROM review_queue rq
     JOIN questions q ON rq.question_id = q.question_id
-    LEFT JOIN user_progress up ON rq.user_id = up.user_id AND rq.question_id = up.question_id
-    WHERE rq.user_id = $1
-      AND up.last_attempt_timestamp >= CURRENT_TIMESTAMP - INTERVAL '${days} days'
-    ORDER BY up.last_attempt_timestamp DESC
-    LIMIT $2
+    WHERE rq.user_id = $1 AND rq.interval_days = $2
+    ORDER BY rq.scheduled_for, q.category, q.day, q.question_number
   `;
 
-  return safeQuery(query, [userId, limit]);
+  return safeQuery(query, [userId, intervalDays]);
 }
 
-// 복습 큐 초기화 (전체 또는 카테고리별)
-async function clearReviewQueue(userId, categoryId = null) {
-  let query = `DELETE FROM review_queue WHERE user_id = $1`;
-  const params = [userId];
+// 복습 완료율 계산
+async function calculateReviewCompletionRate(userId, days = 30) {
+  const query = `
+    WITH review_activity AS (
+      SELECT
+        DATE(scheduled_for) as review_date,
+        COUNT(*) as scheduled_count
+      FROM review_queue
+      WHERE user_id = $1
+        AND scheduled_for >= CURRENT_DATE - INTERVAL '${days} days'
+        AND scheduled_for < CURRENT_DATE
+      GROUP BY DATE(scheduled_for)
+    ),
+    progress_activity AS (
+      SELECT
+        DATE(last_attempt_timestamp) as attempt_date,
+        COUNT(DISTINCT question_id) as attempted_count
+      FROM user_progress
+      WHERE user_id = $1
+        AND last_attempt_timestamp >= CURRENT_DATE - INTERVAL '${days} days'
+        AND last_attempt_timestamp < CURRENT_DATE
+        AND question_id IN (
+          SELECT question_id FROM review_queue
+          WHERE user_id = $1
+        )
+      GROUP BY DATE(last_attempt_timestamp)
+    )
+    SELECT
+      COALESCE(SUM(ra.scheduled_count), 0) as total_scheduled,
+      COALESCE(SUM(pa.attempted_count), 0) as total_attempted,
+      CASE
+        WHEN SUM(ra.scheduled_count) > 0
+        THEN ROUND((SUM(pa.attempted_count)::FLOAT / SUM(ra.scheduled_count)) * 100, 2)
+        ELSE 0
+      END as completion_rate
+    FROM review_activity ra
+    FULL OUTER JOIN progress_activity pa ON ra.review_date = pa.attempt_date
+  `;
 
-  if (categoryId) {
-    query += ` AND category = $2`;
-    params.push(categoryId);
-  }
-
-  const result = await db.result(query, params);
-  return { success: true, deletedCount: result.rowCount };
+  const result = await safeQueryOneOrNone(query, [userId]);
+  return result || { total_scheduled: 0, total_attempted: 0, completion_rate: 0 };
 }
 
 module.exports = {
-  addToReviewQueue,
-  getReviewQuestions,
-  removeFromReviewQueue,
-  updateReviewSchedule,
-  getReviewQueueStats,
-  getReviewStatsByCategory,
-  getDifficultQuestions,
-  getReviewSessionQuestions,
-  completeReview,
-  getReviewHistory,
-  clearReviewQueue
+  REVIEW_INTERVALS,
+  getTodayReviewQuestions,
+  getAllReviewSchedule,
+  getReviewsByType,
+  addWrongAnswerToReview,
+  createDayCompleteReview,
+  updateReviewResult,
+  removeFromReview,
+  getReviewStats,
+  getUpcomingReviews,
+  getReviewsByInterval,
+  calculateReviewCompletionRate
 };

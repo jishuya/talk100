@@ -13,16 +13,17 @@ async function createUser(userData) {
     email,
     profile_image = null,
     voice_gender = 'male',
-    default_difficulty = 2
+    default_difficulty = 2,
+    daily_goal = 1
   } = userData;
 
   const query = `
     INSERT INTO users (
       uid, name, email, profile_image,
-      voice_gender, default_difficulty,
+      voice_gender, default_difficulty, daily_goal,
       created_at, last_login_at
     ) VALUES (
-      $1, $2, $3, $4, $5, $6,
+      $1, $2, $3, $4, $5, $6, $7,
       CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
     )
     RETURNING *
@@ -30,7 +31,7 @@ async function createUser(userData) {
 
   return safeQueryOneOrNone(query, [
     uid, name, email, profile_image,
-    voice_gender, default_difficulty
+    voice_gender, default_difficulty, daily_goal
   ]);
 }
 
@@ -77,10 +78,10 @@ async function findOrCreateUser(userData) {
       user = await t.one(`
         INSERT INTO users (
           uid, name, email, profile_image,
-          voice_gender, default_difficulty,
+          voice_gender, default_difficulty, daily_goal,
           created_at, last_login_at
         ) VALUES (
-          $1, $2, $3, $4, $5, $6,
+          $1, $2, $3, $4, $5, $6, $7,
           CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
         )
         RETURNING *
@@ -90,7 +91,8 @@ async function findOrCreateUser(userData) {
         userData.email,
         userData.profile_image || null,
         userData.voice_gender || 'male',
-        userData.default_difficulty || 2
+        userData.default_difficulty || 2,
+        userData.daily_goal || 1
       ]);
     }
 
@@ -103,6 +105,7 @@ async function updateUserSettings(uid, settings) {
   const allowedFields = [
     'voice_gender',
     'default_difficulty',
+    'daily_goal',
     'notification_enabled'
   ];
 
