@@ -111,7 +111,7 @@ async function getQuestionById(questionId) {
   return safeQueryOneOrNone(query, [questionId]);
 }
 
-// 복수 문제 ID로 문제들 조회
+// 문제ID 여러개로 대량의 문제들을 한번에 조회
 async function getQuestionsByIds(questionIds) {
   if (!questionIds || questionIds.length === 0) {
     return [];
@@ -146,7 +146,7 @@ async function getQuestionsByIds(questionIds) {
   return safeQuery(query, questionIds);
 }
 
-// Day 완료를 위한 복습 문제 선택
+// 오늘의 퀴즈 완료 후, 해당 day의 문제중 복습 문제 선택
 async function selectReviewQuestions(dayNumber, category) {
   const questions = [];
 
