@@ -16,6 +16,9 @@ const passport = require('./config/passport');
 
 // 라우트 import
 const authRoutes = require('./routes/auth');
+const questionRoutes = require('./routes/questions');
+const progressRoutes = require('./routes/progress');
+const reviewRoutes = require('./routes/review');
 
 const app = express();
 
@@ -78,6 +81,9 @@ app.get('/health', (req, res) => {
 
 // API 라우트
 app.use('/auth', authRoutes);
+app.use('/api/questions', questionRoutes);
+app.use('/api/progress', progressRoutes);
+app.use('/api/review', reviewRoutes);
 
 // 404 처리
 app.use((req, res) => {
