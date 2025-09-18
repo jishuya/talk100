@@ -227,6 +227,39 @@ router.get('/status', (req, res) => {
   }
 });
 
+// 테스트용 토큰 생성 (개발 환경에서만)
+router.post('/test-token', (req, res) => {
+  if (process.env.NODE_ENV !== 'development') {
+    return res.status(403).json({
+      success: false,
+      message: 'This endpoint is only available in development mode'
+    });
+  }
+
+  try {
+    const testUser = {
+      uid: 'test_user_123',
+      name: 'Test User',
+      email: 'test@example.com'
+    };
+
+    const token = generateToken(testUser);
+
+    res.json({
+      success: true,
+      token,
+      user: testUser
+    });
+
+  } catch (error) {
+    console.error('Test token generation error:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to generate test token'
+    });
+  }
+});
+
 // 에러 처리 미들웨어
 router.use((error, req, res, next) => {
   console.error('Auth route error:', error.message);
