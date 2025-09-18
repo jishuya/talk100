@@ -19,6 +19,7 @@ const authRoutes = require('./routes/auth');
 const questionRoutes = require('./routes/questions');
 const progressRoutes = require('./routes/progress');
 const reviewRoutes = require('./routes/review');
+const wrongAnswersRoutes = require('./routes/wrongAnswers');
 
 const app = express();
 
@@ -84,6 +85,7 @@ app.use('/auth', authRoutes);
 app.use('/api/questions', questionRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/review', reviewRoutes);
+app.use('/api/wrong-answers', wrongAnswersRoutes);
 
 // 404 처리
 app.use((req, res) => {
