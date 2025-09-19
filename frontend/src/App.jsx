@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AppProvider } from './contexts/AppContext';
+import AppLayout from './components/layout/AppLayout';
 
 // 페이지 컴포넌트들
 import HomePage from './pages/HomePage';
@@ -35,16 +36,18 @@ function App() {
           <ThemeProvider>
             <Router>
               <div className="app-container min-h-screen bg-accent-pale">
-                <Routes>
-                  <Route path="/login" element={<LoginPage />} />
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/quiz" element={<QuizPage />} />
-                  <Route path="/quiz/:category" element={<QuizPage />} />
-                  <Route path="/quiz/:category/:day" element={<QuizPage />} />
-                  <Route path="/status" element={<StatusPage />} />
-                  <Route path="/mypage" element={<MyPage />} />
-                  <Route path="/settings" element={<SettingsPage />} />
-                </Routes>
+                <AppLayout>
+                  <Routes>
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/quiz" element={<QuizPage />} />
+                    <Route path="/quiz/:category" element={<QuizPage />} />
+                    <Route path="/quiz/:category/:day" element={<QuizPage />} />
+                    <Route path="/status" element={<StatusPage />} />
+                    <Route path="/mypage" element={<MyPage />} />
+                    <Route path="/settings" element={<SettingsPage />} />
+                  </Routes>
+                </AppLayout>
               </div>
             </Router>
           </ThemeProvider>

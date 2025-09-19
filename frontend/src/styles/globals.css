@@ -41,7 +41,7 @@
   --radius-full: 100px;
 
   /* 모바일 기준 사이즈 */
-  --header-height: 56px;
+  --header-height: 64px;
   --bottom-nav-height: 60px;
   --safe-area-inset: env(safe-area-inset-bottom);
 }
@@ -172,10 +172,17 @@ body {
   }
 
   .app-container {
-    max-width: 480px;
+    max-width: 768px;        /* 480px → 768px로 확대 */
     min-height: 100vh;
     background: var(--accent-pale);
     border-radius: 20px;
     overflow: hidden;
+  }
+}
+
+/* 더 큰 화면에서는 더욱 확대 */
+@media (min-width: 1440px) {
+  .app-container {
+    max-width: 1024px;       /* 큰 화면에서는 태블릿 크기 */
   }
 }
