@@ -2,13 +2,19 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { AppProvider } from './contexts/AppContext';
 
-// 페이지 컴포넌트들 (추후 생성)
+// 페이지 컴포넌트들
 import HomePage from './pages/HomePage';
-import LoginPage from './pages/LoginPage';
-import TestPage from './pages/TestPage';
-import ReviewPage from './pages/ReviewPage';
+import QuizPage from './pages/QuizPage';
+import StatusPage from './pages/StatusPage';
 import MyPage from './pages/MyPage';
+import SettingsPage from './pages/SettingsPage';
+import LoginPage from './pages/LoginPage';
+
+// 스타일 import
+import './styles/globals.css';
 
 // React Query 클라이언트 생성
 const queryClient = new QueryClient({
@@ -25,18 +31,24 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Router>
-          <div className="min-h-screen bg-gray-50">
-            <Routes>
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/" element={<HomePage />} />
-              <Route path="/test/:category" element={<TestPage />} />
-              <Route path="/test/:category/:day" element={<TestPage />} />
-              <Route path="/review" element={<ReviewPage />} />
-              <Route path="/mypage" element={<MyPage />} />
-            </Routes>
-          </div>
-        </Router>
+        <AppProvider>
+          <ThemeProvider>
+            <Router>
+              <div className="app-container min-h-screen bg-accent-pale">
+                <Routes>
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/quiz" element={<QuizPage />} />
+                  <Route path="/quiz/:category" element={<QuizPage />} />
+                  <Route path="/quiz/:category/:day" element={<QuizPage />} />
+                  <Route path="/status" element={<StatusPage />} />
+                  <Route path="/mypage" element={<MyPage />} />
+                  <Route path="/settings" element={<SettingsPage />} />
+                </Routes>
+              </div>
+            </Router>
+          </ThemeProvider>
+        </AppProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

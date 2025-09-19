@@ -1,0 +1,181 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* talk100 Design System - CSS Variables */
+:root {
+  /* 상쾌한 민트그린 색상 팔레트 */
+  --primary-color: #55AD9B;        /* Teal - 메인 컬러 */
+  --primary-dark: #428A7B;         /* Darker Teal - 다크 버전 */
+  --primary-light: #95D2B3;        /* Medium Mint - 라이트 버전 */
+  --accent-mint: #D8EFD3;          /* Light Mint - 연한 민트 */
+  --accent-pale: #F1F8E8;          /* Pale Green - 연한 그린 */
+
+  /* 배경 그라데이션 */
+  --bg-gradient: linear-gradient(180deg, #F1F8E8 0%, #D8EFD3 40%, #95D2B3 100%);
+  --bg-gradient-soft: linear-gradient(135deg, #F1F8E8 0%, #D8EFD3 100%);
+  --bg-gradient-mint: linear-gradient(135deg, #95D2B3 0%, #55AD9B 100%);
+  --bg-gradient-fresh: linear-gradient(135deg, #D8EFD3 0%, #95D2B3 100%);
+
+  /* 텍스트 색상 */
+  --text-primary: #2C3E50;
+  --text-secondary: #5A6C7D;
+  --text-on-primary: #FFFFFF;
+
+  /* 기본 색상 */
+  --white: #FFFFFF;
+  --gray-light: #F9FBF8;
+  --gray-border: #D8E8D5;
+
+  /* 상태 색상 */
+  --success: #55AD9B;
+  --error: #FF4D4F;
+  --warning: #FAAD14;
+  --info: #29B6F6;
+
+  /* 효과 */
+  --shadow: 0 2px 8px rgba(85, 173, 155, 0.15);
+  --shadow-lg: 0 4px 12px rgba(85, 173, 155, 0.25);
+  --radius: 16px;
+  --radius-small: 12px;
+  --radius-full: 100px;
+
+  /* 모바일 기준 사이즈 */
+  --header-height: 56px;
+  --bottom-nav-height: 60px;
+  --safe-area-inset: env(safe-area-inset-bottom);
+}
+
+/* 다크 테마 지원 */
+[data-theme="dark"] {
+  --primary-color: #6BC2AE;
+  --primary-dark: #55AD9B;
+  --text-primary: #E5E7EB;
+  --text-secondary: #9CA3AF;
+  --white: #1F2937;
+  --gray-light: #111827;
+  --gray-border: #374151;
+  --accent-pale: #0F172A;
+}
+
+/* 기본 스타일 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+  background: var(--accent-pale);
+  color: var(--text-primary);
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* 터치 피드백 */
+.touchable {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.touchable:active {
+  transform: scale(0.98);
+  opacity: 0.8;
+}
+
+.touchable::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.1);
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s;
+}
+
+.touchable:active::after {
+  width: 100%;
+  height: 100%;
+}
+
+/* 애니메이션 */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* 스크롤바 스타일링 */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--gray-light);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-light);
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-color);
+}
+
+/* 포커스 스타일 */
+.focus\:ring-primary:focus {
+  --tw-ring-color: var(--primary-color);
+  --tw-ring-opacity: 0.5;
+}
+
+/* 반응형 브레이크포인트에 따른 추가 스타일 */
+@media (min-width: 768px) {
+  .app-container {
+    max-width: 768px;
+    margin: 0 auto;
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+@media (min-width: 1024px) {
+  body {
+    background: #F5F5F5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .app-container {
+    max-width: 480px;
+    min-height: 100vh;
+    background: var(--accent-pale);
+    border-radius: 20px;
+    overflow: hidden;
+  }
+}
