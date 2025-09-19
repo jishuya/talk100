@@ -28,10 +28,18 @@ const queryClient = new QueryClient({
   },
 });
 
+/**QueryClient (데이터 관리-서버상태)
+   └── Auth (로그인 관리)
+     └── App (앱 전역 상태)
+       └── Theme (테마/색상 관리)
+         └── Router (페이지 이동)
+           └── Layout (공통 레이아웃)
+             └── 실제 페이지들
+*/
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
+      <AuthProvider> 
         <AppProvider>
           <ThemeProvider>
             <Router>

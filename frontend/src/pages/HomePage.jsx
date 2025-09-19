@@ -1,14 +1,14 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { CharacterCard, QuizCard, SummaryCard, HistoryCard } from '../components/common/Card';
-import Button, { StartLearningButton } from '../components/common/Button';
-import useModal from '../hooks/useModal';
+import CharacterSection from '../components/home/CharacterSection';
+import QuizCategorySection from '../components/home/QuizCategorySection';
+import QuizPersonalSection from '../components/home/QuizPersonalSection';
+import StudyHistorySection from '../components/home/StudyHistorySection';
 
 const HomePage = () => {
   const { user, loading, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const avatarModal = useModal();
 
   if (loading) {
     return (
@@ -27,128 +27,140 @@ const HomePage = () => {
   }
 
   // 임시 데이터 (Phase 4에서 실제 API 연동)
-  const characterData = {
-    avatar: '🦊',
-    name: '김학습',
-    level: 'Lv.12 중급 학습자',
-    progress: 35,
-    badges: [
-      { icon: '🏆', count: '182' },
-      { icon: '⭐', count: '4,203' },
-    ],
+  const userData = {
+    name: '삔이',
+    goal: 20
   };
 
-  const quizCategories = [
-    { icon: '📖', title: 'Model Example', count: 'Day 1-30' },
-    { icon: '🗣️', title: 'Small Talk', count: 'Day 1-30' },
-    { icon: '💼', title: 'Cases in Point', count: 'Day 1-30' },
-  ];
+  const progressData = {
+    current: 7,
+    total: 20,
+    percentage: 35
+  };
 
-  const personalQuizzes = [
-    { icon: '❌', title: '틀린문제', count: '15개' },
-    { icon: '❤️', title: '즐겨찾기', count: '8개' },
-  ];
+  const badgesData = {
+    trophy: 182,
+    star: 4203
+  };
 
-  const recentHistory = [
-    { icon: '📝', title: 'Model Example Day 1', time: '10분 전', score: '85%' },
-    { icon: '🗣️', title: 'Small Talk Day 3', time: '2시간 전', score: '92%' },
-    { icon: '💼', title: 'Cases in Point Day 2', time: '어제', score: '78%' },
-  ];
-
-  const handleQuizStart = (category, day = null) => {
-    if (day) {
-      navigate(`/quiz/${category}/${day}`);
-    } else {
-      navigate(`/quiz/${category}`);
+  const categoriesData = [
+    {
+      id: 'model-example',
+      icon: '📖',
+      title: 'Model Example',
+      count: 'Day 1-30',
+      path: '/quiz/model-example'
+    },
+    {
+      id: 'small-talk',
+      icon: '🗣️',
+      title: 'Small Talk',
+      count: 'Day 1-30',
+      path: '/quiz/small-talk'
+    },
+    {
+      id: 'cases-in-point',
+      icon: '💼',
+      title: 'Cases in Point',
+      count: 'Day 1-30',
+      path: '/quiz/cases-in-point'
     }
-  };
+  ];
 
-  const handleDailyQuiz = () => {
+  const personalQuizzesData = [
+    {
+      id: 'wrong-answers',
+      icon: '❌',
+      title: '틀린문제',
+      count: '15개',
+      path: '/quiz/wrong-answers'
+    },
+    {
+      id: 'favorites',
+      icon: '❤️',
+      title: '즐겨찾기',
+      count: '8개',
+      path: '/quiz/favorites'
+    }
+  ];
+
+  const historyData = [
+    {
+      id: 1,
+      icon: '📝',
+      title: 'Model Example Day 1',
+      time: '10분 전',
+      score: 85,
+      category: 'model-example',
+      day: 1
+    },
+    {
+      id: 2,
+      icon: '🗣️',
+      title: 'Small Talk Day 3',
+      time: '2시간 전',
+      score: 92,
+      category: 'small-talk',
+      day: 3
+    },
+    {
+      id: 3,
+      icon: '💼',
+      title: 'Cases in Point Day 2',
+      time: '어제',
+      score: 78,
+      category: 'cases-in-point',
+      day: 2
+    }
+  ];
+
+  const handleStartLearning = () => {
+    console.log('오늘의 퀴즈 시작!');
     navigate('/quiz');
   };
 
+  const handleCategoryClick = (category) => {
+    console.log('카테고리 선택:', category);
+    navigate(category.path);
+  };
+
+  const handlePersonalQuizClick = (quiz) => {
+    console.log('개인 퀴즈 선택:', quiz);
+    navigate(quiz.path);
+  };
+
+  const handleHistoryItemClick = (item) => {
+    console.log('학습 기록 선택:', item);
+    navigate(`/quiz/${item.category}/${item.day}`);
+  };
+
   return (
-    <div className="pt-4 pb-4">
+    <div className="main-content">
       {/* Character Section */}
-      <div className="px-4 py-5 animate-fade-in">
-        <CharacterCard
-          {...characterData}
-          onAvatarClick={avatarModal.openModal}
-        >
-          <StartLearningButton onClick={handleDailyQuiz}>
-            오늘의 퀴즈
-          </StartLearningButton>
-        </CharacterCard>
-      </div>
+      <CharacterSection
+        user={userData}
+        progress={progressData}
+        badges={badgesData}
+        onStartLearning={handleStartLearning}
+      />
 
       {/* Quiz Category Section */}
-      <div className="px-4 py-2">
-        <h2 className="text-base font-bold text-text-primary mb-3">카테고리</h2>
-        <div className="grid grid-cols-2 gap-3 mb-3">
-          {quizCategories.slice(0, 2).map((quiz, index) => (
-            <QuizCard
-              key={index}
-              icon={quiz.icon}
-              title={quiz.title}
-              count={quiz.count}
-              onClick={() => handleQuizStart(quiz.title.toLowerCase().replace(' ', '_'))}
-              className={`delay-${index * 100}`}
-            />
-          ))}
-        </div>
-        <div className="w-full">
-          <QuizCard
-            icon={quizCategories[2].icon}
-            title={quizCategories[2].title}
-            count={quizCategories[2].count}
-            onClick={() => handleQuizStart('cases_in_point')}
-            className="delay-200"
-          />
-        </div>
-      </div>
+      <QuizCategorySection
+        categories={categoriesData}
+        onCategoryClick={handleCategoryClick}
+      />
 
-      {/* Personal Quiz Section */}
-      <div className="px-4 py-2">
-        <h2 className="text-base font-bold text-text-primary mb-3">나만의 퀴즈</h2>
-        <div className="grid grid-cols-2 gap-3">
-          {personalQuizzes.map((quiz, index) => (
-            <QuizCard
-              key={index}
-              icon={quiz.icon}
-              title={quiz.title}
-              count={quiz.count}
-              onClick={() => handleQuizStart(quiz.title)}
-              className={`delay-${index * 100} bg-accent-mint`}
-            />
-          ))}
-        </div>
-      </div>
+      {/* Quiz Personal Section */}
+      <QuizPersonalSection
+        personalQuizzes={personalQuizzesData}
+        onPersonalQuizClick={handlePersonalQuizClick}
+      />
 
-      {/* Recent History */}
-      <div className="px-4 py-2">
-        <h2 className="text-base font-bold text-text-primary mb-3">최근 학습</h2>
-        <HistoryCard items={recentHistory} />
-      </div>
-
-      {/* Phase 2 Demo */}
-      <div className="px-4 py-2">
-        <div className="bg-white p-4 rounded-primary shadow-primary">
-          <h3 className="text-lg font-bold text-text-primary mb-3">
-            🎯 Phase 2 완료: 공통 컴포넌트
-          </h3>
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            <SummaryCard label="AppLayout" value="✅" />
-            <SummaryCard label="MobileHeader" value="✅" />
-            <SummaryCard label="BottomNav" value="✅" />
-            <SummaryCard label="Card Components" value="✅" />
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            <Button variant="primary" size="small">Primary</Button>
-            <Button variant="secondary" size="small">Secondary</Button>
-            <Button variant="success" size="small">Success</Button>
-          </div>
-        </div>
-      </div>
+      {/* Study History Section */}
+      <StudyHistorySection
+        historyItems={historyData}
+        onHistoryItemClick={handleHistoryItemClick}
+      />
     </div>
   );
 };
