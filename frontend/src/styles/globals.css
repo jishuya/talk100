@@ -154,7 +154,14 @@ body {
   --tw-ring-opacity: 0.5;
 }
 
-/* 반응형 브레이크포인트에 따른 추가 스타일 */
+/* 반응형 컨테이너 설계 */
+/* 기본: 모바일 (320px ~ 767px) - 전체 너비 */
+.app-container {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* 태블릿 (768px ~ 1023px) */
 @media (min-width: 768px) {
   .app-container {
     max-width: 768px;
@@ -163,26 +170,22 @@ body {
   }
 }
 
+/* 데스크탑 (1024px+) - 모바일 앱 느낌 유지 */
 @media (min-width: 1024px) {
   body {
     background: #F5F5F5;
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: flex-start;
+    padding: 20px;
   }
 
   .app-container {
-    max-width: 768px;        /* 480px → 768px로 확대 */
-    min-height: 100vh;
+    max-width: 480px;        /* 모바일 앱 느낌 유지 */
+    width: 100%;
     background: var(--accent-pale);
+    min-height: calc(100vh - 40px);
     border-radius: 20px;
-    overflow: hidden;
-  }
-}
-
-/* 더 큰 화면에서는 더욱 확대 */
-@media (min-width: 1440px) {
-  .app-container {
-    max-width: 1024px;       /* 큰 화면에서는 태블릿 크기 */
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
   }
 }
