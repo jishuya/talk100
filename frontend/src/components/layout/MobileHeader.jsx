@@ -71,38 +71,38 @@ const MobileHeader = () => {
     switch (config.rightContent) {
       case 'profile':
         return (
-          <div className="flex items-center gap-3">
+          <div className="header-right">
             {/* 알림 벨 */}
-            <button className="w-8 h-8 flex items-center justify-center touchable">
-              <span className="text-xl">🔔</span>
+            <button className="notification-btn touchable">
+              <span>🔔</span>
             </button>
             {/* 테마 토글 */}
             <button
               onClick={() => changeTheme(theme === 'light' ? 'dark' : 'light')}
-              className="w-8 h-8 flex items-center justify-center touchable rounded-primary-sm"
+              className="notification-btn touchable"
             >
-              <span className="text-lg">{theme === 'light' ? '🌙' : '☀️'}</span>
+              <span>{theme === 'light' ? '🌙' : '☀️'}</span>
             </button>
           </div>
         );
 
       case 'settings':
         return (
-          <button className="w-8 h-8 flex items-center justify-center touchable">
-            <span className="text-xl">⚙️</span>
+          <button className="header-btn touchable">
+            <span>⚙️</span>
           </button>
         );
 
       case 'period':
         return (
-          <div className="flex gap-2 bg-accent-pale px-2 py-1 rounded-primary-full">
-            <button className="px-3 py-1 bg-white text-primary rounded-primary-full text-sm font-semibold">
+          <div className="period-toggle">
+            <button className="period-btn active">
               주간
             </button>
-            <button className="px-3 py-1 text-text-secondary text-sm">
+            <button className="period-btn">
               월간
             </button>
-            <button className="px-3 py-1 text-text-secondary text-sm">
+            <button className="period-btn">
               전체
             </button>
           </div>
@@ -110,7 +110,7 @@ const MobileHeader = () => {
 
       case 'save':
         return (
-          <button className="px-4 py-1 bg-primary text-text-on-primary rounded-primary-full text-sm font-semibold touchable">
+          <button className="save-btn touchable">
             저장
           </button>
         );
@@ -121,45 +121,29 @@ const MobileHeader = () => {
   };
 
   return (
-    <header className="mobile-header fixed top-0 left-0 right-0 h-header bg-white shadow-primary z-50">
-      <div className="flex items-center justify-between h-full px-4">
-        {/* Left Section */}
-        <div className="flex items-center gap-2">
-          {config.showBackButton && (
-            <button
-              onClick={handleBackClick}
-              className="w-8 h-8 flex items-center justify-center touchable"
-            >
-              <span className="text-xl">←</span>
-            </button>
-          )}
+    <header className="mobile-header">
+      {/* Left Section */}
+      <div className="header-left">
+        {config.showBackButton && (
+          <button
+            onClick={handleBackClick}
+            className="menu-btn touchable"
+          >
+            <span>←</span>
+          </button>
+        )}
 
-          {config.showLogo ? (
-            <h1 className="text-xl font-bold text-primary">talk100</h1>
-          ) : (
-            <h1 className="text-lg font-semibold text-text-primary">{config.title}</h1>
-          )}
-        </div>
-
-        {/* Right Section */}
-        <div className="flex items-center">
-          {renderRightContent()}
-        </div>
+        {config.showLogo ? (
+          <span className="logo-text">talk100</span>
+        ) : (
+          <span className="header-title">{config.title}</span>
+        )}
       </div>
 
-      {/* 홈페이지 전용 뱃지 섹션 */}
-      {location.pathname === '/' && (
-        <div className="absolute top-3 right-16 flex gap-2">
-          <div className="flex items-center gap-1 px-2 py-1 bg-accent-pale border border-primary-light rounded-primary-sm">
-            <span className="text-sm">🏆</span>
-            <span className="text-xs font-semibold text-primary">182</span>
-          </div>
-          <div className="flex items-center gap-1 px-2 py-1 bg-accent-pale border border-primary-light rounded-primary-sm">
-            <span className="text-sm">⭐</span>
-            <span className="text-xs font-semibold text-primary">4,203</span>
-          </div>
-        </div>
-      )}
+      {/* Right Section */}
+      <div className="header-right">
+        {renderRightContent()}
+      </div>
     </header>
   );
 };

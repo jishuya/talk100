@@ -37,22 +37,15 @@ const BottomNavigation = () => {
   };
 
   return (
-    <nav className="bottom-nav fixed bottom-0 left-0 right-0 h-bottom-nav bg-white flex justify-around items-center shadow-primary z-40">
+    <nav className="bottom-nav">
       {navItems.map((item) => (
         <button
           key={item.path}
           onClick={() => handleNavClick(item.path)}
-          className={`
-            nav-item flex-1 flex flex-col items-center justify-center gap-1 py-2 touchable
-            transition-colors duration-200
-            ${item.isActive
-              ? 'text-primary'
-              : 'text-text-secondary hover:text-text-primary'
-            }
-          `}
+          className={`nav-item touchable ${item.isActive ? 'active' : ''}`}
         >
-          <span className="nav-icon text-2xl">{item.icon}</span>
-          <span className="nav-label text-xs font-medium">{item.label}</span>
+          <span className="nav-icon">{item.icon}</span>
+          <span className="nav-label">{item.label}</span>
         </button>
       ))}
     </nav>
