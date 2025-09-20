@@ -36,14 +36,17 @@ const Modal = ({
       document.body.style.overflow = 'hidden';
     }
 
+    // 모달이 사라지면, ESC감지하는 이벤트리스너제거, 배경스크롤 복구
     return () => {
       document.removeEventListener('keydown', handleEscape);
       document.body.style.overflow = 'unset';
     };
   }, [isOpen, onClose]);
 
+  // 모달이 닫혀있으면 아무것도 보여주지 않음
   if (!isOpen) return null;
 
+  // 모달 바깥쪽(검은 배경)을 클릭하면 모달 닫기
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget && closeOnBackdrop) {
       onClose();
@@ -95,6 +98,7 @@ const Modal = ({
     </div>
   );
 
+  // 모달을 document.body에 직접 붙여서 다른 컴포넌트들과 독립적으로 최상위에 표시
   return createPortal(modalContent, document.body);
 };
 

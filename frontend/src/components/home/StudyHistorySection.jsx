@@ -1,37 +1,9 @@
 import React from 'react';
+import { MOCK_HOME_DATA } from '../../mocks/homePageData';
 
 const StudyHistorySection = ({ historyItems, onHistoryItemClick }) => {
-  const defaultHistoryItems = [
-    {
-      id: 1,
-      icon: '📝',
-      title: 'Model Example Day 1',
-      time: '10분 전',
-      score: 85,
-      category: 'model-example',
-      day: 1
-    },
-    {
-      id: 2,
-      icon: '🗣️',
-      title: 'Small Talk Day 3',
-      time: '2시간 전',
-      score: 92,
-      category: 'small-talk',
-      day: 3
-    },
-    {
-      id: 3,
-      icon: '💼',
-      title: 'Cases in Point Day 2',
-      time: '어제',
-      score: 78,
-      category: 'cases-in-point',
-      day: 2
-    }
-  ];
-
-  const history = historyItems || defaultHistoryItems;
+  // Mock 데이터를 fallback으로 사용 (API 실패시)
+  const history = historyItems || MOCK_HOME_DATA.history;
 
   const handleItemClick = (item) => {
     if (onHistoryItemClick) {

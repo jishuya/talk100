@@ -1,5 +1,4 @@
 import React from 'react';
-
 import { MOCK_HOME_DATA } from '../../mocks/homePageData';
 
 const QuizCategorySection = ({ categories, onCategoryClick }) => {

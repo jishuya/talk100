@@ -1,24 +1,9 @@
 import React from 'react';
+import { MOCK_HOME_DATA } from '../../mocks/homePageData';
 
 const QuizPersonalSection = ({ personalQuizzes, onPersonalQuizClick }) => {
-  const defaultPersonalQuizzes = [
-    {
-      id: 'wrong-answers',
-      icon: '❌',
-      title: '틀린문제',
-      count: '15개',
-      path: '/quiz/wrong-answers'
-    },
-    {
-      id: 'favorites',
-      icon: '❤️',
-      title: '즐겨찾기',
-      count: '8개',
-      path: '/quiz/favorites'
-    }
-  ];
-
-  const quizzes = personalQuizzes || defaultPersonalQuizzes;
+  // Mock 데이터를 fallback으로 사용 (API 실패시)
+  const quizzes = personalQuizzes || MOCK_HOME_DATA.personalQuizzes;
 
   const handleQuizClick = (quiz) => {
     if (onPersonalQuizClick) {

@@ -153,10 +153,11 @@ export const HistoryCard = ({ items }) => (
   <Card>
     {items.map((item, index) => (
       <div
-        key={index}
+        key={item.id || index}
         className={`flex items-center py-3 touchable ${
           index < items.length - 1 ? 'border-b border-gray-border' : ''
         }`}
+        onClick={item.onClick}
       >
         <div className="w-10 h-10 bg-accent-pale rounded-full flex items-center justify-center text-xl mr-3">
           {item.icon}
@@ -165,7 +166,7 @@ export const HistoryCard = ({ items }) => (
           <div className="font-semibold text-text-primary text-sm">{item.title}</div>
           <div className="text-xs text-text-secondary">{item.time}</div>
         </div>
-        <div className="font-bold text-primary">{item.score}</div>
+        <div className="font-bold text-primary">{item.score}%</div>
       </div>
     ))}
   </Card>
