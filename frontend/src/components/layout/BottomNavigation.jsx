@@ -16,7 +16,7 @@ const BottomNavigation = () => {
       path: '/quiz',
       icon: '📚',
       label: '학습',
-      isActive: location.pathname.startsWith('/quiz'),
+      isActive: location.pathname.startsWith('/quiz'),  // /quiz/daily, /quiz/review 허용
     },
     {
       path: '/status',

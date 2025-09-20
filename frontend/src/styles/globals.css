@@ -319,6 +319,12 @@ body {
   font-weight: 500;
 }
 
+/* Main Content 영역 - 헤더 높이만큼 상단 패딩 */
+.main-content {
+  padding-top: calc(var(--header-height) / 2);
+  padding-bottom: calc(var(--bottom-nav-height) /2);
+}
+
 /* HomePage 컴포넌트 스타일 */
 .character-section {
   padding: 20px 16px;
@@ -501,6 +507,15 @@ body {
 
 .quiz-personal .quiz-card::before {
   background: linear-gradient(90deg, var(--primary-light), var(--primary-color));
+}
+
+/* 다크 테마 - 퀴즈 카드 색상 */
+[data-theme="dark"] .quiz-personal .quiz-card {
+  background: #1E293B; /* 어두운 회색 */
+}
+
+[data-theme="dark"] .quiz-category .quiz-card {
+  background: #374151; /* 밝은 회색 */
 }
 
 .history-card {
