@@ -6,11 +6,27 @@ import QuizCategorySection from '../components/home/QuizCategorySection';
 import QuizPersonalSection from '../components/home/QuizPersonalSection';
 import StudyHistorySection from '../components/home/StudyHistorySection';
 
+// 새로운 데이터 훅들
+import { useUserData, useBadgesData } from '../hooks/api/useUserData';
+import { useProgressData, useStudyHistory } from '../hooks/api/useProgressData';
+import { useQuizCategories, usePersonalQuizzes } from '../hooks/api/useQuizData';
+
 const HomePage = () => {
-  const { user, loading, isAuthenticated } = useAuth();
+  const { loading: authLoading, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  if (loading) {
+  // 새로운 데이터 훅들 사용
+  const { user: userData, isLoading: userLoading } = useUserData();
+  const { progress: progressData, isLoading: progressLoading } = useProgressData();
+  const { badges: badgesData } = useBadgesData();
+  const { categories: categoriesData } = useQuizCategories();
+  const { personalQuizzes: personalQuizzesData } = usePersonalQuizzes();
+  const { history: historyData } = useStudyHistory();
+
+  // 통합 로딩 상태
+  const isLoading = authLoading || userLoading || progressLoading;
+
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -25,94 +41,6 @@ const HomePage = () => {
     navigate('/login');
     return null;
   }
-
-  // 임시 데이터 (Phase 4에서 실제 API 연동)
-  const userData = {
-    name: '삔이',
-    goal: 20
-  };
-
-  const progressData = {
-    current: 7,
-    total: 20,
-    percentage: 35
-  };
-
-  const badgesData = {
-    trophy: 182,
-    star: 4203
-  };
-
-  const categoriesData = [
-    {
-      id: 'model-example',
-      icon: '📖',
-      title: 'Model Example',
-      count: 'Day 1-30',
-      path: '/quiz/model-example'
-    },
-    {
-      id: 'small-talk',
-      icon: '🗣️',
-      title: 'Small Talk',
-      count: 'Day 1-30',
-      path: '/quiz/small-talk'
-    },
-    {
-      id: 'cases-in-point',
-      icon: '💼',
-      title: 'Cases in Point',
-      count: 'Day 1-30',
-      path: '/quiz/cases-in-point'
-    }
-  ];
-
-  const personalQuizzesData = [
-    {
-      id: 'wrong-answers',
-      icon: '❌',
-      title: '틀린문제',
-      count: '15개',
-      path: '/quiz/wrong-answers'
-    },
-    {
-      id: 'favorites',
-      icon: '❤️',
-      title: '즐겨찾기',
-      count: '8개',
-      path: '/quiz/favorites'
-    }
-  ];
-
-  const historyData = [
-    {
-      id: 1,
-      icon: '📝',
-      title: 'Model Example Day 1',
-      time: '10분 전',
-      score: 85,
-      category: 'model-example',
-      day: 1
-    },
-    {
-      id: 2,
-      icon: '🗣️',
-      title: 'Small Talk Day 3',
-      time: '2시간 전',
-      score: 92,
-      category: 'small-talk',
-      day: 3
-    },
-    {
-      id: 3,
-      icon: '💼',
-      title: 'Cases in Point Day 2',
-      time: '어제',
-      score: 78,
-      category: 'cases-in-point',
-      day: 2
-    }
-  ];
 
   const handleStartLearning = () => {
     console.log('오늘의 퀴즈 시작!');

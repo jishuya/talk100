@@ -1,31 +1,10 @@
 import React from 'react';
 
-const QuizCategorySection = ({ categories, onCategoryClick }) => {
-  const defaultCategories = [
-    {
-      id: 'model-example',
-      icon: '📖',
-      title: 'Model Example',
-      count: 'Day 1-30',
-      path: '/quiz/model-example'
-    },
-    {
-      id: 'small-talk',
-      icon: '🗣️',
-      title: 'Small Talk',
-      count: 'Day 1-30',
-      path: '/quiz/small-talk'
-    },
-    {
-      id: 'cases-in-point',
-      icon: '💼',
-      title: 'Cases in Point',
-      count: 'Day 1-30',
-      path: '/quiz/cases-in-point'
-    }
-  ];
+import { MOCK_HOME_DATA } from '../../mocks/homePageData';
 
-  const quizCategories = categories || defaultCategories;
+const QuizCategorySection = ({ categories, onCategoryClick }) => {
+  // Mock 데이터를 fallback으로 사용 (API 실패시)
+  const quizCategories = categories || MOCK_HOME_DATA.categories;
 
   const handleCardClick = (category) => {
     if (onCategoryClick) {
