@@ -63,7 +63,7 @@ const HomePage = () => {
   };
 
   return (
-    <div className="main-content">
+    <div>
       {/* Character Section */}
       <CharacterSection
         user={userData}

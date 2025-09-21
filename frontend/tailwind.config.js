@@ -5,6 +5,12 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
+    screens: {
+      'sm': '640px',
+      'md': '768px',    // 현재 커스텀 CSS와 일치
+      'lg': '1024px',   // 현재 커스텀 CSS와 일치
+      'xl': '1280px',
+    },
     extend: {
       colors: {
         // CSS 변수를 Tailwind 테마로 통합
@@ -13,15 +19,13 @@ export default {
           dark: 'var(--primary-dark)',
           light: 'var(--primary-light)',
         },
-        accent: {
-          mint: 'var(--accent-mint)',
-          pale: 'var(--accent-pale)',
-        },
-        text: {
-          primary: 'var(--text-primary)',
-          secondary: 'var(--text-secondary)',
-          'on-primary': 'var(--text-on-primary)',
-        },
+        // 배경/표면 색상 - 용도 기반 네이밍
+        surface: 'var(--accent-mint)',         // 카드, 컴포넌트 배경
+        background: 'var(--accent-pale)',      // 전체 페이지 배경
+        // 텍스트 색상 - 간결한 네이밍
+        'text-primary': 'var(--text-primary)',
+        'text-secondary': 'var(--text-secondary)',
+        'text-on-primary': 'var(--text-on-primary)',
         gray: {
           light: 'var(--gray-light)',
           border: 'var(--gray-border)',
@@ -32,25 +36,21 @@ export default {
         info: 'var(--info)',
         white: 'var(--white)',
       },
-      backgroundImage: {
-        'gradient-primary': 'var(--bg-gradient)',
-        'gradient-soft': 'var(--bg-gradient-soft)',
-        'gradient-mint': 'var(--bg-gradient-mint)',
-        'gradient-fresh': 'var(--bg-gradient-fresh)',
-      },
       boxShadow: {
-        'primary': 'var(--shadow)',
-        'primary-lg': 'var(--shadow-lg)',
+        'soft': 'var(--shadow)',               // 기본 소프트 그림자
+        'medium': 'var(--shadow-lg)',          // 강조용 그림자
       },
       borderRadius: {
-        'primary': 'var(--radius)',
-        'primary-sm': 'var(--radius-small)',
-        'primary-full': 'var(--radius-full)',
+        'brand': 'var(--radius)',              // 브랜드 기본 라운드
+        'brand-sm': 'var(--radius-small)',     // 작은 라운드
+        'brand-full': 'var(--radius-full)',    // 완전 라운드
       },
       spacing: {
         'header': 'var(--header-height)',
         'bottom-nav': 'var(--bottom-nav-height)',
         'safe': 'var(--safe-area-inset)',
+        '25': '100px',  // character-avatar
+        '30': '120px',  // progress-circle
       },
       fontFamily: {
         sans: [
@@ -64,16 +64,12 @@ export default {
       animation: {
         'slide-up': 'slideUp 0.3s ease-out',
         'fade-in': 'fadeIn 0.3s ease-out',
-        'pulse-primary': 'pulse 1.5s infinite',
-      },
-      transitionProperty: {
-        'touch': 'transform, opacity, background-color',
       },
     },
   },
   plugins: [
     // 커스텀 플러그인으로 touchable 클래스 추가
-    function({ addUtilities }) {
+    function({ addUtilities, addComponents }) {
       const touchableUtilities = {
         '.touchable': {
           position: 'relative',
@@ -87,6 +83,8 @@ export default {
         },
       }
       addUtilities(touchableUtilities)
+
+      // 필요 시 추가 컴포넌트 클래스 정의 가능
     }
   ],
 }

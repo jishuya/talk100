@@ -1,5 +1,6 @@
 import React from 'react';
 import { MOCK_HOME_DATA } from '../../mocks/homePageData';
+import { QuizCard } from '../ui';
 
 const QuizCategorySection = ({ categories, onCategoryClick }) => {
   // Mock 데이터를 fallback으로 사용 (API 실패시)
@@ -12,20 +13,18 @@ const QuizCategorySection = ({ categories, onCategoryClick }) => {
   };
 
   return (
-    <div className="quiz-category">
-      <h2 className="section-title">카테고리</h2>
-      <div className="quiz-mode-grid">
+    <div className="px-4 pb-5">
+      <h2 className="text-base font-bold mb-3 text-text-primary">카테고리</h2>
+      <div className="grid grid-cols-3 gap-3">
         {quizCategories.map((category, index) => (
-          <div
+          <QuizCard
             key={category.id}
-            className="quiz-card touchable animate-slide-up"
-            style={{ animationDelay: `${index * 0.1}s` }}
+            icon={category.icon}
+            title={category.title}
+            count={category.count}
             onClick={() => handleCardClick(category)}
-          >
-            <div className="quiz-card-icon">{category.icon}</div>
-            <div className="quiz-card-title">{category.title}</div>
-            <div className="quiz-card-count">{category.count}</div>
-          </div>
+            style={{ animationDelay: `${index * 0.1}s` }}
+          />
         ))}
       </div>
     </div>

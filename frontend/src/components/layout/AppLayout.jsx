@@ -20,21 +20,21 @@ const AppLayout = ({ children }) => {
 
   if (shouldHideLayout) {
     return (
-      <div className="app-container">
+      <div className="w-full min-h-screen">
         {children}
       </div>
     );
   }
 
   return (
-    <div className="app-container flex flex-col">
+    <div className="w-full min-h-screen md:max-w-[768px] lg:max-w-[900px] mx-auto md:shadow-medium flex flex-col bg-background">
       {/* Mobile Header */}
       <MobileHeader />
 
       {/* Main Content */}
       <main className={`
-        main-content flex-1 overflow-y-auto -webkit-overflow-scrolling-touch
-        ${shouldHideBottomNav ? 'pb-5' : 'pb-bottom-nav'}
+        flex-1 overflow-y-auto pt-header min-h-[calc(100vh-theme(spacing.header))]
+        ${shouldHideBottomNav ? 'pb-5' : 'pb-[calc(theme(spacing.bottom-nav)+theme(spacing.safe))]'}
       `}>
         {children}
       </main>

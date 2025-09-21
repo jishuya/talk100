@@ -43,7 +43,7 @@ function App() {
         <AppProvider>
           <ThemeProvider>
             <Router>
-              <div className="app-container min-h-screen bg-accent-pale">
+              <div className="app-container min-h-screen bg-background">
                 <AppLayout>
                   <Routes>
                     <Route path="/login" element={<LoginPage />} />

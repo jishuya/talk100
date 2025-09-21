@@ -1,5 +1,6 @@
 import React from 'react';
 import { MOCK_HOME_DATA } from '../../mocks/homePageData';
+import { HistoryCard } from '../ui';
 
 const StudyHistorySection = ({ historyItems, onHistoryItemClick }) => {
   // Mock 데이터를 fallback으로 사용 (API 실패시)
@@ -11,36 +12,35 @@ const StudyHistorySection = ({ historyItems, onHistoryItemClick }) => {
     }
   };
 
-  const getScoreColor = (score) => {
-    if (score >= 90) return 'var(--success)';
-    if (score >= 70) return 'var(--warning)';
-    return 'var(--error)';
+  const getScoreColorClass = (score) => {
+    if (score >= 90) return 'text-success';
+    if (score >= 70) return 'text-warning';
+    return 'text-error';
   };
 
   return (
-    <div className="study-history">
-      <h2 className="section-title">최근 학습</h2>
-      <div className="history-card">
+    <div className="px-4 pb-5">
+      <h2 className="text-base font-bold mb-3 text-text-primary">최근 학습</h2>
+      <HistoryCard>
         {history.map((item) => (
           <div
             key={item.id}
-            className="history-item touchable"
+            className="flex items-center py-3 border-b border-gray-border last:border-b-0 touchable"
             onClick={() => handleItemClick(item)}
           >
-            <div className="history-icon">{item.icon}</div>
-            <div className="history-info">
-              <div className="history-title">{item.title}</div>
-              <div className="history-time">{item.time}</div>
+            <div className="w-10 h-10 bg-accent-pale rounded-full flex items-center justify-center text-xl mr-3">
+              {item.icon}
             </div>
-            <div
-              className="history-score"
-              style={{ color: getScoreColor(item.score) }}
-            >
+            <div className="flex-1">
+              <div className="text-sm font-semibold text-text-primary mb-0.5">{item.title}</div>
+              <div className="text-xs text-text-secondary">{item.time}</div>
+            </div>
+            <div className={`text-sm font-bold ${getScoreColorClass(item.score)}`}>
               {item.score}%
             </div>
           </div>
         ))}
-      </div>
+      </HistoryCard>
     </div>
   );
 };

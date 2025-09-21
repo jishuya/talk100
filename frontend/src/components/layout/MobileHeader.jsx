@@ -71,15 +71,15 @@ const MobileHeader = () => {
     switch (config.rightContent) {
       case 'profile':
         return (
-          <div className="header-right">
+          <div className="flex items-center gap-2">
             {/* 알림 벨 */}
-            <button className="notification-btn touchable">
+            <button className="w-8 h-8 flex items-center justify-center text-lg touchable">
               <span>🔔</span>
             </button>
             {/* 테마 토글 */}
             <button
               onClick={() => changeTheme(theme === 'light' ? 'dark' : 'light')}
-              className="notification-btn touchable"
+              className="w-8 h-8 flex items-center justify-center text-lg touchable"
             >
               <span>{theme === 'light' ? '🌙' : '☀️'}</span>
             </button>
@@ -88,21 +88,21 @@ const MobileHeader = () => {
 
       case 'settings':
         return (
-          <button className="header-btn touchable">
+          <button className="w-8 h-8 flex items-center justify-center text-xl text-text-primary touchable">
             <span>⚙️</span>
           </button>
         );
 
       case 'period':
         return (
-          <div className="period-toggle">
-            <button className="period-btn active">
+          <div className="flex gap-1 bg-accent-pale p-1 rounded-primary-full">
+            <button className="px-3 py-1 rounded-primary-full text-xs bg-white text-primary font-semibold">
               주간
             </button>
-            <button className="period-btn">
+            <button className="px-3 py-1 rounded-primary-full text-xs text-text-secondary">
               월간
             </button>
-            <button className="period-btn">
+            <button className="px-3 py-1 rounded-primary-full text-xs text-text-secondary">
               전체
             </button>
           </div>
@@ -110,7 +110,7 @@ const MobileHeader = () => {
 
       case 'save':
         return (
-          <button className="save-btn touchable">
+          <button className="px-4 py-1.5 bg-primary text-white rounded-primary-full text-sm font-semibold touchable">
             저장
           </button>
         );
@@ -121,27 +121,27 @@ const MobileHeader = () => {
   };
 
   return (
-    <header className="mobile-header">
+    <header className="fixed top-0 left-0 right-0 md:left-1/2 md:-translate-x-1/2 md:w-[768px] lg:w-[900px] h-header bg-white flex items-center justify-between px-4 z-[100] shadow-primary md:border-b md:border-gray-border md:shadow-none">
       {/* Left Section */}
-      <div className="header-left">
+      <div className="flex items-center gap-2">
         {config.showBackButton && (
           <button
             onClick={handleBackClick}
-            className="menu-btn touchable"
+            className="w-8 h-8 flex items-center justify-center text-xl text-text-primary touchable"
           >
             <span>←</span>
           </button>
         )}
 
         {config.showLogo ? (
-          <span className="logo-text">talk100</span>
+          <span className="text-lg font-bold text-primary">talk100</span>
         ) : (
-          <span className="header-title">{config.title}</span>
+          <span className="text-base font-semibold text-text-primary">{config.title}</span>
         )}
       </div>
 
       {/* Right Section */}
-      <div className="header-right">
+      <div className="flex items-center gap-2">
         {renderRightContent()}
       </div>
     </header>
