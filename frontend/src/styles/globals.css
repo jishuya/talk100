@@ -592,16 +592,18 @@ body {
 /* 태블릿 (768px ~ 1023px) */
 @media (min-width: 768px) {
   .mobile-header {
-    max-width: 768px;
+    width: 768px;
     left: 50%;
+    right: auto;
     transform: translateX(-50%);
     box-shadow: none;
     border-bottom: 1px solid var(--gray-border);
   }
 
   .bottom-nav {
-    max-width: 768px;
+    width: 768px;
     left: 50%;
+    right: auto;
     transform: translateX(-50%);
   }
 }
@@ -609,14 +611,16 @@ body {
 /* 데스크탑 (1024px+) */
 @media (min-width: 1024px) {
   .mobile-header {
-    max-width: 900px;        /* 콘텐츠와 동일한 크기 */
+    width: 900px;        /* 콘텐츠와 동일한 크기 */
     left: 50%;
+    right: auto;
     transform: translateX(-50%);
   }
 
   .bottom-nav {
-    max-width: 900px;        /* 콘텐츠와 동일한 크기 */
+    width: 900px;        /* 콘텐츠와 동일한 크기 */
     left: 50%;
+    right: auto;
     transform: translateX(-50%);
   }
 }

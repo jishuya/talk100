@@ -20,14 +20,14 @@ const AppLayout = ({ children }) => {
 
   if (shouldHideLayout) {
     return (
-      <div className="app min-h-screen">
+      <div className="app-container">
         {children}
       </div>
     );
   }
 
   return (
-    <div className="app min-h-screen flex flex-col">
+    <div className="app-container flex flex-col">
       {/* Mobile Header */}
       <MobileHeader />
 
