@@ -22,6 +22,9 @@ export default {
         // 배경/표면 색상 - 용도 기반 네이밍
         surface: 'var(--accent-mint)',         // 카드, 컴포넌트 배경
         background: 'var(--accent-pale)',      // 전체 페이지 배경
+        // 직접 사용 가능한 accent 색상
+        'accent-mint': 'var(--accent-mint)',
+        'accent-pale': 'var(--accent-pale)',
         // 텍스트 색상 - 간결한 네이밍
         'text-primary': 'var(--text-primary)',
         'text-secondary': 'var(--text-secondary)',

@@ -1,20 +1,7 @@
 import React from 'react';
 import { cn } from '../../utils/cn';
 import { getIcon } from '../../utils/iconMap.jsx';
-
-// 아이콘별 색상 매핑
-const getIconColor = (iconName) => {
-  const colorMap = {
-    'BiBulb': 'text-3xl text-amber-400',         // 전구 - 부드러운 앰버 (아이디어)
-    'BiChat': 'text-3xl text-sky-400',           // 채팅 - 부드러운 스카이블루 (소통)
-    'BiDetail': 'text-3xl text-violet-400',      // 상세 - 부드러운 바이올렛 (전문성)
-    'MdOutlineStar': 'text-3xl text-orange-400', // 별 - 부드러운 오렌지 (틀린문제)
-    'AiFillHeart': 'text-3xl text-rose-400',     // 하트 - 부드러운 로즈 (즐겨찾기)
-    'IoTrophy': 'text-3xl text-yellow-600',      // 트로피 - 금색
-    'IoStar': 'text-3xl text-yellow-400'         // 별 - 부드러운 노란색
-  };
-  return colorMap[iconName] || 'text-3xl text-gray-400';
-};
+import { getIconColor } from '../../utils/iconColors.js';
 
 // Card variants 정의
 const cardVariants = {
@@ -105,7 +92,7 @@ export const QuizCard = React.forwardRef(({
       {...props}
     >
       <div className="w-12 h-12 mx-auto mb-2 flex items-center justify-center">
-        {typeof icon === 'string' ? getIcon(icon, getIconColor(icon)) : icon}
+        {typeof icon === 'string' ? getIcon(icon, getIconColor(icon, '3xl')) : icon}
       </div>
       <div className="text-sm font-bold text-text-primary mb-1">
         {title}

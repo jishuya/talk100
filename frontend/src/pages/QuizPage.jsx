@@ -1,12 +1,318 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+
+// QuizPage 관련 훅들
+import {
+  useQuizPageData,
+  useSubmitAnswer,
+  useMoveToNextQuestion,
+  useSkipQuestion,
+  useToggleFavorite,
+  useToggleWrongAnswerStar,
+  useQuestionAudio,
+  useSpeechRecognition,
+  useUpdateQuizSettings
+} from '../hooks/api/useQuizData';
+
+// UI 컴포넌트들
+import { QuizProgressBar } from '../components/quiz/QuizProgressBar';
+import { QuizContent } from '../components/quiz/QuizContent';
+import { QuizControls } from '../components/quiz/QuizControls';
+import { FeedbackModal } from '../components/quiz/FeedbackModal';
+import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 
 const QuizPage = () => {
-  return (
-    <div className="min-h-screen bg-accent-pale">
-      <div className="p-4">
-        <h1 className="text-2xl font-bold text-text-primary">Quiz Page</h1>
-        <p className="text-text-secondary mt-2">퀴즈 페이지 - Phase 3에서 구현 예정</p>
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { isAuthenticated } = useAuth();
+
+  // URL 파라미터에서 세션 ID 추출 (실제로는 퀴즈 시작시 생성)
+  const sessionId = searchParams.get('session') || 'mock_session_001';
+
+  // 퀴즈 데이터 및 상태 훅들
+  const { session, question, progress, isLoading, error, refetch } = useQuizPageData(sessionId);
+
+  // 액션 훅들
+  const submitAnswerMutation = useSubmitAnswer();
+  const moveToNextMutation = useMoveToNextQuestion();
+  const skipQuestionMutation = useSkipQuestion();
+  const toggleFavoriteMutation = useToggleFavorite();
+  const toggleStarMutation = useToggleWrongAnswerStar();
+  const speechRecognitionMutation = useSpeechRecognition();
+  const updateSettingsMutation = useUpdateQuizSettings();
+
+  // 오디오 관련
+  const { audioUrl } = useQuestionAudio(question?.id);
+
+  // 로컬 상태
+  const [userAnswer, setUserAnswer] = useState('');
+  const [inputMode, setInputMode] = useState('voice'); // 'voice' | 'keyboard'
+  const [isRecording, setIsRecording] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedbackData, setFeedbackData] = useState(null);
+  const [keyboardInput, setKeyboardInput] = useState('');
+
+  // 인증 체크
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, navigate]);
+
+  // 키보드 입력 실시간 반영
+  useEffect(() => {
+    if (inputMode === 'keyboard' && keyboardInput.trim()) {
+      setUserAnswer(keyboardInput);
+    }
+  }, [keyboardInput, inputMode]);
+
+  // ================================================================
+  // 이벤트 핸들러들
+  // ================================================================
+
+  // 입력 모드 변경
+  const handleInputModeChange = (mode) => {
+    setInputMode(mode);
+    if (mode === 'keyboard') {
+      setUserAnswer('');
+      setKeyboardInput('');
+    }
+
+    // 설정 업데이트
+    updateSettingsMutation.mutate({
+      sessionId,
+      settings: { inputMode: mode }
+    });
+  };
+
+  // 답변 제출
+  const handleSubmitAnswer = async () => {
+    if (!userAnswer.trim()) {
+      alert('답변을 입력해주세요!');
+      return;
+    }
+
+    try {
+      const result = await submitAnswerMutation.mutateAsync({
+        sessionId,
+        questionId: question.id,
+        answer: userAnswer.trim(),
+        mode: inputMode
+      });
+
+      // 피드백 표시
+      setFeedbackData(result);
+      setShowFeedback(true);
+
+      // 2초 후 자동으로 다음 문제 (설정에 따라)
+      if (session?.settings?.autoNext) {
+        setTimeout(() => {
+          handleNextQuestion();
+        }, 2000);
+      }
+
+    } catch (error) {
+      console.error('Answer submission error:', error);
+      alert('답변 제출에 실패했습니다. 다시 시도해주세요.');
+    }
+  };
+
+  // 다음 문제로 이동
+  const handleNextQuestion = async () => {
+    try {
+      await moveToNextMutation.mutateAsync(sessionId);
+
+      // 상태 초기화
+      setUserAnswer('');
+      setKeyboardInput('');
+      setFeedbackData(null);
+      setShowFeedback(false);
+
+    } catch (error) {
+      console.error('Move to next question error:', error);
+      alert('다음 문제 로드에 실패했습니다.');
+    }
+  };
+
+  // 문제 건너뛰기
+  const handleSkipQuestion = async () => {
+    if (confirm('이 문제를 건너뛰시겠습니까?')) {
+      try {
+        await skipQuestionMutation.mutateAsync({
+          sessionId,
+          questionId: question.id
+        });
+
+        // 상태 초기화
+        setUserAnswer('');
+        setKeyboardInput('');
+
+      } catch (error) {
+        console.error('Skip question error:', error);
+        alert('문제 건너뛰기에 실패했습니다.');
+      }
+    }
+  };
+
+  // 음성 녹음 토글
+  const handleToggleRecording = async () => {
+    if (isRecording) {
+      // 녹음 중지
+      setIsRecording(false);
+
+      // Mock 음성 인식 (실제로는 MediaRecorder API 사용)
+      try {
+        const mockAudioBlob = new Blob([], { type: 'audio/wav' });
+        const result = await speechRecognitionMutation.mutateAsync({
+          audioBlob: mockAudioBlob,
+          sessionId
+        });
+
+        setUserAnswer(result.transcription);
+
+      } catch (error) {
+        console.error('Speech recognition error:', error);
+        alert('음성 인식에 실패했습니다. 다시 시도해주세요.');
+      }
+    } else {
+      // 녹음 시작
+      setIsRecording(true);
+      setUserAnswer('');
+    }
+  };
+
+  // 메인 액션 버튼 처리
+  const handleMainAction = () => {
+    if (inputMode === 'voice') {
+      handleToggleRecording();
+    } else {
+      handleSubmitAnswer();
+    }
+  };
+
+  // 문제 오디오 재생
+  const handlePlayAudio = () => {
+    if (audioUrl) {
+      const audio = new Audio(audioUrl);
+      audio.play().catch(error => {
+        console.error('Audio playback error:', error);
+        alert('오디오 재생에 실패했습니다.');
+      });
+    }
+  };
+
+  // 힌트 보기
+  const handleShowHint = () => {
+    if (question?.hints?.length > 0) {
+      alert(`힌트: ${question.hints.join(', ')}`);
+    } else {
+      alert('이 문제에는 힌트가 없습니다.');
+    }
+  };
+
+  // 즐겨찾기 토글
+  const handleToggleFavorite = async () => {
+    try {
+      await toggleFavoriteMutation.mutateAsync(question.id);
+    } catch (error) {
+      console.error('Toggle favorite error:', error);
+    }
+  };
+
+  // 틀린문제 별표 토글
+  const handleToggleStar = async () => {
+    try {
+      await toggleStarMutation.mutateAsync(question.id);
+    } catch (error) {
+      console.error('Toggle star error:', error);
+    }
+  };
+
+
+  // 피드백 모달 닫기
+  const handleCloseFeedback = () => {
+    setShowFeedback(false);
+    setFeedbackData(null);
+  };
+
+  // ================================================================
+  // 렌더링
+  // ================================================================
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <LoadingSpinner />
+        <p className="mt-4 text-text-secondary">퀴즈를 불러오는 중...</p>
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <p className="text-error mb-4">퀴즈 로드에 실패했습니다.</p>
+          <button
+            onClick={refetch}
+            className="btn-primary"
+          >
+            다시 시도
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!session || !question) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <p className="text-text-secondary">퀴즈 데이터를 찾을 수 없습니다.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="quiz-container min-h-screen bg-background flex flex-col">
+      {/* 프로그레스 바 */}
+      <QuizProgressBar
+        progress={progress}
+      />
+
+      {/* 메인 콘텐츠 */}
+      <QuizContent
+        question={question}
+        userAnswer={userAnswer}
+        inputMode={inputMode}
+        keyboardInput={keyboardInput}
+        onKeyboardInputChange={setKeyboardInput}
+        onInputModeChange={handleInputModeChange}
+        onFavoriteToggle={handleToggleFavorite}
+        onStarToggle={handleToggleStar}
+      />
+
+      {/* 하단 컨트롤 */}
+      <QuizControls
+        inputMode={inputMode}
+        isRecording={isRecording}
+        keyboardInput={keyboardInput}
+        onKeyboardInputChange={setKeyboardInput}
+        onMainAction={handleMainAction}
+        onPlayAudio={handlePlayAudio}
+        onShowHint={handleShowHint}
+        onSkipQuestion={handleSkipQuestion}
+        isSubmitting={submitAnswerMutation.isPending}
+      />
+
+      {/* 피드백 모달 */}
+      {showFeedback && feedbackData && (
+        <FeedbackModal
+          feedback={feedbackData}
+          onClose={handleCloseFeedback}
+          onNextQuestion={handleNextQuestion}
+        />
+      )}
     </div>
   );
 };

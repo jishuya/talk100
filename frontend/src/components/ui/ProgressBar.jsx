@@ -34,7 +34,7 @@ const ProgressBar = ({
         </div>
       )}
       <div className={cn(
-        'w-full bg-gray-light rounded-primary-full overflow-hidden',
+        'w-full bg-accent-pale rounded-primary-full overflow-hidden border border-accent-mint',
         sizeClasses[size]
       )}>
         <div

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { IoHomeOutline, IoHome, IoBookOutline, IoBook, IoStatsChartOutline, IoStatsChart, IoPersonOutline, IoPerson } from 'react-icons/io5';
+import { getIconColor } from '../../utils/iconColors.js';
 
 const BottomNavigation = () => {
   const location = useLocation();
@@ -50,7 +51,7 @@ const BottomNavigation = () => {
           className="flex-1 flex flex-col items-center justify-center gap-1 p-2 touchable transition-colors duration-300"
         >
           {React.createElement(item.isActive ? item.activeIcon : item.icon, {
-            className: `text-2xl ${item.isActive ? 'text-primary' : 'text-gray-400'}`
+            className: `${item.isActive ? 'text-2xl text-primary' : getIconColor('navigation-inactive', '2xl')}`
           })}
           <span className={`text-xs font-medium ${
             item.isActive ? 'text-primary' : 'text-gray-400'

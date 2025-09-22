@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { cn } from '../../utils/cn';
 import Button from './Button';
 import { IoCloseOutline } from 'react-icons/io5';
+import { getIconColor } from '../../utils/iconColors.js';
 
 const Modal = ({
   isOpen = false,
@@ -73,7 +74,7 @@ const Modal = ({
             onClick={onClose}
             className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors"
           >
-            <IoCloseOutline className="text-xl text-gray-400" />
+            <IoCloseOutline className={getIconColor('IoCloseOutline', 'xl')} />
           </button>
         )}
         {children}

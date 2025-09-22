@@ -8,10 +8,13 @@
 - **단계**: 프로토타입 (MVP)
 
 **기술 스택**:
-- Frontend: React + Vite
-- Backend: Node.js + Express
-- Database: PostgreSQL
-- Auth: Passport.js (Google/Naver OAuth)
+- **Frontend**: React + Vite + Tailwind CSS
+- **Backend**: Node.js + Express
+- **Database**: PostgreSQL
+- **Auth**: Passport.js (Google/Naver OAuth)
+- **상태관리**: React Query (@tanstack/react-query)
+- **아이콘**: React Icons + Heroicons
+- **UI**: Headless UI (@headlessui/react)
 
 ---
 
@@ -129,6 +132,104 @@ const questions = await getReviewQuestions(reviewDay.source_day);
 
 ---
 
+## 🏗️ 프런트엔드 아키텍처
+
+### 데이터 흐름: 3계층 아키텍처
+
+**Pages ➝ Hooks ➝ Services**
+
+#### 1. **Pages 계층** (`src/pages/`)
+- 페이지 컴포넌트에서 여러 커스텀 훅 조합
+- UI 로직과 비즈니스 로직 분리
+```javascript
+// HomePage.jsx 예시
+const { user: userData, isLoading: userLoading } = useUserData();
+const { progress: progressData } = useProgressData();
+const { badges: badgesData } = useBadgesData();
+```
+
+#### 2. **Hooks 계층** (`src/hooks/api/`)
+- **React Query 기반**: 서버 상태 관리 & 자동 캐싱
+- **데이터별 분리**: useUserData, useProgressData, useQuizData
+- **에러 처리**: 통합된 에러 핸들링 및 재시도 로직
+```javascript
+// useUserData.js 예시
+export const useUserData = () => {
+  return useQuery({
+    queryKey: ['user', 'profile'],
+    queryFn: () => userService.getProfile(),
+    staleTime: ENV.CACHE_TIMES.USER_DATA,
+    retry: 2
+  });
+};
+```
+
+#### 3. **Services 계층** (`src/services/`)
+- **BaseService**: Mock/Real API 전환 로직
+- **환경별 데이터**: 개발시 Mock, 프로덕션시 실제 API
+- **Fallback 지원**: API 실패시 Mock 데이터로 대체
+```javascript
+// userService.js 예시
+class UserService extends BaseService {
+  async getProfile() {
+    return this.request(
+      () => this.apiCall('/api/users/profile'),
+      'user'  // Mock 데이터 키
+    );
+  }
+}
+```
+
+### 상태 관리 전략
+- **React Query**: 서버 상태 (API 데이터, 캐싱)
+- **Context API**: 전역 상태 (인증, 테마)
+- **Local State**: 컴포넌트별 UI 상태
+- **LocalStorage**: 사용자 설정 영속성
+
+---
+
+## 🎨 스타일링 시스템
+
+### Tailwind CSS + 디자인 시스템
+
+#### 1. **디자인 토큰** (`src/styles/globals.css`)
+```css
+:root {
+  --primary-color: #55AD9B;     /* 메인 민트그린 */
+  --primary-dark: #428A7B;      /* 다크 버전 */
+  --primary-light: #95D2B3;     /* 라이트 버전 */
+  --accent-mint: #D8EFD3;       /* 연한 민트 */
+  --accent-pale: #F1F8E8;       /* 연한 그린 */
+}
+```
+
+#### 2. **Tailwind 통합** (`tailwind.config.js`)
+- CSS 변수를 Tailwind 테마로 매핑
+- 커스텀 유틸리티 클래스 (touchable, animations)
+- 반응형 breakpoint 정의
+
+#### 3. **컴포넌트 시스템**
+- **@layer components**: 재사용 가능한 컴포넌트 클래스
+- **Variants 패턴**: UI 컴포넌트별 스타일 옵션 관리
+```javascript
+// Button.jsx 예시 - Variants 패턴
+const buttonVariants = {
+  variant: {
+    primary: 'btn-primary',
+    secondary: 'bg-white text-primary border border-primary',
+    ghost: 'bg-transparent text-text-primary hover:bg-gray-light'
+  }
+};
+```
+
+#### 4. **특징**
+- **일관된 디자인**: CSS 변수 기반 디자인 토큰
+- **다크테마 지원**: `[data-theme="dark"]` 선택자
+- **터치 피드백**: `.touchable` 클래스로 모바일 UX
+- **애니메이션**: 커스텀 keyframes (slide-up, fade-in)
+
+---
+
 ## 📁 프로젝트 구조
 
 ```
@@ -141,6 +242,23 @@ talk100/
 │   └── routes/         # 라우팅
 ├── frontend/
 │   └── src/
+│       ├── components/  # 재사용 UI 컴포넌트
+│       │   ├── ui/     # 기본 UI 컴포넌트 (Button, Card, Modal 등)
+│       │   ├── home/   # 홈 페이지 섹션 컴포넌트
+│       │   └── layout/ # 레이아웃 컴포넌트 (Header, Navigation 등)
+│       ├── contexts/   # React Context (인증, 테마)
+│       ├── hooks/      # 커스텀 훅
+│       │   └── api/    # API 관련 훅 (React Query)
+│       ├── services/   # API 서비스 계층
+│       │   ├── baseService.js    # Mock/Real API 전환
+│       │   ├── userService.js    # 사용자 관련 API
+│       │   ├── progressService.js # 진행률 관련 API
+│       │   └── quizService.js    # 퀴즈 관련 API
+│       ├── pages/      # 페이지 컴포넌트
+│       ├── styles/     # 스타일 파일
+│       │   └── globals.css       # 디자인 시스템 & CSS 변수
+│       ├── utils/      # 유틸리티 함수
+│       └── mocks/      # Mock 데이터
 └── database/
     └── talk100_postgresql.sql
 ```
@@ -166,164 +284,39 @@ talk100/
 
 ---
 
-## 🎨 React 프론트엔드 마이그레이션 계획
+## 🎯 현재 구현 상태
 
-### 📋 **프로젝트 현황**
-- **기존**: HTML/CSS/JS 프로토타입 (5개 페이지)
-- **목표**: React 18 + Tailwind CSS 4 + Vite 기반 SPA
-- **상태**: 백엔드 API 완료, 프론트엔드 마이그레이션 단계
+### ✅ **완료된 부분**
+- **아키텍처**: 3계층 데이터 흐름 구조 완성
+- **스타일링**: Tailwind + 디자인 시스템 구축 완료
+- **UI 컴포넌트**: Button, Card, Modal 등 기본 컴포넌트 완성
+- **홈페이지**: CharacterSection, QuizSections 구현
+- **Mock 시스템**: 개발용 Mock 데이터 및 서비스 완성
 
-### 🔍 **기존 HTML 분석 결과**
-- 일관된 민트그린 색상 팔레트 (`--primary-color: #55AD9B`)
-- Mobile-first 반응형 디자인
-- 공통 패턴: Header + Bottom Navigation + Modal
-- CSS 변수 시스템으로 테마 통일성 확보
-- 터치 피드백 및 애니메이션 일관성
+### 🚧 **진행 중인 작업**
+- **API 연동**: 실제 백엔드 API 연결 및 테스트
+- **퀴즈 페이지**: QuizPage 구현 진행
+- **상태 관리**: 전역 상태 최적화
 
-### 🏗️ **아키텍처 설계**
+### 🚀 **다음 우선순위 작업**
 
-#### **폴더 구조**
-```
-frontend/src/
-├── components/
-│   ├── common/          # 재사용 가능한 공통 컴포넌트
-│   │   ├── Button.jsx   # 터치 피드백 포함
-│   │   ├── Card.jsx     # quiz-card, summary-card
-│   │   ├── Modal.jsx    # 공통 모달 베이스
-│   │   ├── ToggleSwitch.jsx
-│   │   ├── ProgressBar.jsx
-│   │   └── Badge.jsx
-│   ├── layout/          # 레이아웃 컴포넌트
-│   │   ├── AppLayout.jsx
-│   │   ├── MobileHeader.jsx
-│   │   └── BottomNavigation.jsx
-│   ├── quiz/            # 퀴즈 관련 컴포넌트
-│   ├── stats/           # 통계 관련 컴포넌트
-│   └── forms/           # 폼 관련 컴포넌트
-├── pages/               # 라우트 페이지 컴포넌트
-│   ├── HomePage.jsx     # 홈화면
-│   ├── QuizPage.jsx     # 퀴즈 진행
-│   ├── StatusPage.jsx   # 학습 통계
-│   ├── MyPage.jsx       # 마이페이지
-│   └── SettingsPage.jsx # 설정
-├── hooks/               # 커스텀 훅
-│   ├── useAuth.js       # 인증 상태 관리
-│   ├── useTheme.js      # 테마 변경 로직
-│   ├── useApi.js        # API 호출 로직 추상화
-│   ├── useLocalStorage.js # 로컬 스토리지 상태 관리
-│   ├── useDebounce.js   # 입력 디바운싱
-│   ├── usePagination.js # 페이지네이션 로직
-│   └── useModal.js      # 모달 상태 관리
-├── services/            # API 통신 로직
-├── contexts/            # Context API 관련
-│   ├── AppContext.jsx   # 전역 상태
-│   ├── AuthContext.jsx  # 인증 상태 (기존)
-│   └── ThemeContext.jsx # 테마 상태
-├── utils/               # 유틸리티 함수
-└── styles/              # 전역 스타일
-    └── globals.css      # CSS 변수 + Tailwind
-```
+#### Phase 1: 핵심 기능 완성
+1. **QuizPage 구현**: 문제 출제 및 답변 제출 기능
+2. **채점 시스템**: Keywords 기반 채점 로직 구현
+3. **진행률 추적**: 사용자 학습 진행도 실시간 업데이트
 
-### 🎯 **Phase별 구현 계획**
+#### Phase 2: 복습 시스템
+1. **복습 알고리즘**: 8단계 간격 복습 스케줄링
+2. **Review Queue**: 복습 대기열 관리 시스템
+3. **동적 문제 선택**: 복습 시점 랜덤 문제 추출
 
-#### **Phase 1: 프로젝트 기반 설정 (1-2일)**
-1. **Tailwind CSS 설정 & 테마 시스템**
-   ```css
-   /* CSS 변수를 Tailwind 테마로 통합 */
-   :root {
-     --primary-color: #55AD9B;
-     --primary-dark: #428A7B;
-     --primary-light: #95D2B3;
-     --accent-mint: #D8EFD3;
-     --accent-pale: #F1F8E8;
-   }
-   ```
+#### Phase 3: 고급 기능
+1. **통계 대시보드**: StatusPage 구현
+2. **사용자 설정**: SettingsPage 고도화
+3. **성능 최적화**: React.memo, 코드 스플리팅 적용
 
-2. **라우팅 설정**
-   ```jsx
-   <BrowserRouter>
-     <Routes>
-       <Route path="/" element={<HomePage />} />
-       <Route path="/quiz" element={<QuizPage />} />
-       <Route path="/status" element={<StatusPage />} />
-       <Route path="/mypage" element={<MyPage />} />
-       <Route path="/settings" element={<SettingsPage />} />
-     </Routes>
-   </BrowserRouter>
-   ```
-
-3. **상태 관리 구조 설계**
-
-#### **Phase 2: 공통 컴포넌트 & 레이아웃 (2-3일)**
-1. **Layout 컴포넌트**
-   - AppLayout (전체 앱 구조)
-   - MobileHeader (상단 헤더)
-   - BottomNavigation (하단 네비게이션)
-
-2. **재사용 가능한 UI 컴포넌트**
-   - Button (touchable 효과)
-   - Card (다양한 카드 타입)
-   - Modal (공통 모달)
-   - Form 요소들
-
-#### **Phase 3: 페이지별 컴포넌트 구현 (3-4일)**
-1. **HomePage 변환**
-   - CharacterSection (프로필 + 진행률)
-   - QuizCategorySection (카테고리별 퀴즈)
-   - QuizPersonalSection (나만의 퀴즈)
-   - StudyHistorySection (최근 학습)
-
-2. **QuizPage 변환**
-   - QuizHeader (프로그레스 바)
-   - QuizContent (문제 표시)
-   - UserAnswerBox (답변 입력)
-   - QuizControls (하단 컨트롤)
-
-3. **기타 페이지들 변환**
-
-#### **Phase 4: 기능 통합 & 상태 관리 (2-3일)**
-1. **API 연동**
-2. **상태 관리 구현**
-3. **로컬 스토리지 관리**
-
-#### **Phase 5: 최적화 & 테스팅 (1-2일)**
-1. **성능 최적화** (React.memo, useMemo, 코드 스플리팅)
-2. **접근성 & UX**
-3. **에러 처리**
-
-### 📊 **구현 우선순위**
-
-| 우선순위 | 컴포넌트 | 복잡도 | 기간 |
-|---------|---------|--------|------|
-| 🔥 **High** | Layout + Navigation | 중 | 1일 |
-| 🔥 **High** | HomePage | 중 | 1일 |
-| 🔴 **Medium** | QuizPage | 고 | 2일 |
-| 🔴 **Medium** | StatusPage | 중 | 1일 |
-| 🟡 **Low** | MyPage | 저 | 1일 |
-| 🟡 **Low** | SettingsPage | 중 | 1일 |
-
-### 🔧 **기술적 세부사항**
-
-#### **스타일링 전략**
-- HTML의 CSS 변수를 Tailwind 테마로 변환
-- 컴포넌트별 스타일 모듈화
-- 다크모드 지원을 위한 CSS 변수 활용
-- 반응형 디자인 우선 (mobile-first)
-
-#### **상태 관리 전략**
-- Context API: 전역 상태 (테마, 인증)
-- Local State: 컴포넌트 상태
-- React Query: 서버 상태 (기존 설치됨)
-- LocalStorage: 설정 영속성
-
-#### **성능 최적화**
-- React.memo를 활용한 불필요한 리렌더링 방지
-- useMemo, useCallback 적절 활용
-- Code splitting (lazy loading) 구현
-- 이미지 최적화 (lazy loading, WebP 형식)
-
-### 🚀 **즉시 시작 가능한 작업**
-1. CSS 변수 → Tailwind 테마 변환
-2. 공통 Layout 컴포넌트 생성
-3. 재사용 UI 컴포넌트 라이브러리 구축
-4. HomePage 우선 구현 (가장 복잡하고 핵심적)
+### 🔧 **기술적 고려사항**
+- **성능**: React Query 캐싱 전략 최적화
+- **접근성**: ARIA 레이블 및 키보드 네비게이션
+- **모바일**: 터치 피드백 및 반응형 디자인
+- **PWA**: 오프라인 지원 고려 (향후)

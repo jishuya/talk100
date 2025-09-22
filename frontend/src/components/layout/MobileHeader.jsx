@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { IoNotifications, IoMoon, IoSunny, IoSettingsOutline, IoChevronBackOutline } from 'react-icons/io5';
+import { getIconColor } from '../../utils/iconColors.js';
 
 const MobileHeader = () => {
   const location = useLocation();
@@ -75,7 +76,7 @@ const MobileHeader = () => {
           <div className="flex items-center gap-2">
             {/* 알림 벨 */}
             <button className="w-8 h-8 flex items-center justify-center text-lg touchable">
-              <IoNotifications className="text-xl text-yellow-500" />
+              <IoNotifications className={getIconColor('IoNotifications', 'xl')} />
             </button>
             {/* 테마 토글 */}
             <button
@@ -83,8 +84,8 @@ const MobileHeader = () => {
               className="w-8 h-8 flex items-center justify-center text-lg touchable"
             >
               {theme === 'light' ?
-                <IoMoon className="text-xl text-yellow-500" /> :
-                <IoSunny className="text-xl text-yellow-500" />
+                <IoMoon className={getIconColor('IoMoon', 'xl')} /> :
+                <IoSunny className={getIconColor('IoSunny', 'xl')} />
               }
             </button>
           </div>
@@ -93,7 +94,7 @@ const MobileHeader = () => {
       case 'settings':
         return (
           <button className="w-8 h-8 flex items-center justify-center text-xl text-text-primary touchable">
-            <IoSettingsOutline className="text-xl text-gray-400" />
+            <IoSettingsOutline className={getIconColor('IoSettingsOutline', 'xl')} />
           </button>
         );
 
@@ -133,7 +134,7 @@ const MobileHeader = () => {
             onClick={handleBackClick}
             className="w-8 h-8 flex items-center justify-center text-xl text-text-primary touchable"
           >
-            <IoChevronBackOutline className="text-xl text-gray-400" />
+            <IoChevronBackOutline className={getIconColor('IoChevronBackOutline', 'xl')} />
           </button>
         )}
 

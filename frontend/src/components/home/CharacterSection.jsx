@@ -2,6 +2,7 @@ import React from 'react';
 import { CharacterCard, TrophyBadge, StarBadge, StartLearningButton, CircularProgress } from '../ui';
 import { IoChevronDownOutline, IoSchoolOutline } from 'react-icons/io5';
 import { SiQuizlet } from "react-icons/si";
+import { getIconColor } from '../../utils/iconColors.js';
 
 const CharacterSection = ({
   user = { name: '삔이', goal: 20 },
@@ -19,7 +20,7 @@ const CharacterSection = ({
 
       {/* 캐릭터 아바타 */}
       <div className="w-25 h-25 mx-auto mb-3 bg-surface rounded-full flex items-center justify-center">
-        <IoSchoolOutline className="text-5xl text-gray-400" />
+        <IoSchoolOutline className={getIconColor('IoSchoolOutline', '3xl')} />
       </div>
 
       {/* 캐릭터 정보 */}
@@ -27,7 +28,7 @@ const CharacterSection = ({
         <div className="text-xl font-bold text-text-primary mb-1">{user.name}</div>
         <div className="flex items-center justify-center text-sm text-text-secondary">
           학습 목표: {user.goal}개
-          <IoChevronDownOutline className="ml-1 text-gray-400" />
+          <IoChevronDownOutline className={`ml-1 ${getIconColor('IoChevronDownOutline', 'md')}`} />
         </div>
       </div>
 
