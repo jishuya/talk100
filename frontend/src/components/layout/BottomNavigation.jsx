@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { IoHomeOutline, IoHome, IoBookOutline, IoBook, IoStatsChartOutline, IoStatsChart, IoPersonOutline, IoPerson } from 'react-icons/io5';
 
 const BottomNavigation = () => {
   const location = useLocation();
@@ -8,25 +9,29 @@ const BottomNavigation = () => {
   const navItems = [
     {
       path: '/',
-      icon: '🏠',
+      icon: IoHomeOutline,
+      activeIcon: IoHome,
       label: '홈',
       isActive: location.pathname === '/',
     },
     {
       path: '/quiz',
-      icon: '📚',
+      icon: IoBookOutline,
+      activeIcon: IoBook,
       label: '학습',
       isActive: location.pathname.startsWith('/quiz'),  // /quiz/daily, /quiz/review 허용
     },
     {
       path: '/status',
-      icon: '📊',
+      icon: IoStatsChartOutline,
+      activeIcon: IoStatsChart,
       label: '통계',
       isActive: location.pathname === '/status',
     },
     {
       path: '/mypage',
-      icon: '👤',
+      icon: IoPersonOutline,
+      activeIcon: IoPerson,
       label: '마이',
       isActive: location.pathname === '/mypage',
     },
@@ -42,12 +47,14 @@ const BottomNavigation = () => {
         <button
           key={item.path}
           onClick={() => handleNavClick(item.path)}
-          className={`flex-1 flex flex-col items-center justify-center gap-1 p-2 touchable transition-colors duration-300 ${
-            item.isActive ? 'text-primary' : 'text-text-secondary'
-          }`}
+          className="flex-1 flex flex-col items-center justify-center gap-1 p-2 touchable transition-colors duration-300"
         >
-          <span className="text-2xl">{item.icon}</span>
-          <span className="text-xs font-medium">{item.label}</span>
+          {React.createElement(item.isActive ? item.activeIcon : item.icon, {
+            className: `text-2xl ${item.isActive ? 'text-primary' : 'text-gray-400'}`
+          })}
+          <span className={`text-xs font-medium ${
+            item.isActive ? 'text-primary' : 'text-gray-400'
+          }`}>{item.label}</span>
         </button>
       ))}
     </nav>

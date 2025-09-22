@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { cn } from '../../utils/cn';
 import Button from './Button';
+import { IoCloseOutline } from 'react-icons/io5';
 
 const Modal = ({
   isOpen = false,
@@ -23,16 +24,19 @@ const Modal = ({
   // ESC 키로 모달 닫기
   useEffect(() => {
     const handleEscape = (e) => {
+      // ESC 키 눌렀을 때 닫힘
       if (e.key === 'Escape' && isOpen) {
         onClose?.();
       }
     };
 
+    // 뒷배경의 스크롤기능 막음
     if (isOpen) {
       document.addEventListener('keydown', handleEscape);
       document.body.style.overflow = 'hidden';
     }
 
+    // 모달 닫히면 원래대로 복귀하기 위해 이벤트 제거
     return () => {
       document.removeEventListener('keydown', handleEscape);
       document.body.style.overflow = 'unset';
@@ -69,7 +73,7 @@ const Modal = ({
             onClick={onClose}
             className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors"
           >
-            ✕
+            <IoCloseOutline className="text-xl text-gray-400" />
           </button>
         )}
         {children}

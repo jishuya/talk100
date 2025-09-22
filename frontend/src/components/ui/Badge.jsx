@@ -1,5 +1,6 @@
 import React from 'react';
 import { cn } from '../../utils/cn';
+import { IoTrophy, IoStar } from 'react-icons/io5';
 
 // Badge variants
 const badgeVariants = {
@@ -18,6 +19,14 @@ const badgeVariants = {
   }
 };
 
+/**
+ forwardRef((props, ref) => {
+    return <div ref={ref}>{props.children}</div>;
+  }); 
+  -> forwardRef는 함수 하나를 인자로 받으며 그 함수는 두 개의 매개변수를 가짐.
+    1) props → 부모가 전달한 일반 props (예: className, onClick 등)
+    2) ref → 부모가 <MyComponent ref={...} />로 넘긴 ref 객체
+ */
 const Badge = React.forwardRef(({
   children,
   className = '',
@@ -51,14 +60,14 @@ Badge.displayName = 'Badge';
 // Trophy Badge 컴포넌트
 export const TrophyBadge = ({ count, className = '', ...props }) => (
   <span className={cn('badge-trophy', className)} {...props}>
-    🏆 {count}
+    <IoTrophy className="inline text-yellow-500 mr-1" /> {count}
   </span>
 );
 
 // Star Badge 컴포넌트
 export const StarBadge = ({ count, className = '', ...props }) => (
   <span className={cn('badge-star', className)} {...props}>
-    ⭐ {typeof count === 'number' ? count.toLocaleString() : count}
+    <IoStar className="inline text-yellow-500 mr-1" /> {typeof count === 'number' ? count.toLocaleString() : count}
   </span>
 );
 

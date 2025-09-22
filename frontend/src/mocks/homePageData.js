@@ -27,7 +27,7 @@ export const MOCK_HOME_DATA = {
   categories: [
     {
       id: 'model-example',
-      icon: '📖',
+      icon: 'BiBulb',
       title: 'Model Example',
       count: 'Day 1-30',
       path: '/quiz/model-example',
@@ -37,7 +37,7 @@ export const MOCK_HOME_DATA = {
     },
     {
       id: 'small-talk',
-      icon: '🗣️',
+      icon: 'BiChat',
       title: 'Small Talk',
       count: 'Day 1-30',
       path: '/quiz/small-talk',
@@ -47,7 +47,7 @@ export const MOCK_HOME_DATA = {
     },
     {
       id: 'cases-in-point',
-      icon: '💼',
+      icon: 'BiDetail',
       title: 'Cases in Point',
       count: 'Day 1-30',
       path: '/quiz/cases-in-point',
@@ -60,7 +60,7 @@ export const MOCK_HOME_DATA = {
   personalQuizzes: [
     {
       id: 'wrong-answers',
-      icon: '❌',
+      icon: 'MdOutlineStar',
       title: '틀린문제',
       count: 15,              // 실제 개수 (Number)
       path: '/quiz/wrong-answers',
@@ -68,7 +68,7 @@ export const MOCK_HOME_DATA = {
     },
     {
       id: 'favorites',
-      icon: '❤️',
+      icon: 'AiFillHeart',
       title: '즐겨찾기',
       count: 8,
       path: '/quiz/favorites',
@@ -79,7 +79,7 @@ export const MOCK_HOME_DATA = {
   history: [
     {
       id: 1,
-      icon: '📝',
+      icon: 'BiBulb',
       title: 'Model Example Day 1',
       time: '10분 전',
       score: 85,
@@ -89,7 +89,7 @@ export const MOCK_HOME_DATA = {
     },
     {
       id: 2,
-      icon: '🗣️',
+      icon: 'BiChat',
       title: 'Small Talk Day 3',
       time: '2시간 전',
       score: 92,
@@ -99,7 +99,7 @@ export const MOCK_HOME_DATA = {
     },
     {
       id: 3,
-      icon: '💼',
+      icon: 'BiDetail',
       title: 'Cases in Point Day 2',
       time: '어제',
       score: 78,

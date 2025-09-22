@@ -2,6 +2,7 @@ import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { IoNotifications, IoMoon, IoSunny, IoSettingsOutline, IoChevronBackOutline } from 'react-icons/io5';
 
 const MobileHeader = () => {
   const location = useLocation();
@@ -74,14 +75,17 @@ const MobileHeader = () => {
           <div className="flex items-center gap-2">
             {/* 알림 벨 */}
             <button className="w-8 h-8 flex items-center justify-center text-lg touchable">
-              <span>🔔</span>
+              <IoNotifications className="text-xl text-yellow-500" />
             </button>
             {/* 테마 토글 */}
             <button
               onClick={() => changeTheme(theme === 'light' ? 'dark' : 'light')}
               className="w-8 h-8 flex items-center justify-center text-lg touchable"
             >
-              <span>{theme === 'light' ? '🌙' : '☀️'}</span>
+              {theme === 'light' ?
+                <IoMoon className="text-xl text-yellow-500" /> :
+                <IoSunny className="text-xl text-yellow-500" />
+              }
             </button>
           </div>
         );
@@ -89,7 +93,7 @@ const MobileHeader = () => {
       case 'settings':
         return (
           <button className="w-8 h-8 flex items-center justify-center text-xl text-text-primary touchable">
-            <span>⚙️</span>
+            <IoSettingsOutline className="text-xl text-gray-400" />
           </button>
         );
 
@@ -129,7 +133,7 @@ const MobileHeader = () => {
             onClick={handleBackClick}
             className="w-8 h-8 flex items-center justify-center text-xl text-text-primary touchable"
           >
-            <span>←</span>
+            <IoChevronBackOutline className="text-xl text-gray-400" />
           </button>
         )}
 
