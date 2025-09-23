@@ -127,6 +127,15 @@ body {
     content: '';
   }
 
+  /* 통계 페이지 그라디언트 */
+  .bg-gradient-primary {
+    @apply bg-gradient-to-br from-primary to-primary-light;
+  }
+
+  .bg-gradient-badge {
+    @apply bg-gradient-to-br from-primary-light to-accent-mint;
+  }
+
   .quiz-card-personal {
     @apply card-surface p-4 text-center cursor-pointer touchable transition-all duration-300;
     @apply hover:shadow-medium;
