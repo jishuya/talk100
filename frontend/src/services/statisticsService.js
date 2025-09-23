@@ -9,7 +9,8 @@ class StatisticsService extends BaseService {
   async getSummaryStats(period = 'week') {
     return this.request(
       () => this.apiCall(`/api/statistics/summary?period=${period}`),
-      `summaryStats.${period}`
+      null, // Mock key
+      () => this.mockData.summaryStats[period]
     );
   }
 
@@ -25,7 +26,8 @@ class StatisticsService extends BaseService {
   async getWeeklyPattern(period = 'week') {
     return this.request(
       () => this.apiCall(`/api/statistics/weekly-pattern?period=${period}`),
-      `weeklyPattern.${period}`
+      null, // Mock key
+      () => this.mockData.weeklyPattern[period]
     );
   }
 
@@ -41,7 +43,8 @@ class StatisticsService extends BaseService {
   async getLearningPattern(period = 'week') {
     return this.request(
       () => this.apiCall(`/api/statistics/learning-pattern?period=${period}`),
-      `learningPattern.${period}`
+      null, // Mock key
+      () => this.mockData.learningPattern[period]
     );
   }
 

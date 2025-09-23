@@ -34,12 +34,12 @@ const ProgressBar = ({
         </div>
       )}
       <div className={cn(
-        'w-full bg-accent-pale rounded-primary-full overflow-hidden border border-accent-mint',
+        'w-full bg-accent-pale rounded-full overflow-hidden border border-accent-mint',
         sizeClasses[size]
       )}>
         <div
           className={cn(
-            'h-full rounded-primary-full transition-all duration-500 ease-out',
+            'h-full rounded-full transition-all duration-500 ease-out',
             variantClasses[variant]
           )}
           style={{ width: `${percentage}%` }}

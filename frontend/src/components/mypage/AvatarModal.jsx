@@ -20,8 +20,8 @@ const AvatarModal = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="bg-white rounded-2xl p-6 w-[90%] max-w-[380px] max-h-[80vh] overflow-y-auto">
+    <Modal isOpen={isOpen} onClose={onClose} size="sm">
+      <div className="p-6 max-h-[80vh] overflow-y-auto">
         <h3 className="text-lg font-semibold mb-4 text-center">아바타 선택</h3>
 
         <div className="p-3 bg-accent-pale rounded-xl mb-3 text-center">

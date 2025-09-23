@@ -149,7 +149,7 @@ const MobileHeader = () => {
 
       case 'save':
         return (
-          <button className="px-4 py-1.5 bg-primary text-white rounded-primary-full text-sm font-semibold touchable">
+          <button className="px-4 py-1.5 bg-primary text-white rounded-full text-sm font-semibold touchable">
             저장
           </button>
         );

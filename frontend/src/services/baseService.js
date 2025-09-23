@@ -14,7 +14,7 @@ export class BaseService {
     if (ENV.USE_MOCK_DATA && mockData) {
       // 개발 환경: Mock 데이터 반환 (네트워크 지연 시뮬레이션)
       return new Promise(resolve =>
-        setTimeout(() => resolve(this.mockData[mockKey]), delay)
+        setTimeout(() => resolve(mockData), delay)
       );
     }
 
@@ -29,6 +29,11 @@ export class BaseService {
       }
       throw error;
     }
+  }
+
+  // Mock 데이터 가져오기 헬퍼
+  getMockData(mockKey) {
+    return mockKey ? this.mockData[mockKey] : null;
   }
 
   // 에러 처리 헬퍼

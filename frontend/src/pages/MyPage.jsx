@@ -170,17 +170,18 @@ const MyPage = () => {
 
   return (
     <div className="min-h-screen bg-accent-pale">
-      {/* 프로필 헤더 */}
-      <ProfileHeader
-        profile={profile}
-        onAvatarClick={handleAvatarClick}
-      />
+      <div className="max-w-2xl mx-auto">
+        {/* 프로필 헤더 */}
+        <ProfileHeader
+          profile={profile}
+          onAvatarClick={handleAvatarClick}
+        />
 
-      {/* 학습 요약 카드 */}
-      <SummaryCards summary={summary} />
+        {/* 학습 요약 카드 */}
+        <SummaryCards summary={summary} />
 
-      {/* 메인 콘텐츠 */}
-      <main className="flex-1 p-4 pb-20 md:p-6">
+        {/* 메인 콘텐츠 */}
+        <main className="flex-1 p-4 pb-20 md:p-6">
         {/* 학습 목표 설정 */}
         <GoalsSection
           goals={goals}
@@ -234,6 +235,7 @@ const MyPage = () => {
         goals={goals}
         onSave={handleGoalsSave}
       />
+      </div>
     </div>
   );
 };

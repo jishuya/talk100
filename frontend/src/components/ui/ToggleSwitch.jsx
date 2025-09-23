@@ -42,7 +42,7 @@ const ToggleSwitch = ({
         />
         <div className={cn(
           toggle,
-          'bg-gray-light rounded-primary-full transition-colors duration-200 ease-in-out',
+          'bg-gray-light rounded-full transition-colors duration-200 ease-in-out',
           checked ? 'bg-primary' : 'bg-gray-light',
           disabled && 'opacity-50 cursor-not-allowed'
         )}>
