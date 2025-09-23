@@ -1,15 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { IoNotifications, IoMoon, IoSunny, IoSettingsOutline, IoChevronBackOutline } from 'react-icons/io5';
+import { IoNotifications, IoMoon, IoSunny, IoSettingsOutline, IoChevronBackOutline, IoMenuOutline } from 'react-icons/io5';
 import { getIconColor } from '../../utils/iconColors.js';
+import HamburgerMenu from './HamburgerMenu';
 
 const MobileHeader = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { theme, changeTheme } = useTheme();
   const { user } = useAuth();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // 퀴즈 카테고리별 제목 매핑
   const getQuizTitle = (pathname) => {
@@ -52,6 +54,7 @@ const MobileHeader = () => {
           title: 'talk100',
           showBackButton: false,
           showLogo: true,
+          showMenuButton: true,
           rightContent: 'profile', // 프로필 + 테마 토글
         };
       case '/status':
@@ -163,6 +166,15 @@ const MobileHeader = () => {
     <header className="fixed top-0 left-0 right-0 md:left-1/2 md:-translate-x-1/2 md:w-[768px] lg:w-[900px] h-header bg-white flex items-center justify-between px-4 z-[100] shadow-primary md:border-b md:border-gray-border md:shadow-none">
       {/* Left Section */}
       <div className="flex items-center gap-2">
+        {config.showMenuButton && (
+          <button
+            onClick={() => setIsMenuOpen(true)}
+            className="w-8 h-8 flex items-center justify-center text-xl text-text-primary touchable"
+          >
+            <IoMenuOutline className={getIconColor('IoMenuOutline', 'xl')} />
+          </button>
+        )}
+
         {config.showBackButton && (
           <button
             onClick={handleBackClick}
@@ -183,6 +195,12 @@ const MobileHeader = () => {
       <div className="flex items-center gap-2">
         {renderRightContent()}
       </div>
+
+      {/* Hamburger Menu */}
+      <HamburgerMenu
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+      />
     </header>
   );
 };
