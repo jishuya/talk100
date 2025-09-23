@@ -123,4 +123,5 @@ export const SaveButton = ({ children = '저장', ...props }) => (
   </Button>
 );
 
+export { Button };
 export default Button;

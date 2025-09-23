@@ -23,8 +23,9 @@ export class BaseService {
   }
 
   // Mock 데이터와 실제 API 호출을 선택적으로 사용
-  async request(apiCall, mockKey, delay = 500) {
-    const mockData = this.getMockData(mockKey);
+  async request(apiCall, mockKey, mockFn, delay = 500) {
+    // mockFn이 제공되면 사용, 그렇지 않으면 mockKey로 데이터 찾기
+    const mockData = mockFn ? mockFn() : this.getMockData(mockKey);
 
     if (ENV.USE_MOCK_DATA && mockData) {
       // 개발 환경: Mock 데이터 반환 (네트워크 지연 시뮬레이션)
@@ -39,7 +40,7 @@ export class BaseService {
     } catch (error) {
       // API 실패시 Mock 데이터로 fallback (선택적)
       if (mockData) {
-        console.warn(`API call failed, using mock data for ${mockKey}:`, error);
+        console.warn(`API call failed, using mock data for ${mockKey || 'custom'}:`, error);
         return mockData;
       }
       throw error;

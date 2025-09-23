@@ -42,7 +42,7 @@ const MobileHeader = () => {
         title: getQuizTitle(location.pathname),
         showBackButton: true,
         showLogo: false,
-        rightContent: 'settings',
+        rightContent: '',
       };
     }
 
@@ -59,12 +59,12 @@ const MobileHeader = () => {
           title: '학습 통계',
           showBackButton: true,
           showLogo: false,
-          rightContent: 'period',
+          rightContent: '',
         };
       case '/mypage':
         return {
           title: '마이페이지',
-          showBackButton: false,
+          showBackButton: true,
           showLogo: false,
           rightContent: 'settings',
         };
@@ -95,6 +95,10 @@ const MobileHeader = () => {
     }
   };
 
+  const handleSettingsClick = () => {
+    navigate('/settings');
+  };
+
   const renderRightContent = () => {
     switch (config.rightContent) {
       case 'profile':
@@ -119,7 +123,10 @@ const MobileHeader = () => {
 
       case 'settings':
         return (
-          <button className="w-8 h-8 flex items-center justify-center text-xl text-text-primary touchable">
+          <button
+            onClick={handleSettingsClick}
+            className="w-8 h-8 flex items-center justify-center text-xl text-text-primary touchable"
+          >
             <IoSettingsOutline className={getIconColor('IoSettingsOutline', 'xl')} />
           </button>
         );

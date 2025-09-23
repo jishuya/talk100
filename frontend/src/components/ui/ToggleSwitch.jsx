@@ -63,4 +63,5 @@ const ToggleSwitch = ({
   );
 };
 
+export { ToggleSwitch };
 export default ToggleSwitch;

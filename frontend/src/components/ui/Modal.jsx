@@ -134,4 +134,5 @@ export const ConfirmModal = ({
   </Modal>
 );
 
+export { Modal };
 export default Modal;
