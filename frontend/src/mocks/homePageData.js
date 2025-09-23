@@ -1,4 +1,7 @@
 // Mock 데이터 - 개발 및 테스트용
+import { statisticsData } from './statisticsData';
+
+export { statisticsData };
 export const MOCK_HOME_DATA = {
   user: {
     name: '삔이',

@@ -57,7 +57,7 @@ const MobileHeader = () => {
       case '/status':
         return {
           title: '학습 통계',
-          showBackButton: false,
+          showBackButton: true,
           showLogo: false,
           rightContent: 'period',
         };
@@ -126,17 +126,18 @@ const MobileHeader = () => {
 
       case 'period':
         return (
-          <div className="flex gap-1 bg-accent-pale p-1 rounded-primary-full">
-            <button className="px-3 py-1 rounded-primary-full text-xs bg-white text-primary font-semibold">
-              주간
-            </button>
-            <button className="px-3 py-1 rounded-primary-full text-xs text-text-secondary">
-              월간
-            </button>
-            <button className="px-3 py-1 rounded-primary-full text-xs text-text-secondary">
-              전체
-            </button>
-          </div>
+          <div></div>
+          // <div className="flex gap-1 bg-accent-pale p-1 rounded-primary-full">
+          //   <button className="px-3 py-1 rounded-primary-full text-xs bg-white text-primary font-semibold">
+          //     주간
+          //   </button>
+          //   <button className="px-3 py-1 rounded-primary-full text-xs text-text-secondary">
+          //     월간
+          //   </button>
+          //   <button className="px-3 py-1 rounded-primary-full text-xs text-text-secondary">
+          //     전체
+          //   </button>
+          // </div>
         );
 
       case 'save':
