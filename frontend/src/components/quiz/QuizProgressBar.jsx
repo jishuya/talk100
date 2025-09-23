@@ -1,4 +1,3 @@
-import React from 'react';
 
 export const QuizProgressBar = ({
   progress = { completed: 0, total: 20, percentage: 0 }

@@ -11,8 +11,41 @@ const MobileHeader = () => {
   const { theme, changeTheme } = useTheme();
   const { user } = useAuth();
 
+  // 퀴즈 카테고리별 제목 매핑
+  const getQuizTitle = (pathname) => {
+    const pathSegments = pathname.split('/');
+    if (pathSegments[1] === 'quiz' && pathSegments[2]) {
+      const category = pathSegments[2];
+      switch (category) {
+        case 'cases-in-point':
+          return 'Cases in Point';
+        case 'model-example':
+          return 'Model Example';
+        case 'small-talk':
+          return 'Small Talk';
+        case 'wrong-answers':
+          return '틀린 문제';
+        case 'favorites':
+          return '즐겨찾기';
+        default:
+          return '오늘의 퀴즈';
+      }
+    }
+    return '오늘의 퀴즈';
+  };
+
   // 페이지별 헤더 설정
   const getHeaderConfig = () => {
+    // 퀴즈 페이지들 처리
+    if (location.pathname.startsWith('/quiz')) {
+      return {
+        title: getQuizTitle(location.pathname),
+        showBackButton: true,
+        showLogo: false,
+        rightContent: 'settings',
+      };
+    }
+
     switch (location.pathname) {
       case '/':
         return {
@@ -20,13 +53,6 @@ const MobileHeader = () => {
           showBackButton: false,
           showLogo: true,
           rightContent: 'profile', // 프로필 + 테마 토글
-        };
-      case '/quiz':
-        return {
-          title: '오늘의 퀴즈',
-          showBackButton: true,
-          showLogo: false,
-          rightContent: 'settings',
         };
       case '/status':
         return {

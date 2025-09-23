@@ -12,7 +12,7 @@ import { useProgressData, useStudyHistory } from '../hooks/api/useProgressData';
 import { useQuizCategories, usePersonalQuizzes } from '../hooks/api/useQuizData';
 
 const HomePage = () => {
-  const { loading: authLoading, isAuthenticated } = useAuth();
+  const { loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   // 새로운 데이터 훅들 사용
@@ -37,10 +37,11 @@ const HomePage = () => {
     );
   }
 
-  if (!isAuthenticated) {
-    navigate('/login');
-    return null;
-  }
+  // Temporarily disable login requirement for testing
+  // if (!isAuthenticated) {
+  //   navigate('/login');
+  //   return null;
+  // }
 
   const handleStartLearning = () => {
     console.log('오늘의 퀴즈 시작!');

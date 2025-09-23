@@ -284,6 +284,59 @@ talk100/
 
 ---
 
+## 🎮 QuizPage 시스템 (완료)
+
+### 두 가지 퀴즈 모드
+**1. 문제풀이 모드 (`solving`)**
+- 사용자가 답변을 입력하는 모드
+- 힌트보기, 정답보기, 정답말하기/답변제출 버튼 표시
+- 키워드 기반 실시간 입력 및 채점
+
+**2. 채점모드 (`grading`)**
+- 정답 확인 후 다음 문제로 이동하는 모드
+- 다시듣기, 힌트보기, 다음문제 버튼만 표시
+- 메인 액션 버튼 숨김
+
+### 키워드 기반 입력 시스템
+```javascript
+// 키보드 모드에서 키워드 박스를 클릭 가능한 input field로 변경
+{isKeyword && inputMode === 'keyboard' && quizMode === 'solving' && (
+  <input
+    type="text"
+    value={keywordInputs[cleanWord.toLowerCase()] || ''}
+    onChange={(e) => onKeywordInputChange?.(cleanWord.toLowerCase(), e.target.value)}
+    onKeyDown={(e) => onKeywordKeyDown?.(cleanWord.toLowerCase(), keywordInputs[cleanWord.toLowerCase()] || '', e)}
+    className="bg-yellow-200 px-2 py-1 rounded font-semibold text-center border-2 border-yellow-300 focus:border-primary focus:outline-none"
+    placeholder="___"
+    data-keyword={cleanWord.toLowerCase()}
+  />
+)}
+```
+
+### 실시간 채점 시스템
+- **개별 키워드 검증**: 정답 입력시 자동으로 다음 키워드로 포커스 이동
+- **전체 완성 검증**: 모든 키워드 완성시 자동으로 다음 문제로 이동
+- **답변 표시**: 스페이스/엔터 입력시 "내 답변"에 콤마로 구분하여 표시
+
+### 힌트 시스템
+```javascript
+// 힌트보기: 키워드만 첫 글자로 표시, 나머지 단어는 그대로
+if (isKeyword) {
+  const hint = firstLetter + '_'.repeat(restLength);
+  return <span className="bg-gray-200">{hint}{punctuation}</span>;
+} else {
+  return <span>{word}</span>; // 일반 단어는 그대로
+}
+```
+
+### UI 개선사항
+- **QuizProgressBar**: QuizHeader 대신 단순한 진행률 표시
+- **메인 액션 버튼**: 1.5배 크기 확대 (py-6, text-lg, text-2xl 아이콘)
+- **키워드 입력 영역**: textarea 삭제하고 키워드 박스 직접 클릭 입력
+- **모드별 버튼 제어**: 조건부 렌더링으로 적절한 버튼만 표시
+
+---
+
 ## 🎯 현재 구현 상태
 
 ### ✅ **완료된 부분**
@@ -291,19 +344,23 @@ talk100/
 - **스타일링**: Tailwind + 디자인 시스템 구축 완료
 - **UI 컴포넌트**: Button, Card, Modal 등 기본 컴포넌트 완성
 - **홈페이지**: CharacterSection, QuizSections 구현
+- **QuizPage**: 완전한 퀴즈 인터페이스 구현 완료
+  - 두 가지 모드 (문제풀이/채점) 구현
+  - 키워드 기반 입력 시스템 구현
+  - 실시간 채점 및 자동 진행 구현
+  - 힌트/정답 표시 시스템 구현
 - **Mock 시스템**: 개발용 Mock 데이터 및 서비스 완성
 
 ### 🚧 **진행 중인 작업**
 - **API 연동**: 실제 백엔드 API 연결 및 테스트
-- **퀴즈 페이지**: QuizPage 구현 진행
 - **상태 관리**: 전역 상태 최적화
 
 ### 🚀 **다음 우선순위 작업**
 
-#### Phase 1: 핵심 기능 완성
-1. **QuizPage 구현**: 문제 출제 및 답변 제출 기능
-2. **채점 시스템**: Keywords 기반 채점 로직 구현
-3. **진행률 추적**: 사용자 학습 진행도 실시간 업데이트
+#### Phase 1: 백엔드 연동
+1. **API 연결**: Mock에서 실제 API로 전환
+2. **채점 로직**: 백엔드 키워드 기반 채점 구현
+3. **진행률 동기화**: 사용자 학습 진행도 실시간 동기화
 
 #### Phase 2: 복습 시스템
 1. **복습 알고리즘**: 8단계 간격 복습 스케줄링

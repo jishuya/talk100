@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-
 // QuizPage 관련 훅들
 import {
   useQuizPageData,
@@ -48,10 +47,13 @@ const QuizPage = () => {
   // 로컬 상태
   const [userAnswer, setUserAnswer] = useState('');
   const [inputMode, setInputMode] = useState('voice'); // 'voice' | 'keyboard'
+  const [quizMode, setQuizMode] = useState('solving'); // 'solving' | 'grading'
   const [isRecording, setIsRecording] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackData, setFeedbackData] = useState(null);
-  const [keyboardInput, setKeyboardInput] = useState('');
+  const [showHint, setShowHint] = useState(false);
+  const [showAnswer, setShowAnswer] = useState(false);
+  const [keywordInputs, setKeywordInputs] = useState({});
 
   // 인증 체크
   useEffect(() => {
@@ -60,12 +62,101 @@ const QuizPage = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  // 키보드 입력 실시간 반영
-  useEffect(() => {
-    if (inputMode === 'keyboard' && keyboardInput.trim()) {
-      setUserAnswer(keyboardInput);
+  // 키워드 입력 변경 핸들러
+  const handleKeywordInputChange = (keyword, value) => {
+    setKeywordInputs(prev => {
+      const newInputs = {
+        ...prev,
+        [keyword]: value
+      };
+
+      // 즉시 답변 업데이트
+      const completedAnswers = Object.entries(newInputs)
+        .filter(([, val]) => val && val.trim() !== '')
+        .map(([, val]) => val.trim())
+        .filter((val, index, array) => val !== '' && array.indexOf(val) === index);
+
+      setUserAnswer(completedAnswers.join(', '));
+
+      return newInputs;
+    });
+
+    // 실시간 정답 검증
+    if (value.toLowerCase().trim() === keyword) {
+      // 정답이면 다음 키워드로 포커스 이동
+      setTimeout(() => {
+        moveToNextKeywordInput(keyword);
+      }, 100);
     }
-  }, [keyboardInput, inputMode]);
+  };
+
+  // 키워드 입력 키 이벤트 핸들러
+  const handleKeywordKeyDown = (keyword, value, e) => {
+    if (e.key === ' ' || e.key === 'Enter' || e.key === 'Tab') {
+      e.preventDefault();
+
+      // Tab키의 경우 다음 키워드로 포커스 이동
+      if (e.key === 'Tab' && value.trim()) {
+        setTimeout(() => {
+          moveToNextKeywordInput(keyword);
+        }, 50);
+      }
+    }
+  };
+
+  // 다음 키워드 input으로 포커스 이동
+  const moveToNextKeywordInput = (currentKeyword) => {
+    if (!question?.keywords) return;
+
+    const keywords = question.keywords.map(k => k.toLowerCase());
+    const currentIndex = keywords.indexOf(currentKeyword);
+
+    if (currentIndex !== -1 && currentIndex < keywords.length - 1) {
+      const nextKeyword = keywords[currentIndex + 1];
+      const nextInput = document.querySelector(`input[data-keyword="${nextKeyword}"]`);
+      if (nextInput) {
+        nextInput.focus();
+      }
+    }
+  };
+
+  // 키워드 입력 기반 실시간 채점 로직
+  useEffect(() => {
+    if (quizMode === 'solving' && inputMode === 'keyboard' && question?.keywords) {
+      const allKeywordsCorrect = question.keywords.every(keyword => {
+        const userInput = keywordInputs[keyword.toLowerCase()];
+        return userInput?.toLowerCase().trim() === keyword.toLowerCase();
+      });
+
+      if (allKeywordsCorrect && question.keywords.length > 0) {
+        // 모든 키워드가 정답이면 채점 모드로 전환
+        setQuizMode('grading');
+        setTimeout(() => {
+          handleNextQuestion();
+        }, 2000);
+      }
+    }
+  }, [keywordInputs, question, quizMode, inputMode]);
+
+  // 음성 모드 실시간 채점 로직 (기존)
+  useEffect(() => {
+    if (quizMode === 'solving' && inputMode === 'voice' && userAnswer.trim() && question?.answer) {
+      const normalizedAnswer = userAnswer.toLowerCase().trim();
+      const normalizedCorrect = question.answer.toLowerCase().trim();
+
+      // 간단한 키워드 매칭 또는 정확한 매칭
+      if (normalizedAnswer === normalizedCorrect ||
+          (question.keywords && question.keywords.some(keyword =>
+            normalizedAnswer.includes(keyword.toLowerCase())
+          ))) {
+        // 정답이면 채점 모드로 전환
+        setQuizMode('grading');
+        setTimeout(() => {
+          handleNextQuestion();
+        }, 2000);
+      }
+    }
+  }, [userAnswer, question, quizMode, inputMode]);
 
   // ================================================================
   // 이벤트 핸들러들
@@ -76,7 +167,7 @@ const QuizPage = () => {
     setInputMode(mode);
     if (mode === 'keyboard') {
       setUserAnswer('');
-      setKeyboardInput('');
+      setKeywordInputs({});
     }
 
     // 설정 업데이트
@@ -125,9 +216,12 @@ const QuizPage = () => {
 
       // 상태 초기화
       setUserAnswer('');
-      setKeyboardInput('');
       setFeedbackData(null);
       setShowFeedback(false);
+      setQuizMode('solving');
+      setShowHint(false);
+      setShowAnswer(false);
+      setKeywordInputs({});
 
     } catch (error) {
       console.error('Move to next question error:', error);
@@ -146,7 +240,7 @@ const QuizPage = () => {
 
         // 상태 초기화
         setUserAnswer('');
-        setKeyboardInput('');
+        setKeywordInputs({});
 
       } catch (error) {
         console.error('Skip question error:', error);
@@ -202,13 +296,25 @@ const QuizPage = () => {
     }
   };
 
-  // 힌트 보기
+  // 힌트 보기 (기존)
   const handleShowHint = () => {
     if (question?.hints?.length > 0) {
       alert(`힌트: ${question.hints.join(', ')}`);
     } else {
       alert('이 문제에는 힌트가 없습니다.');
     }
+  };
+
+  // 힌트 보기 (첫 글자)
+  const handleShowFirstLetters = () => {
+    setShowHint(true);
+    setShowAnswer(false);
+  };
+
+  // 정답 보기 (전체)
+  const handleShowFullAnswer = () => {
+    setShowAnswer(true);
+    setShowHint(false);
   };
 
   // 즐겨찾기 토글
@@ -285,8 +391,12 @@ const QuizPage = () => {
         question={question}
         userAnswer={userAnswer}
         inputMode={inputMode}
-        keyboardInput={keyboardInput}
-        onKeyboardInputChange={setKeyboardInput}
+        quizMode={quizMode}
+        showHint={showHint}
+        showAnswer={showAnswer}
+        keywordInputs={keywordInputs}
+        onKeywordInputChange={handleKeywordInputChange}
+        onKeywordKeyDown={handleKeywordKeyDown}
         onInputModeChange={handleInputModeChange}
         onFavoriteToggle={handleToggleFavorite}
         onStarToggle={handleToggleStar}
@@ -295,12 +405,13 @@ const QuizPage = () => {
       {/* 하단 컨트롤 */}
       <QuizControls
         inputMode={inputMode}
+        quizMode={quizMode}
         isRecording={isRecording}
-        keyboardInput={keyboardInput}
-        onKeyboardInputChange={setKeyboardInput}
         onMainAction={handleMainAction}
         onPlayAudio={handlePlayAudio}
         onShowHint={handleShowHint}
+        onShowFirstLetters={handleShowFirstLetters}
+        onShowFullAnswer={handleShowFullAnswer}
         onSkipQuestion={handleSkipQuestion}
         isSubmitting={submitAnswerMutation.isPending}
       />
