@@ -8,7 +8,8 @@ export const MOCK_HOME_DATA = {
     goal: 20,
     level: 5,
     joinDate: '2024-01-15',
-    uid: 'mock_user_123'
+    uid: 'mock_user_123',
+    avatar: '🦊'
   },
 
   progress: {

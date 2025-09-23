@@ -5,7 +5,7 @@ import { SiQuizlet } from "react-icons/si";
 import { getIconColor } from '../../utils/iconColors.js';
 
 const CharacterSection = ({
-  user = { name: '삔이', goal: 20 },
+  user = { name: '삔이', goal: 20, avatar: '👨‍🎓' },
   progress = { current: 0, total: 20, percentage: 35 },
   badges = { trophy: 182, star: 4203 },
   onStartLearning
@@ -19,8 +19,8 @@ const CharacterSection = ({
       </div>
 
       {/* 캐릭터 아바타 */}
-      <div className="w-25 h-25 mx-auto mb-3 bg-surface rounded-full flex items-center justify-center">
-        <IoSchoolOutline className={getIconColor('IoSchoolOutline', '3xl')} />
+      <div className="w-25 h-25 mx-auto mb-3 bg-surface rounded-full flex items-center justify-center text-5xl">
+        {user.avatar}
       </div>
 
       {/* 캐릭터 정보 */}
