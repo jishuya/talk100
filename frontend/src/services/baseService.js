@@ -6,22 +6,6 @@ export class BaseService {
     this.mockData = mockData;
   }
 
-  // Mock 데이터에서 nested key 값 추출
-  getMockData(mockKey) {
-    const keys = mockKey.split('.');
-    let data = this.mockData;
-
-    for (const key of keys) {
-      if (data && typeof data === 'object' && key in data) {
-        data = data[key];
-      } else {
-        return null;
-      }
-    }
-
-    return data;
-  }
-
   // Mock 데이터와 실제 API 호출을 선택적으로 사용
   async request(apiCall, mockKey, mockFn, delay = 500) {
     // mockFn이 제공되면 사용, 그렇지 않으면 mockKey로 데이터 찾기
@@ -30,7 +14,7 @@ export class BaseService {
     if (ENV.USE_MOCK_DATA && mockData) {
       // 개발 환경: Mock 데이터 반환 (네트워크 지연 시뮬레이션)
       return new Promise(resolve =>
-        setTimeout(() => resolve(mockData), delay)
+        setTimeout(() => resolve(this.mockData[mockKey]), delay)
       );
     }
 
