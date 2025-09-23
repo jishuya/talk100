@@ -2,7 +2,6 @@ import React from 'react';
 import { MOCK_HOME_DATA } from '../../mocks/homePageData';
 import { HistoryCard } from '../ui';
 import { getIcon } from '../../utils/iconMap.jsx';
-import { getIconColor } from '../../utils/iconColors.js';
 
 const StudyHistorySection = ({ historyItems, onHistoryItemClick }) => {
   // Mock 데이터를 fallback으로 사용 (API 실패시)
@@ -31,7 +30,7 @@ const StudyHistorySection = ({ historyItems, onHistoryItemClick }) => {
             onClick={() => handleItemClick(item)}
           >
             <div className="w-10 h-10 bg-accent-pale rounded-full flex items-center justify-center mr-3">
-              {typeof item.icon === 'string' ? getIcon(item.icon, getIconColor(item.icon, 'xl')) : item.icon}
+              {typeof item.icon === 'string' ? getIcon(item.icon, { size: 'xl' }) : item.icon}
             </div>
             <div className="flex-1">
               <div className="text-sm font-semibold text-text-primary mb-0.5">{item.title}</div>

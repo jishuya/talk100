@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { IoCloseOutline, IoHomeOutline, IoStatsChartOutline, IoPersonOutline, IoSettingsOutline, IoHeartOutline, IoCloseCircleOutline, IoLibraryOutline } from 'react-icons/io5';
+import { getIcon } from '../../utils/iconMap';
 
 const HamburgerMenu = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
@@ -11,49 +11,49 @@ const HamburgerMenu = ({ isOpen, onClose }) => {
     {
       id: 'home',
       title: '홈',
-      icon: IoHomeOutline,
+      icon: 'IoHomeOutline',
       path: '/',
       description: '대시보드'
     },
     {
       id: 'categories',
       title: '카테고리',
-      icon: IoLibraryOutline,
+      icon: 'IoLibraryOutline',
       path: '/categories',
       description: '학습 카테고리'
     },
     {
       id: 'wrong-answers',
       title: '틀린 문제',
-      icon: IoCloseCircleOutline,
+      icon: 'IoCloseCircleOutline',
       path: '/quiz/wrong-answers',
       description: '복습이 필요한 문제들'
     },
     {
       id: 'favorites',
       title: '즐겨찾기',
-      icon: IoHeartOutline,
+      icon: 'IoHeartOutline',
       path: '/quiz/favorites',
       description: '중요 표시한 문제들'
     },
     {
       id: 'status',
       title: '학습 통계',
-      icon: IoStatsChartOutline,
+      icon: 'IoStatsChartOutline',
       path: '/status',
       description: '학습 진행도 및 통계'
     },
     {
       id: 'mypage',
       title: '마이페이지',
-      icon: IoPersonOutline,
+      icon: 'IoPersonOutline',
       path: '/mypage',
       description: '프로필 및 설정'
     },
     {
       id: 'settings',
       title: '설정',
-      icon: IoSettingsOutline,
+      icon: 'IoSettingsOutline',
       path: '/settings',
       description: '앱 설정'
     }
@@ -101,14 +101,13 @@ const HamburgerMenu = ({ isOpen, onClose }) => {
             onClick={onClose}
             className="w-8 h-8 flex items-center justify-center text-white/80 hover:text-white transition-colors"
           >
-            <IoCloseOutline size={24} />
+            {getIcon('IoCloseOutline', { size: '2xl', color: 'text-white/80 hover:text-white' })}
           </button>
         </div>
 
         {/* Menu Items */}
         <div className="flex-1 py-2 bg-white">
           {menuItems.map((item) => {
-            const IconComponent = item.icon;
             return (
               <button
                 key={item.id}
@@ -116,7 +115,7 @@ const HamburgerMenu = ({ isOpen, onClose }) => {
                 className="w-full flex items-center gap-4 px-4 py-3 text-left hover:bg-accent-pale transition-colors group"
               >
                 <div className="w-10 h-10 flex items-center justify-center bg-gray-light rounded-full group-hover:bg-primary group-hover:text-white transition-colors">
-                  <IconComponent size={20} />
+                  {getIcon(item.icon, { size: 'lg', className: 'group-hover:text-white' })}
                 </div>
                 <div className="flex-1">
                   <div className="font-medium text-text-primary text-sm">{item.title}</div>

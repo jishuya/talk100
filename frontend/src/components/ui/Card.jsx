@@ -1,7 +1,6 @@
 import React from 'react';
 import { cn } from '../../utils/cn';
 import { getIcon } from '../../utils/iconMap.jsx';
-import { getIconColor } from '../../utils/iconColors.js';
 
 // Card variants 정의
 const cardVariants = {
@@ -92,7 +91,7 @@ export const QuizCard = React.forwardRef(({
       {...props}
     >
       <div className="w-12 h-12 mx-auto mb-2 flex items-center justify-center">
-        {typeof icon === 'string' ? getIcon(icon, getIconColor(icon, '3xl')) : icon}
+        {typeof icon === 'string' ? getIcon(icon, { size: '3xl' }) : icon}
       </div>
       <div className="text-sm font-bold text-text-primary mb-1">
         {title}

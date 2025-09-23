@@ -1,7 +1,5 @@
-import { AiFillHeart } from 'react-icons/ai';
-import { MdOutlineStar } from 'react-icons/md';
 import { IconButton } from '../ui/Button';
-import { getIconColorWithHover } from '../../utils/iconColors.js';
+import { getIcon } from '../../utils/iconMap';
 
 export const QuizContent = ({
   question,
@@ -180,16 +178,14 @@ export const QuizContent = ({
         {/* 즐겨찾기/별표 버튼 */}
         <div className="absolute top-4 right-4 flex gap-2">
           <IconButton
-            icon={<AiFillHeart className="text-lg" />}
+            icon={getIcon('AiFillHeart', { size: 'lg' })}
             onClick={onFavoriteToggle}
             variant="ghost"
-            className={getIconColorWithHover('AiFillHeart')}
           />
           <IconButton
-            icon={<MdOutlineStar className="text-lg" />}
+            icon={getIcon('MdOutlineStar', { size: 'lg' })}
             onClick={onStarToggle}
             variant="ghost"
-            className={getIconColorWithHover('MdOutlineStar')}
           />
         </div>
       </div>

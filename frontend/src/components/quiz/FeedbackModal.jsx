@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import { IoClose, IoCheckmark, IoArrowForward } from 'react-icons/io5';
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
+import { getIcon } from '../../utils/iconMap';
 
 export const FeedbackModal = ({
   feedback,
@@ -97,7 +97,7 @@ export const FeedbackModal = ({
                   key={index}
                   className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium"
                 >
-                  <IoCheckmark className="inline w-3 h-3 mr-1" />
+                  {getIcon('IoCheckmark', { className: 'inline w-3 h-3 mr-1' })}
                   {keyword}
                 </span>
               ))}
@@ -113,7 +113,7 @@ export const FeedbackModal = ({
             size="sm"
             className="flex-1"
           >
-            <IoClose className="w-4 h-4 mr-1" />
+            {getIcon('IoClose', { className: 'w-4 h-4 mr-1' })}
             닫기
           </Button>
 
@@ -127,7 +127,7 @@ export const FeedbackModal = ({
               size="sm"
               className="flex-1"
             >
-              <IoArrowForward className="w-4 h-4 mr-1" />
+              {getIcon('IoArrowForward', { className: 'w-4 h-4 mr-1' })}
               다음 문제
             </Button>
           )}

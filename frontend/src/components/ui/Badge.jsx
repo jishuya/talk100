@@ -1,7 +1,6 @@
 import React from 'react';
 import { cn } from '../../utils/cn';
-import { IoTrophy, IoStar } from 'react-icons/io5';
-import { getIconColor } from '../../utils/iconColors.js';
+import { getIcon } from '../../utils/iconMap';
 
 // Badge variants
 const badgeVariants = {
@@ -61,14 +60,14 @@ Badge.displayName = 'Badge';
 // Trophy Badge 컴포넌트
 export const TrophyBadge = ({ count, className = '', ...props }) => (
   <span className={cn('badge-trophy', className)} {...props}>
-    <IoTrophy className={`inline ${getIconColor('IoTrophy', 'md')} mr-1`} /> {count}
+    {getIcon('IoTrophy', { size: 'md', className: 'inline mr-1' })} {count}
   </span>
 );
 
 // Star Badge 컴포넌트
 export const StarBadge = ({ count, className = '', ...props }) => (
   <span className={cn('badge-star', className)} {...props}>
-    <IoStar className={`inline ${getIconColor('IoStar', 'md')} mr-1`} /> {typeof count === 'number' ? count.toLocaleString() : count}
+    {getIcon('IoStar', { size: 'md', className: 'inline mr-1' })} {typeof count === 'number' ? count.toLocaleString() : count}
   </span>
 );
 

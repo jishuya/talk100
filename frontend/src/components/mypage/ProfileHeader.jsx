@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button } from '../ui/Button';
+import { getIcon } from '../../utils/iconMap';
 
 const ProfileHeader = ({
   profile,
@@ -28,7 +29,7 @@ const ProfileHeader = ({
         >
           <span>{profile.avatar}</span>
           <div className="absolute bottom-0 right-0 w-6 h-6 bg-primary rounded-full flex items-center justify-center text-xs border-2 border-white">
-            ✏️
+            {getIcon('IoPencil', { size: 'sm', color: 'text-white' })}
           </div>
         </div>
         <div className="flex-1">

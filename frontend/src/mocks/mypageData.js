@@ -17,7 +17,7 @@ export const mypageData = {
         id: 'notifications',
         title: '학습 알림',
         description: '매일 오후 8시',
-        icon: '🔔',
+        icon: 'IoNotifications',
         bgColor: 'bg-accent-mint',
         type: 'toggle',
         value: true
@@ -26,7 +26,7 @@ export const mypageData = {
         id: 'autoplay',
         title: '음성 자동 재생',
         description: null,
-        icon: '🔊',
+        icon: 'IoVolumeHigh',
         bgColor: 'bg-accent-mint',
         type: 'toggle',
         value: false
@@ -35,7 +35,7 @@ export const mypageData = {
         id: 'feedback',
         title: '피드백 보내기',
         description: null,
-        icon: '💬',
+        icon: 'BiChat',
         bgColor: 'bg-accent-mint',
         type: 'link',
         path: '/feedback'
@@ -44,7 +44,7 @@ export const mypageData = {
         id: 'help',
         title: '도움말',
         description: null,
-        icon: '❓',
+        icon: 'AiOutlineQuestionCircle',
         bgColor: 'bg-accent-mint',
         type: 'link',
         path: '/help'
@@ -72,7 +72,7 @@ export const mypageData = {
       id: 'wrong-answers',
       title: '틀린 문제',
       description: '복습이 필요한 문제들',
-      icon: '❌',
+      icon: 'IoCloseCircleOutline',
       bgColor: 'bg-red-100',
       count: 15,
       path: '/quiz/wrong-answers'
@@ -81,7 +81,7 @@ export const mypageData = {
       id: 'favorites',
       title: '즐겨찾기',
       description: '중요 표시한 문제들',
-      icon: '❤️',
+      icon: 'IoHeartOutline',
       bgColor: 'bg-yellow-100',
       count: 28,
       path: '/quiz/favorites'
@@ -90,7 +90,7 @@ export const mypageData = {
       id: 'review-schedule',
       title: '복습 스케줄',
       description: '예정된 복습 일정',
-      icon: '📅',
+      icon: 'IoTimeOutline',
       bgColor: 'bg-blue-100',
       count: 3,
       countLabel: '오늘 3개',
@@ -100,7 +100,7 @@ export const mypageData = {
       id: 'achievements',
       title: '성취 & 뱃지',
       description: '획득한 뱃지 확인',
-      icon: '🏆',
+      icon: 'IoTrophy',
       bgColor: 'bg-purple-100',
       count: 12,
       path: '/achievements'
@@ -113,7 +113,7 @@ export const mypageData = {
       id: 'notifications',
       title: '학습 알림',
       description: '매일 오후 8시',
-      icon: '🔔',
+      icon: 'IoNotifications',
       bgColor: 'bg-accent-mint',
       type: 'toggle',
       value: true
@@ -122,7 +122,7 @@ export const mypageData = {
       id: 'autoplay',
       title: '음성 자동 재생',
       description: null,
-      icon: '🔊',
+      icon: 'IoVolumeHigh',
       bgColor: 'bg-accent-mint',
       type: 'toggle',
       value: false
@@ -131,7 +131,7 @@ export const mypageData = {
       id: 'feedback',
       title: '피드백 보내기',
       description: null,
-      icon: '💬',
+      icon: 'BiChat',
       bgColor: 'bg-accent-mint',
       type: 'link',
       path: '/feedback'
@@ -140,7 +140,7 @@ export const mypageData = {
       id: 'help',
       title: '도움말',
       description: null,
-      icon: '❓',
+      icon: 'AiOutlineQuestionCircle',
       bgColor: 'bg-accent-mint',
       type: 'link',
       path: '/help'

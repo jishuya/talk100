@@ -1,10 +1,8 @@
-import { IoVolumeHigh, IoBulb, IoPlayForward, IoMic, IoStop, IoPencil  } from 'react-icons/io5';
-import { AiOutlineQuestionCircle, AiOutlineCheckCircle } from "react-icons/ai";
 import Button from '../ui/Button';
+import { getIcon } from '../../utils/iconMap';
 
 // 공통 버튼 스타일
 const BUTTON_BASE_STYLE = "flex-1 p-3 bg-white border border-gray-border rounded-brand-sm transition-all duration-200 active:bg-primary-light active:scale-[0.97] active:border-primary flex flex-col items-center gap-1";
-const ICON_STYLE = "text-xl text-text-primary transition-colors duration-200 active:text-primary";
 const LABEL_STYLE = "text-xs text-text-primary";
 
 export const QuizControls = ({
@@ -27,11 +25,11 @@ export const QuizControls = ({
         {quizMode === 'solving' && (
           <div className="flex gap-2 mb-3">
             <button onClick={onShowFirstLetters} className={BUTTON_BASE_STYLE}>
-              <AiOutlineQuestionCircle className={ICON_STYLE} />
+              {getIcon('AiOutlineQuestionCircle', { size: 'xl' })}
               <span className={LABEL_STYLE}>힌트보기</span>
             </button>
             <button onClick={onShowFullAnswer} className={BUTTON_BASE_STYLE}>
-              <AiOutlineCheckCircle className={ICON_STYLE} />
+              {getIcon('AiOutlineCheckCircle', { size: 'xl' })}
               <span className={LABEL_STYLE}>정답보기</span>
             </button>
           </div>
@@ -40,15 +38,15 @@ export const QuizControls = ({
         {quizMode === 'grading' && (
           <div className="flex gap-2 mb-3">
             <button onClick={onPlayAudio} className={BUTTON_BASE_STYLE}>
-              <IoVolumeHigh className={ICON_STYLE} />
+              {getIcon('IoVolumeHigh', { size: 'xl' })}
               <span className={LABEL_STYLE}>다시 듣기</span>
             </button>
             <button onClick={onShowHint} className={BUTTON_BASE_STYLE}>
-              <IoBulb className={ICON_STYLE} />
+              {getIcon('IoBulb', { size: 'xl' })}
               <span className={LABEL_STYLE}>힌트 보기</span>
             </button>
             <button onClick={onSkipQuestion} className={BUTTON_BASE_STYLE}>
-              <IoPlayForward className={ICON_STYLE} />
+              {getIcon('IoPlayForward', { size: 'xl' })}
               <span className={LABEL_STYLE}>다음 문제</span>
             </button>
           </div>
@@ -75,19 +73,19 @@ export const QuizControls = ({
               <>
                 {isRecording ? (
                   <>
-                    <IoStop className="text-2xl" />
+                    {getIcon('IoStop', { size: '2xl' })}
                     <span>녹음 중지</span>
                   </>
                 ) : (
                   <>
-                    <IoMic className="text-2xl" />
+                    {getIcon('IoMic', { size: '2xl' })}
                     <span>정답 말하기</span>
                   </>
                 )}
               </>
             ) : (
               <>
-                <IoPencil className="text-2xl" />
+                {getIcon('IoPencil', { size: '2xl' })}
                 <span>답변 제출</span>
               </>
             )}

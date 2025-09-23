@@ -1,7 +1,5 @@
-import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { IoHomeOutline, IoHome, IoBookOutline, IoBook, IoStatsChartOutline, IoStatsChart, IoPersonOutline, IoPerson } from 'react-icons/io5';
-import { getIconColor } from '../../utils/iconColors.js';
+import { getIcon } from '../../utils/iconMap';
 
 const BottomNavigation = () => {
   const location = useLocation();
@@ -10,29 +8,29 @@ const BottomNavigation = () => {
   const navItems = [
     {
       path: '/',
-      icon: IoHomeOutline,
-      activeIcon: IoHome,
+      icon: 'IoHomeOutline',
+      activeIcon: 'IoHome',
       label: '홈',
       isActive: location.pathname === '/',
     },
     {
       path: '/quiz',
-      icon: IoBookOutline,
-      activeIcon: IoBook,
+      icon: 'IoBookOutline',
+      activeIcon: 'IoBook',
       label: '학습',
       isActive: location.pathname.startsWith('/quiz'),  // /quiz/daily, /quiz/review 허용
     },
     {
       path: '/status',
-      icon: IoStatsChartOutline,
-      activeIcon: IoStatsChart,
+      icon: 'IoStatsChartOutline',
+      activeIcon: 'IoStatsChart',
       label: '통계',
       isActive: location.pathname === '/status',
     },
     {
       path: '/mypage',
-      icon: IoPersonOutline,
-      activeIcon: IoPerson,
+      icon: 'IoPersonOutline',
+      activeIcon: 'IoPerson',
       label: '마이',
       isActive: location.pathname === '/mypage',
     },
@@ -50,8 +48,9 @@ const BottomNavigation = () => {
           onClick={() => handleNavClick(item.path)}
           className="flex-1 flex flex-col items-center justify-center gap-1 p-2 touchable transition-colors duration-300"
         >
-          {React.createElement(item.isActive ? item.activeIcon : item.icon, {
-            className: `${item.isActive ? 'text-2xl text-primary' : getIconColor('navigation-inactive', '2xl')}`
+          {getIcon(item.isActive ? item.activeIcon : item.icon, {
+            size: '2xl',
+            color: item.isActive ? 'text-primary' : 'text-gray-400'
           })}
           <span className={`text-xs font-medium ${
             item.isActive ? 'text-primary' : 'text-gray-400'

@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { IoNotifications, IoMoon, IoSunny, IoSettingsOutline, IoChevronBackOutline, IoMenuOutline } from 'react-icons/io5';
-import { getIconColor } from '../../utils/iconColors.js';
+import { getIcon } from '../../utils/iconMap';
 import HamburgerMenu from './HamburgerMenu';
 
 const MobileHeader = () => {
@@ -109,7 +108,7 @@ const MobileHeader = () => {
           <div className="flex items-center gap-2">
             {/* 알림 벨 */}
             <button className="w-8 h-8 flex items-center justify-center text-lg touchable">
-              <IoNotifications className={getIconColor('IoNotifications', 'xl')} />
+              {getIcon('IoNotifications', { size: 'xl' })}
             </button>
             {/* 테마 토글 */}
             <button
@@ -117,8 +116,8 @@ const MobileHeader = () => {
               className="w-8 h-8 flex items-center justify-center text-lg touchable"
             >
               {theme === 'light' ?
-                <IoMoon className={getIconColor('IoMoon', 'xl')} /> :
-                <IoSunny className={getIconColor('IoSunny', 'xl')} />
+                getIcon('IoMoon', { size: 'xl' }) :
+                getIcon('IoSunny', { size: 'xl' })
               }
             </button>
           </div>
@@ -130,7 +129,7 @@ const MobileHeader = () => {
             onClick={handleSettingsClick}
             className="w-8 h-8 flex items-center justify-center text-xl text-text-primary touchable"
           >
-            <IoSettingsOutline className={getIconColor('IoSettingsOutline', 'xl')} />
+            {getIcon('IoSettingsOutline', { size: 'xl' })}
           </button>
         );
 
@@ -171,7 +170,7 @@ const MobileHeader = () => {
             onClick={() => setIsMenuOpen(true)}
             className="w-8 h-8 flex items-center justify-center text-xl text-text-primary touchable"
           >
-            <IoMenuOutline className={getIconColor('IoMenuOutline', 'xl')} />
+            {getIcon('IoMenuOutline', { size: 'xl' })}
           </button>
         )}
 
@@ -180,7 +179,7 @@ const MobileHeader = () => {
             onClick={handleBackClick}
             className="w-8 h-8 flex items-center justify-center text-xl text-text-primary touchable"
           >
-            <IoChevronBackOutline className={getIconColor('IoChevronBackOutline', 'xl')} />
+            {getIcon('IoChevronBackOutline', { size: 'xl' })}
           </button>
         )}
 

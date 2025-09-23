@@ -1,5 +1,6 @@
 import React from 'react';
 import { ToggleSwitch } from '../ui/ToggleSwitch';
+import { getIcon } from '../../utils/iconMap';
 
 const MenuSection = ({
   title,
@@ -31,7 +32,7 @@ const MenuSection = ({
         >
           <div className="flex items-center gap-3">
             <div className={`w-9 h-9 flex items-center justify-center ${item.bgColor} rounded-full text-lg`}>
-              {item.icon}
+              {getIcon(item.icon, { size: 'lg' })}
             </div>
             <div>
               <div className="text-[15px] text-text-primary mb-0.5">{item.title}</div>
