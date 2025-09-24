@@ -26,7 +26,7 @@ const HamburgerMenu = ({ isOpen, onClose }) => {
     {
       id: 'wrong-answers',
       title: '틀린 문제',
-      icon: 'MdOutlineStar',
+      icon: 'fluent:star-24-regular',
       path: '/quiz/wrong-answers',
       description: '복습이 필요한 문제들'
     },
@@ -54,7 +54,7 @@ const HamburgerMenu = ({ isOpen, onClose }) => {
     {
       id: 'settings',
       title: '설정',
-      icon: 'IoSettingsOutline',
+      icon: 'fluent:settings-24-regular',
       path: '/settings',
       description: '앱 설정'
     }
@@ -133,7 +133,7 @@ const HamburgerMenu = ({ isOpen, onClose }) => {
             onClick={handleLogout}
             className="w-full flex items-center justify-center gap-2 py-3 bg-white text-red-500 hover:bg-red-50 rounded-xl transition-colors border border-red-200"
           >
-            {getIcon('logout', { size: 'md' })}
+            {/* {getIcon('noto:door', { size: 'md' })} */}
             <span className="font-medium">로그아웃</span>
           </button>
 

@@ -24,7 +24,11 @@ const QuizPersonalSection = ({ personalQuizzes, onPersonalQuizClick }) => {
             style={{ animationDelay: `${index * 0.1}s` }}
           >
             <div className="w-12 h-12 mx-auto mb-2 flex items-center justify-center">
-              {typeof quiz.icon === 'string' ? getIcon(quiz.icon, { size: '3xl' }) : quiz.icon}
+              {typeof quiz.icon === 'string' ? getIcon(quiz.icon, {
+                size: '3xl',
+                className: quiz.id === 'wrong-answers' ? 'text-yellow-400' :
+                          quiz.id === 'favorites' ? 'text-red-400' : ''
+              }) : quiz.icon}
             </div>
             <div className="text-sm font-bold text-text-primary mb-1">
               {quiz.title}

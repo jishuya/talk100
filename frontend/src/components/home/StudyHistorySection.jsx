@@ -29,7 +29,12 @@ const StudyHistorySection = ({ historyItems, onHistoryItemClick }) => {
             onClick={() => handleItemClick(item)}
           >
             <div className="w-10 h-10 bg-accent-pale rounded-full flex items-center justify-center mr-3">
-              {typeof item.icon === 'string' ? getIcon(item.icon, { size: 'xl' }) : item.icon}
+              {typeof item.icon === 'string' ? getIcon(item.icon, {
+                size: 'xl',
+                className: item.category === 'model-example' ? 'text-green-400' :
+                          item.category === 'small-talk' ? 'text-purple-400' :
+                          item.category === 'cases-in-point' ? 'text-blue-400' : ''
+              }) : item.icon}
             </div>
             <div className="flex-1">
               <div className="text-sm font-semibold text-text-primary mb-0.5">{item.title}</div>

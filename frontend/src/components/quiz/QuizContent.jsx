@@ -13,7 +13,9 @@ export const QuizContent = ({
   onKeywordKeyDown,
   onInputModeChange,
   onFavoriteToggle,
-  onStarToggle
+  onStarToggle,
+  isFavorited = false,
+  isStarred = false
 }) => {
   if (!question) {
     return (
@@ -178,12 +180,18 @@ export const QuizContent = ({
         {/* 즐겨찾기/별표 버튼 */}
         <div className="absolute top-4 right-4 flex gap-2">
           <IconButton
-            icon={getIcon('AiFillHeart', { size: 'lg' })}
+            icon={getIcon(isFavorited ? 'fluent:heart-24-filled' : 'fluent:heart-24-regular', {
+              size: 'lg',
+              className: 'text-red-400'
+            })}
             onClick={onFavoriteToggle}
             variant="ghost"
           />
           <IconButton
-            icon={getIcon('MdOutlineStar', { size: 'lg' })}
+            icon={getIcon(isStarred ? 'fluent:star-24-filled' : 'fluent:star-24-regular', {
+              size: 'lg',
+              className: 'text-yellow-400'
+            })}
             onClick={onStarToggle}
             variant="ghost"
           />
@@ -212,7 +220,7 @@ export const QuizContent = ({
                 : 'text-text-secondary'
             }`}
           >
-            <span>⌨️</span>
+{getIcon('noto:keyboard', { size: 'sm' })}
             <span>키보드</span>
           </button>
         </div>

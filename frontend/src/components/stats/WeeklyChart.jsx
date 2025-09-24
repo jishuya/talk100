@@ -9,7 +9,7 @@ const WeeklyChart = ({ data }) => {
     <div className="bg-white rounded-2xl p-5 mb-4 shadow-lg">
       <div className="flex justify-between items-center mb-10">
         <h2 className="text-base font-semibold text-text-primary flex items-center gap-2">
-{getIcon('IoStatsChartOutline', { size: 'xl' })}
+{getIcon('noto:bar-chart', { size: 'xl' })}
           <span>주간 출석 패턴</span>
         </h2>
       </div>

@@ -67,7 +67,7 @@ export const TrophyBadge = ({ count, className = '', ...props }) => (
 // Star Badge 컴포넌트
 export const StarBadge = ({ count, className = '', ...props }) => (
   <span className={cn('badge-star', className)} {...props}>
-    {getIcon('IoStar', { size: 'md', className: 'inline mr-1' })} {typeof count === 'number' ? count.toLocaleString() : count}
+    {getIcon('noto:star', { size: 'md', className: 'inline mr-1' })} {typeof count === 'number' ? count.toLocaleString() : count}
   </span>
 );
 

@@ -1,3 +1,5 @@
+import { getIcon } from '../../utils/iconMap';
+
 const CategoryProgress = ({ data }) => {
   if (!data || !Array.isArray(data)) return null;
 
@@ -5,7 +7,7 @@ const CategoryProgress = ({ data }) => {
     <div className="bg-white rounded-2xl p-5 mb-4 shadow-lg">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-base font-semibold text-text-primary flex items-center gap-2">
-          <span className="text-xl">📚</span>
+          {getIcon('flat-color-icons:folder', { size: 'xl' })}
           <span>카테고리별 진행률</span>
         </h2>
       </div>

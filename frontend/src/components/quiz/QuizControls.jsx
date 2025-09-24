@@ -15,7 +15,9 @@ export const QuizControls = ({
   onShowFirstLetters,
   onShowFullAnswer,
   onSkipQuestion,
-  isSubmitting = false
+  isSubmitting = false,
+  showHint = false,
+  showAnswer = false
 }) => {
   return (
     <div className="fixed bottom-0 left-0 right-0 md:left-1/2 md:-translate-x-1/2 md:w-[768px] lg:w-[900px] bg-white shadow-[0_-2px_8px_rgba(0,0,0,0.08)] z-100">
@@ -24,13 +26,25 @@ export const QuizControls = ({
         {/* 힌트/정답 보기 버튼들 (문제풀이 모드에서만) */}
         {quizMode === 'solving' && (
           <div className="flex gap-2 mb-3">
-            <button onClick={onShowFirstLetters} className={BUTTON_BASE_STYLE}>
-              {getIcon('AiOutlineQuestionCircle', { size: 'xl' })}
-              <span className={LABEL_STYLE}>힌트보기</span>
+            <button
+              onClick={onShowFirstLetters}
+              className={`${BUTTON_BASE_STYLE} ${showHint ? 'border-primary bg-primary-light' : ''}`}
+            >
+              {getIcon('AiOutlineQuestionCircle', {
+                size: 'xl',
+                className: showHint ? 'text-[#55AD9B]' : 'text-gray-600'
+              })}
+              <span className={`${LABEL_STYLE} ${showHint ? 'text-[#55AD9B]' : ''}`}>힌트보기</span>
             </button>
-            <button onClick={onShowFullAnswer} className={BUTTON_BASE_STYLE}>
-              {getIcon('AiOutlineCheckCircle', { size: 'xl' })}
-              <span className={LABEL_STYLE}>정답보기</span>
+            <button
+              onClick={onShowFullAnswer}
+              className={`${BUTTON_BASE_STYLE} ${showAnswer ? 'border-primary bg-primary-light' : ''}`}
+            >
+              {getIcon('AiOutlineCheckCircle', {
+                size: 'xl',
+                className: showAnswer ? 'text-[#55AD9B]' : 'text-gray-600'
+              })}
+              <span className={`${LABEL_STYLE} ${showAnswer ? 'text-[#55AD9B]' : ''}`}>정답보기</span>
             </button>
           </div>
         )}

@@ -24,7 +24,12 @@ const QuizCategorySection = ({ categories, onCategoryClick }) => {
             style={{ animationDelay: `${index * 0.1}s` }}
           >
             <div className="w-12 h-12 mx-auto mb-2 flex items-center justify-center">
-              {typeof category.icon === 'string' ? getIcon(category.icon, { size: '3xl' }) : category.icon}
+              {typeof category.icon === 'string' ? getIcon(category.icon, {
+                size: '3xl',
+                className: category.id === 'model-example' ? 'text-green-400' :
+                          category.id === 'small-talk' ? 'text-purple-400' :
+                          category.id === 'cases-in-point' ? 'text-blue-400' : ''
+              }) : category.icon}
             </div>
             <div className="text-sm font-bold text-text-primary mb-1">
               {category.title}

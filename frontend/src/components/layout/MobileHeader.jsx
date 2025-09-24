@@ -108,7 +108,7 @@ const MobileHeader = () => {
           <div className="flex items-center gap-2">
             {/* 알림 벨 */}
             <button className="w-8 h-8 flex items-center justify-center text-lg touchable">
-              {getIcon('IoNotifications', { size: 'xl' })}
+              {getIcon('tabler:bell-filled', { size: 'xl', className: 'text-yellow-500' })}
             </button>
             {/* 테마 토글 */}
             <button
@@ -116,8 +116,8 @@ const MobileHeader = () => {
               className="w-8 h-8 flex items-center justify-center text-lg touchable"
             >
               {theme === 'light' ?
-                getIcon('IoMoon', { size: 'xl' }) :
-                getIcon('IoSunny', { size: 'xl' })
+                getIcon('tabler:moon-filled', { size: 'xl', className: 'text-yellow-500' }) :
+                getIcon('tabler:sun-filled', { size: 'xl', className: 'text-yellow-500' })
               }
             </button>
           </div>

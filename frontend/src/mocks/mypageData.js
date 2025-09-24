@@ -44,7 +44,7 @@ export const mypageData = {
         id: 'help',
         title: '도움말',
         description: null,
-        icon: 'AiOutlineQuestionCircle',
+        icon: 'noto:information',
         bgColor: 'bg-accent-mint',
         type: 'link',
         path: '/help'
@@ -72,7 +72,7 @@ export const mypageData = {
       id: 'wrong-answers',
       title: '틀린 문제',
       description: '복습이 필요한 문제들',
-      icon: 'IoCloseCircleOutline',
+      icon: 'noto:star',
       bgColor: 'bg-red-100',
       count: 15,
       path: '/quiz/wrong-answers'
@@ -81,7 +81,7 @@ export const mypageData = {
       id: 'favorites',
       title: '즐겨찾기',
       description: '중요 표시한 문제들',
-      icon: 'IoHeartOutline',
+      icon: 'noto:red-heart',
       bgColor: 'bg-yellow-100',
       count: 28,
       path: '/quiz/favorites'
@@ -140,7 +140,7 @@ export const mypageData = {
       id: 'help',
       title: '도움말',
       description: null,
-      icon: 'AiOutlineQuestionCircle',
+      icon: 'noto:information',
       bgColor: 'bg-accent-mint',
       type: 'link',
       path: '/help'

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button } from '../ui/Button';
+import { getIcon } from '../../utils/iconMap';
 
 const DangerZone = ({ onResetProgress, onDeleteAccount }) => {
   const handleResetProgress = () => {
@@ -21,8 +22,9 @@ const DangerZone = ({ onResetProgress, onDeleteAccount }) => {
 
   return (
     <div className="bg-white border border-red-500 rounded-2xl p-4 mt-6">
-      <div className="text-sm font-semibold text-red-500 mb-3">
-        ⚠️ 주의가 필요한 작업
+      <div className="text-sm font-semibold text-red-500 mb-3 flex items-center gap-2">
+        {getIcon('noto:warning', { size: 'lg' })}
+        주의가 필요한 작업
       </div>
 
       <Button

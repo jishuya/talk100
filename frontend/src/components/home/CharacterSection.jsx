@@ -42,7 +42,7 @@ const CharacterSection = ({
 
       {/* 학습 시작 버튼 */}
       <button className="btn-start-learning" onClick={onStartLearning}>
-        {getIcon('SiQuizlet', { size: 'xl', color: 'text-white' })}
+        {getIcon('noto:sparkles', { size: 'xl', className: 'text-yellow-400' })}
         <span>오늘의 퀴즈</span>
       </button>
     </div>
