@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { getIcon } from '../../utils/iconMap';
@@ -76,16 +77,16 @@ const HamburgerMenu = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <>
       {/* Overlay */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 z-[150] animate-fade-in"
+        className="fixed inset-0 bg-black bg-opacity-50 z-[200] animate-fade-in"
         onClick={onClose}
       />
 
       {/* Menu Panel */}
-      <div className="fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-white z-[160] animate-slide-right shadow-2xl">
+      <div className="fixed top-0 left-0 md:left-1/2 md:-translate-x-1/2 md:ml-[-240px] lg:ml-[-280px] h-full w-80 max-w-[85vw] bg-white z-[210] shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-border bg-primary text-white">
           <div className="flex items-center gap-3">
@@ -141,7 +142,8 @@ const HamburgerMenu = ({ isOpen, onClose }) => {
           </div>
         </div>
       </div>
-    </>
+    </>,
+    document.body
   );
 };
 
