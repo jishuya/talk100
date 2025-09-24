@@ -35,7 +35,7 @@ export const mypageData = {
         id: 'feedback',
         title: '피드백 보내기',
         description: null,
-        icon: 'BiChat',
+        icon: 'noto:memo',
         bgColor: 'bg-accent-mint',
         type: 'link',
         path: '/feedback'
@@ -44,7 +44,7 @@ export const mypageData = {
         id: 'help',
         title: '도움말',
         description: null,
-        icon: 'noto:information',
+        icon: 'noto:speech-balloon',
         bgColor: 'bg-accent-mint',
         type: 'link',
         path: '/help'
@@ -131,7 +131,7 @@ export const mypageData = {
       id: 'feedback',
       title: '피드백 보내기',
       description: null,
-      icon: 'BiChat',
+      icon: 'noto:memo',
       bgColor: 'bg-accent-mint',
       type: 'link',
       path: '/feedback'
@@ -140,7 +140,7 @@ export const mypageData = {
       id: 'help',
       title: '도움말',
       description: null,
-      icon: 'noto:information',
+      icon: 'noto:speech-balloon',
       bgColor: 'bg-accent-mint',
       type: 'link',
       path: '/help'

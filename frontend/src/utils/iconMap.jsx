@@ -1,99 +1,103 @@
-// @iconify/react를 사용한 간단한 아이콘 시스템
 import { Icon } from '@iconify/react';
 
-// 실제 프로젝트에서 사용 중인 아이콘만 매핑
 const ICON_MAP = {
-  // 네비게이션
+  // === Navigation & UI Actions ===
+  IoHome: 'tabler:home-filled',
+  IoHomeOutline: 'tabler:home',
   IoMenuOutline: 'tabler:menu-2',
   IoChevronBackOutline: 'tabler:chevron-left',
   IoChevronDownOutline: 'tabler:chevron-down',
-  IoCloseOutline: 'tabler:x',
-
-  // 액션
   IoClose: 'fluent:dismiss-circle-24-filled',
+  IoCloseOutline: 'tabler:x',
+  IoCloseCircleOutline: 'fluent:dismiss-circle-24-regular',
   IoCheckmark: 'fluent:checkmark-circle-24-filled',
   IoArrowForward: 'tabler:arrow-right',
   IoSettingsOutline: 'fluent:settings-24-regular',
-  IoPencil: 'noto:pencil',
 
-  // 미디어
+  // === Bottom Navigation ===
+  IoBook: 'fluent:book-24-filled',
+  IoBookOutline: 'fluent:book-24-regular',
+  IoStatsChart: 'fluent:data-histogram-24-filled',
+  IoStatsChartOutline: 'fluent:data-histogram-24-regular',
+  IoPerson: 'fluent:person-24-filled',
+  IoPersonOutline: 'fluent:person-24-regular',
+
+  // === Media Controls ===
   IoVolumeHigh: 'noto:speaker-high-volume',
   IoMic: 'noto:microphone',
   IoStop: 'noto:stop-button',
   IoPlayForward: 'noto:next-track-button',
 
-  // UI 요소
-  IoBulb: 'noto:light-bulb',
-  IoTrophy: 'noto:trophy',
-
-  // 퀴즈 컨트롤
+  // === Quiz & Learning ===
   AiOutlineQuestionCircle: 'tabler:help-circle',
   AiOutlineCheckCircle: 'tabler:circle-check',
+  IoBulb: 'noto:light-bulb',
+  BiBulb: 'noto:light-bulb',
+  SiQuizlet: 'noto:graduation-cap',
+  IoPencil: 'noto:pencil',
+  BiChat: 'noto:speech-balloon',
+  BiDetail: 'noto:clipboard',
 
-  // 상태별 아이콘 (즐겨찾기/틀린문제)
-  'fluent:heart-24-filled': 'fluent:heart-24-filled',
-  'fluent:heart-24-regular': 'fluent:heart-24-regular',
-  'fluent:star-24-filled': 'fluent:star-24-filled',
-  'fluent:star-24-regular': 'fluent:star-24-regular',
-
-  // 테마 아이콘
-  'tabler:bell-filled': 'tabler:bell-filled',
-  'tabler:moon-filled': 'tabler:moon-filled',
-  'tabler:sun-filled': 'tabler:sun-filled',
-
-  // 카테고리 아이콘
-  'noto:sparkles': 'noto:sparkles',
+  // === Category Icons ===
   'tabler:bulb': 'tabler:bulb',
   'tabler:message-circle': 'tabler:message-circle',
   'tabler:file-text': 'tabler:file-text',
+  'noto:sparkles': 'noto:sparkles',
 
-  // 기타 필수 아이콘
-  'noto:keyboard': 'noto:keyboard',
+  // === Interactive Elements ===
+  'fluent:star-24-filled': 'fluent:star-24-filled',
+  'fluent:star-24-regular': 'fluent:star-24-regular',
+  'fluent:heart-24-filled': 'fluent:heart-24-filled',
+  'fluent:heart-24-regular': 'fluent:heart-24-regular',
+  MdOutlineStar: 'fluent:star-24-regular',
+  IoStar: 'fluent:star-24-filled',
+  IoHeartOutline: 'fluent:heart-24-regular',
+  AiFillHeart: 'fluent:heart-24-filled',
+
+  // === Theme & Status ===
+  'tabler:bell-filled': 'tabler:bell-filled',
+  'tabler:moon-filled': 'tabler:moon-filled',
+  'tabler:sun-filled': 'tabler:sun-filled',
+  IoNotifications: 'noto:bell',
+  IoMoon: 'noto:crescent-moon',
+  IoSunny: 'noto:sun',
+
+  // === Stats & Achievements ===
+  IoTrophy: 'noto:trophy',
   'noto:fire': 'noto:fire',
   'noto:bar-chart': 'noto:bar-chart',
   'noto:star': 'noto:star',
+
+  // === System & Info ===
+  'noto:information': 'noto:information',
   'noto:warning': 'noto:warning',
-  'flat-color-icons:folder': 'flat-color-icons:folder'
+  'noto:speech-balloon': 'noto:speech-balloon',
+  'noto:memo': 'noto:memo',
+  'noto:keyboard': 'noto:keyboard',
+  'noto:door': 'noto:door',
+  logout: 'noto:door',
+
+  // === File & Folder ===
+  'flat-color-icons:folder': 'flat-color-icons:folder',
+  'solar:folder-with-files-line-duotone': 'solar:folder-with-files-line-duotone',
+
+  // === Legacy & Misc ===
+  IoLibraryOutline: 'noto:books',
+  IoSchoolOutline: 'noto:school',
+  IoTimeOutline: 'noto:alarm-clock',
+  'noto:red-heart': 'noto:red-heart',
+  'fluent:settings-24-regular': 'fluent:settings-24-regular'
 };
 
-// 크기 매핑
-const SIZE_MAP = {
-  sm: 16,
-  md: 20,
-  lg: 24,
-  xl: 28,
-  '2xl': 32,
-  '3xl': 36,
-  '5xl': 48
-};
-
-/**
- * 아이콘 컴포넌트를 반환합니다
- * @param {string} iconName - 아이콘 이름
- * @param {object} options - 옵션
- * @param {string} options.size - 크기 (sm, md, lg, xl, 2xl, 3xl, 5xl)
- * @param {string} options.className - Tailwind CSS 클래스
- * @param {string} options.color - 레거시 색상 (className 사용 권장)
- * @returns {JSX.Element|null} 아이콘 컴포넌트
- */
 export const getIcon = (iconName, { size = 'xl', color, className = '', ...props } = {}) => {
   const iconifyName = ICON_MAP[iconName];
+  if (!iconifyName) return null;
 
-  if (!iconifyName) {
-    console.warn(`아이콘을 찾을 수 없습니다: "${iconName}"`);
-    return null;
-  }
+  const sizeMap = { xs: 12, sm: 16, md: 20, lg: 24, xl: 28, '2xl': 32, '3xl': 36, '4xl': 40, '5xl': 48 };
+  const iconSize = sizeMap[size] || 28;
 
-  const iconSize = SIZE_MAP[size] || 28;
+  // color와 className을 결합 (color가 우선)
   const combinedClassName = [color, className].filter(Boolean).join(' ');
 
-  return (
-    <Icon
-      icon={iconifyName}
-      width={iconSize}
-      height={iconSize}
-      className={combinedClassName}
-      {...props}
-    />
-  );
+  return <Icon icon={iconifyName} width={iconSize} height={iconSize} className={combinedClassName} {...props} />;
 };
