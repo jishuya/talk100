@@ -19,14 +19,14 @@ const HamburgerMenu = ({ isOpen, onClose }) => {
     {
       id: 'categories',
       title: '카테고리',
-      icon: 'IoLibraryOutline',
+      icon: 'solar:folder-with-files-line-duotone',
       path: '/categories',
       description: '학습 카테고리'
     },
     {
       id: 'wrong-answers',
       title: '틀린 문제',
-      icon: 'IoCloseCircleOutline',
+      icon: 'MdOutlineStar',
       path: '/quiz/wrong-answers',
       description: '복습이 필요한 문제들'
     },
@@ -133,7 +133,7 @@ const HamburgerMenu = ({ isOpen, onClose }) => {
             onClick={handleLogout}
             className="w-full flex items-center justify-center gap-2 py-3 bg-white text-red-500 hover:bg-red-50 rounded-xl transition-colors border border-red-200"
           >
-            <span>🚪</span>
+            {getIcon('logout', { size: 'md' })}
             <span className="font-medium">로그아웃</span>
           </button>
 
