@@ -103,25 +103,5 @@ export const IconButton = ({ icon, ...props }) => (
   <Button variant="icon" shape="circle" icon={icon} {...props} />
 );
 
-export const StartLearningButton = ({ children, ...props }) => (
-  <button
-    className="btn-start-learning"
-    {...props}
-  >
-    {children}
-  </button>
-);
-
-export const SaveButton = ({ children = '저장', ...props }) => (
-  <Button
-    variant="primary"
-    size="sm"
-    shape="pill"
-    {...props}
-  >
-    {children}
-  </Button>
-);
-
-export { Button };
 export default Button;
+export { Button };

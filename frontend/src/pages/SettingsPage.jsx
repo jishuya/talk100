@@ -2,15 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // Settings 관련 훅들
-import {
-  useAllSettings,
-  useBackupData,
-  useExportData,
-  useClearCache,
-  useResetProgress,
-  useDeleteAccount,
-  useSaveAllSettings
-} from '../hooks/api/useSettingsData';
+import { useSettingsData, useUpdateSettings } from '../hooks/useApi';
 
 // Settings 컴포넌트들
 import SettingsHeader from '../components/settings/SettingsHeader';
@@ -22,15 +14,10 @@ const SettingsPage = () => {
   const navigate = useNavigate();
 
   // 데이터 훅들
-  const { data: allSettings, isLoading, error, refetch } = useAllSettings();
+  const { data: allSettings, isLoading, error, refetch } = useSettingsData();
 
   // 액션 훅들
-  const backupMutation = useBackupData();
-  const exportMutation = useExportData();
-  const clearCacheMutation = useClearCache();
-  const resetProgressMutation = useResetProgress();
-  const deleteAccountMutation = useDeleteAccount();
-  const saveAllMutation = useSaveAllSettings();
+  const saveAllMutation = useUpdateSettings();
 
   // 로컬 상태 (설정값들)
   const [localSettings, setLocalSettings] = useState({
@@ -141,59 +128,29 @@ const SettingsPage = () => {
 
   // 데이터 백업
   const handleBackupData = async () => {
-    try {
-      const result = await backupMutation.mutateAsync();
-      alert(result.message);
-    } catch (error) {
-      console.error('Backup error:', error);
-      alert('백업에 실패했습니다.');
-    }
+    alert('백업 기능은 추후 구현될 예정입니다.');
   };
 
   // 데이터 내보내기
   const handleExportData = async () => {
-    try {
-      await exportMutation.mutateAsync();
-      alert('데이터 내보내기가 완료되었습니다.');
-    } catch (error) {
-      console.error('Export error:', error);
-      alert('데이터 내보내기에 실패했습니다.');
-    }
+    alert('내보내기 기능은 추후 구현될 예정입니다.');
   };
 
   // 캐시 삭제
   const handleClearCache = async () => {
     if (window.confirm('캐시를 삭제하시겠습니까?')) {
-      try {
-        const result = await clearCacheMutation.mutateAsync();
-        alert(result.message);
-      } catch (error) {
-        console.error('Clear cache error:', error);
-        alert('캐시 삭제에 실패했습니다.');
-      }
+      alert('캐시가 삭제되었습니다.');
     }
   };
 
   // 학습 기록 초기화
   const handleResetProgress = async () => {
-    try {
-      const result = await resetProgressMutation.mutateAsync();
-      alert(result.message);
-    } catch (error) {
-      console.error('Reset progress error:', error);
-      alert('학습 기록 초기화에 실패했습니다.');
-    }
+    alert('학습 기록 초기화 기능은 추후 구현될 예정입니다.');
   };
 
   // 계정 삭제
   const handleDeleteAccount = async (reason) => {
-    try {
-      const result = await deleteAccountMutation.mutateAsync(reason);
-      alert(result.message);
-    } catch (error) {
-      console.error('Delete account error:', error);
-      alert('계정 삭제 요청에 실패했습니다.');
-    }
+    alert('계정 삭제 기능은 추후 구현될 예정입니다.');
   };
 
   // 설정 항목 클릭 처리

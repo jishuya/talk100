@@ -1,5 +1,5 @@
 import React from 'react';
-import { CharacterCard, TrophyBadge, StarBadge, StartLearningButton, CircularProgress } from '../ui';
+import { TrophyBadge, StarBadge, CircularProgress } from '../ui';
 import { getIcon } from '../../utils/iconMap';
 
 const CharacterSection = ({
@@ -9,7 +9,7 @@ const CharacterSection = ({
   onStartLearning
 }) => {
   return (
-    <CharacterCard>
+    <div className="character-card animate-fade-in">
       {/* 우측 상단 뱃지 */}
       <div className="absolute top-3 right-3 flex gap-2">
         <TrophyBadge count={badges.trophy} />
@@ -41,11 +41,11 @@ const CharacterSection = ({
       </div>
 
       {/* 학습 시작 버튼 */}
-      <StartLearningButton onClick={onStartLearning}>
+      <button className="btn-start-learning" onClick={onStartLearning}>
         {getIcon('SiQuizlet', { size: 'xl', color: 'text-white' })}
         <span>오늘의 퀴즈</span>
-      </StartLearningButton>
-    </CharacterCard>
+      </button>
+    </div>
   );
 };
 

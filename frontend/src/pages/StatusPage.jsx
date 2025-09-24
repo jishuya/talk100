@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAllStatistics } from '../hooks/api/useStatisticsData';
+import { useStatisticsData, useWeeklyChart, useCategoryProgress, useLearningPattern } from '../hooks/useApi';
 import SummaryCard from '../components/stats/SummaryCard';
 import StreakSection from '../components/stats/StreakSection';
 import WeeklyChart from '../components/stats/WeeklyChart';
@@ -11,16 +11,24 @@ import PeriodSelector from '../components/stats/PeriodSelector';
 const StatusPage = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('week');
 
-  const {
-    summary,
-    streak,
-    weeklyPattern,
-    categoryProgress,
-    learningPattern,
-    badges,
-    isLoading,
-    error
-  } = useAllStatistics(selectedPeriod);
+  // 통계 데이터 훅들
+  const { data: statisticsData, isLoading: statsLoading, error: statsError } = useStatisticsData(selectedPeriod);
+  const { data: weeklyData, isLoading: weeklyLoading } = useWeeklyChart();
+  const { data: categoryData, isLoading: categoryLoading } = useCategoryProgress();
+  const { data: patternData, isLoading: patternLoading } = useLearningPattern();
+
+
+  // Mock 데이터에서 값 추출 (올바른 경로)
+  const summary = statisticsData?.summaryStats?.[selectedPeriod] || statisticsData?.summaryStats?.week;
+  const streak = statisticsData?.streakData;
+  const weeklyPattern = weeklyData?.[selectedPeriod] || weeklyData?.week;
+  const categoryProgress = categoryData;
+  const learningPattern = patternData?.[selectedPeriod] || patternData?.week;
+  const badges = statisticsData?.badges;
+
+  // 통합 로딩 상태
+  const isLoading = statsLoading || weeklyLoading || categoryLoading || patternLoading;
+  const error = statsError;
 
   if (isLoading) {
     return (

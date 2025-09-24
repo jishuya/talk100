@@ -4,12 +4,11 @@ import { Button } from '../components/ui/Button';
 
 // MyPage 관련 훅들
 import {
-  useAllMypageData,
-  useUpdateLearningGoals,
+  useMypageData,
+  useUpdateGoals,
   useUpdateAvatar,
-  useToggleAppSetting,
   useLogout
-} from '../hooks/api/useMypageData';
+} from '../hooks/useApi';
 
 // MyPage 컴포넌트들
 import ProfileHeader from '../components/mypage/ProfileHeader';
@@ -23,22 +22,20 @@ const MyPage = () => {
   const navigate = useNavigate();
 
   // 데이터 훅들
-  const {
-    profile,
-    summary,
-    goals,
-    management,
-    avatarSystem,
-    isLoading,
-    error,
-    refetch
-  } = useAllMypageData();
+  const { data: mypageData, isLoading, error, refetch } = useMypageData();
 
   // 액션 훅들
-  const updateGoalsMutation = useUpdateLearningGoals();
+  const updateGoalsMutation = useUpdateGoals();
   const updateAvatarMutation = useUpdateAvatar();
-  const toggleSettingMutation = useToggleAppSetting();
   const logoutMutation = useLogout();
+
+  // Mock 데이터에서 값 추출 (올바른 키들)
+  const profile = mypageData?.userProfile;
+  const summary = mypageData?.summaryStats;
+  const goals = mypageData?.learningGoals;
+  const management = mypageData?.learningManagement;
+  const avatarSystem = mypageData?.avatarSystem;
+
 
   // 모달 상태
   const [showAvatarModal, setShowAvatarModal] = useState(false);

@@ -7,21 +7,21 @@ import QuizPersonalSection from '../components/home/QuizPersonalSection';
 import StudyHistorySection from '../components/home/StudyHistorySection';
 
 // 새로운 데이터 훅들
-import { useUserData, useBadgesData } from '../hooks/api/useUserData';
-import { useProgressData, useStudyHistory } from '../hooks/api/useProgressData';
-import { useQuizCategories, usePersonalQuizzes } from '../hooks/api/useQuizData';
+import { useUserData, useBadgesData, useProgressData } from '../hooks/useApi';
 
 const HomePage = () => {
   const { loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   // 새로운 데이터 훅들 사용
-  const { user: userData, isLoading: userLoading } = useUserData();
-  const { progress: progressData, isLoading: progressLoading } = useProgressData();
-  const { badges: badgesData } = useBadgesData();
-  const { categories: categoriesData } = useQuizCategories();
-  const { personalQuizzes: personalQuizzesData } = usePersonalQuizzes();
-  const { history: historyData } = useStudyHistory();
+  const { data: userData, isLoading: userLoading } = useUserData();
+  const { data: progressData, isLoading: progressLoading } = useProgressData();
+  const { data: badgesData } = useBadgesData();
+
+  // Mock 데이터 사용 (추후 API 구현 시 제거)
+  const categoriesData = null;
+  const personalQuizzesData = null;
+  const historyData = null;
 
   // 통합 로딩 상태
   const isLoading = authLoading || userLoading || progressLoading;

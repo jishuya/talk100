@@ -1,6 +1,5 @@
 import React from 'react';
 import { MOCK_HOME_DATA } from '../../mocks/homePageData';
-import { HistoryCard } from '../ui';
 import { getIcon } from '../../utils/iconMap.jsx';
 
 const StudyHistorySection = ({ historyItems, onHistoryItemClick }) => {
@@ -22,7 +21,7 @@ const StudyHistorySection = ({ historyItems, onHistoryItemClick }) => {
   return (
     <div className="px-4 pb-5">
       <h2 className="text-base font-bold mb-3 text-text-primary">최근 학습</h2>
-      <HistoryCard>
+      <div className="history-card">
         {history.map((item) => (
           <div
             key={item.id}
@@ -41,7 +40,7 @@ const StudyHistorySection = ({ historyItems, onHistoryItemClick }) => {
             </div>
           </div>
         ))}
-      </HistoryCard>
+      </div>
     </div>
   );
 };

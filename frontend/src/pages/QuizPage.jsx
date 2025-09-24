@@ -2,17 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 // QuizPage 관련 훅들
-import {
-  useQuizPageData,
-  useSubmitAnswer,
-  useMoveToNextQuestion,
-  useSkipQuestion,
-  useToggleFavorite,
-  useToggleWrongAnswerStar,
-  useQuestionAudio,
-  useSpeechRecognition,
-  useUpdateQuizSettings
-} from '../hooks/api/useQuizData';
+import { useQuizData, useSubmitAnswer } from '../hooks/useApi';
 
 // UI 컴포넌트들
 import { QuizProgressBar } from '../components/quiz/QuizProgressBar';
@@ -30,19 +20,16 @@ const QuizPage = () => {
   const sessionId = searchParams.get('session') || 'mock_session_001';
 
   // 퀴즈 데이터 및 상태 훅들
-  const { session, question, progress, isLoading, error, refetch } = useQuizPageData(sessionId);
+  const { data: quizData, isLoading, error, refetch } = useQuizData(sessionId);
 
   // 액션 훅들
   const submitAnswerMutation = useSubmitAnswer();
-  const moveToNextMutation = useMoveToNextQuestion();
-  const skipQuestionMutation = useSkipQuestion();
-  const toggleFavoriteMutation = useToggleFavorite();
-  const toggleStarMutation = useToggleWrongAnswerStar();
-  const speechRecognitionMutation = useSpeechRecognition();
-  const updateSettingsMutation = useUpdateQuizSettings();
 
-  // 오디오 관련
-  const { audioUrl } = useQuestionAudio(question?.id);
+  // Mock 데이터에서 값 추출
+  const session = quizData?.session;
+  const question = quizData?.currentQuestion;
+  const progress = quizData?.progress;
+  const audioUrl = question?.audioUrl;
 
   // 로컬 상태
   const [userAnswer, setUserAnswer] = useState('');

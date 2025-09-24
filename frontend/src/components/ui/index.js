@@ -2,10 +2,10 @@
 // 모든 재사용 가능한 UI 컴포넌트들을 여기서 export
 
 // Button 컴포넌트들
-export { default as Button, IconButton, StartLearningButton, SaveButton } from './Button';
+export { default as Button, IconButton } from './Button';
 
 // Card 컴포넌트들
-export { default as Card, QuizCard, CharacterCard, HistoryCard } from './Card';
+export { default as Card } from './Card';
 
 // Badge 컴포넌트들
 export { default as Badge, TrophyBadge, StarBadge } from './Badge';

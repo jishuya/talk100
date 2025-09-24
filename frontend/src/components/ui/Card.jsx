@@ -1,6 +1,5 @@
 import React from 'react';
 import { cn } from '../../utils/cn';
-import { getIcon } from '../../utils/iconMap.jsx';
 
 // Card variants 정의
 const cardVariants = {
@@ -67,70 +66,5 @@ const Card = React.forwardRef(({
 
 Card.displayName = 'Card';
 
-// Quiz Card 컴포넌트
-export const QuizCard = React.forwardRef(({
-  icon,
-  title,
-  count,
-  variant = 'default',
-  onClick,
-  className = '',
-  ...props
-}, ref) => {
-  const isPersonal = variant === 'personal';
-
-  return (
-    <div
-      ref={ref}
-      className={cn(
-        isPersonal ? 'quiz-card-personal' : 'quiz-card',
-        'animate-slide-up',
-        className
-      )}
-      onClick={onClick}
-      {...props}
-    >
-      <div className="w-12 h-12 mx-auto mb-2 flex items-center justify-center">
-        {typeof icon === 'string' ? getIcon(icon, { size: '3xl' }) : icon}
-      </div>
-      <div className="text-sm font-bold text-text-primary mb-1">
-        {title}
-      </div>
-      <div className="text-xs text-text-secondary">
-        {count}
-      </div>
-    </div>
-  );
-});
-
-QuizCard.displayName = 'QuizCard';
-
-// Character Card 컴포넌트
-export const CharacterCard = ({
-  children,
-  className = '',
-  ...props
-}) => (
-  <div
-    className={cn('character-card animate-fade-in', className)}
-    {...props}
-  >
-    {children}
-  </div>
-);
-
-// History Card 컴포넌트
-export const HistoryCard = ({
-  children,
-  className = '',
-  ...props
-}) => (
-  <div
-    className={cn('history-card', className)}
-    {...props}
-  >
-    {children}
-  </div>
-);
 
 export default Card;
