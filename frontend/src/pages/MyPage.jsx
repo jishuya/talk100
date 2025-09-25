@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
 
 // MyPage 관련 훅들
@@ -20,6 +21,14 @@ import GoalEditModal from '../components/mypage/GoalEditModal';
 
 const MyPage = () => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+
+  // 인증 체크
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, navigate]);
 
   // 데이터 훅들
   const { data: mypageData, isLoading, error, refetch } = useMypageData();

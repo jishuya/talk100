@@ -10,7 +10,7 @@ import StudyHistorySection from '../components/home/StudyHistorySection';
 import { useUserData, useBadgesData, useProgressData } from '../hooks/useApi';
 
 const HomePage = () => {
-  const { loading: authLoading } = useAuth();
+  const { loading: authLoading, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   // 새로운 데이터 훅들 사용
@@ -37,11 +37,10 @@ const HomePage = () => {
     );
   }
 
-  // Temporarily disable login requirement for testing
-  // if (!isAuthenticated) {
-  //   navigate('/login');
-  //   return null;
-  // }
+  if (!isAuthenticated) {
+    navigate('/login');
+    return null;
+  }
 
   const handleStartLearning = () => {
     console.log('오늘의 퀴즈 시작!');

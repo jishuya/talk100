@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { useStatisticsData, useWeeklyChart, useCategoryProgress, useLearningPattern } from '../hooks/useApi';
 import SummaryCard from '../components/stats/SummaryCard';
 import StreakSection from '../components/stats/StreakSection';
@@ -9,7 +11,16 @@ import BadgesSection from '../components/stats/BadgesSection';
 import PeriodSelector from '../components/stats/PeriodSelector';
 
 const StatusPage = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [selectedPeriod, setSelectedPeriod] = useState('week');
+
+  // 인증 체크
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, navigate]);
 
   // 통계 데이터 훅들
   const { data: statisticsData, isLoading: statsLoading, error: statsError } = useStatisticsData(selectedPeriod);
