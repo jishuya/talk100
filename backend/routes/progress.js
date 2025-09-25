@@ -33,8 +33,12 @@ router.post('/submit', verifyToken, submitAnswerHandler);
 router.post('/day-complete', verifyToken, dayCompleteHandler);
 
 // 사용자 진행상황 조회
-// GET /api/progress/user/:userId
-// GET /api/progress/user (본인 데이터 조회)
+// GET /api/progress/:userId (프론트엔드 호환)
+// GET /api/progress (본인 데이터 조회, 프론트엔드 호환)
+router.get('/:userId', verifyToken, getUserProgressHandler);
+router.get('/', verifyToken, getUserProgressHandler);
+
+// 기존 경로 호환성 유지
 router.get('/user/:userId', verifyToken, getUserProgressHandler);
 router.get('/user', verifyToken, getUserProgressHandler);
 
