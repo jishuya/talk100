@@ -7,18 +7,18 @@ const GoalsSection = ({ goals, onEditClick }) => {
   const goalItems = [
     {
       value: goals.dailyGoal,
-      label: '일일 목표 Day',
+      label: '일일 학습목표',
       suffix: ''
     },
     {
-      value: goals.monthlyGoal,
-      label: '월간 목표일',
+      value: goals.weeklyAttendance,
+      label: '주간 목표 출석일',
       suffix: ''
     },
     {
-      value: goals.targetAccuracy,
-      label: '목표 정답률',
-      suffix: '%'
+      value: goals.weeklyTotalQuiz,
+      label: '주간 목표 문제수',
+      suffix: ''
     }
   ];
 

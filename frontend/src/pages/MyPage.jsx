@@ -10,6 +10,9 @@ import {
   useLogout
 } from '../hooks/useApi';
 
+// Mock 데이터
+import { mypageData } from '../mocks/mypageData';
+
 // MyPage 컴포넌트들
 import ProfileHeader from '../components/mypage/ProfileHeader';
 import SummaryCards from '../components/mypage/SummaryCards';
@@ -23,19 +26,22 @@ const MyPage = () => {
 
 
   // 데이터 훅들
-  const { data: mypageData, isLoading, error, refetch } = useMypageData();
+  const { data: apiMypageData, isLoading, error, refetch } = useMypageData();
 
   // 액션 훅들
   const updateGoalsMutation = useUpdateGoals();
   const updateAvatarMutation = useUpdateAvatar();
   const logoutMutation = useLogout();
 
-  // Mock 데이터에서 값 추출 (올바른 키들)
-  const profile = mypageData?.userProfile;
-  const summary = mypageData?.summaryStats;
-  const goals = mypageData?.learningGoals;
-  const management = mypageData?.learningManagement;
-  const avatarSystem = mypageData?.avatarSystem;
+  // Mock 데이터를 fallback으로 사용
+  const finalMypageData = apiMypageData || mypageData;
+
+  // 데이터에서 값 추출
+  const profile = finalMypageData?.userProfile;
+  const summary = finalMypageData?.summaryStats;
+  const goals = finalMypageData?.learningGoals;
+  const management = finalMypageData?.learningManagement;
+  const avatarSystem = finalMypageData?.avatarSystem;
 
 
   // 모달 상태

@@ -4,13 +4,9 @@ export const mypageData = {
   userProfile: {
     nickname: "김학습",
     email: "learner@talk100.com",
-    profileImage: null,
     avatar: "🦊",
     level: 12,
-    levelTitle: "영리한 학습자",
     gradeName: "중급 학습자",
-    joinDate: "2024-01-15",
-    lastLoginDate: "2024-12-08",
     // 앱 설정을 프로필에 포함
     appSettings: [
       {
@@ -56,14 +52,14 @@ export const mypageData = {
   summaryStats: {
     totalDays: 45,
     streakDays: 7,
-    accuracy: 87
+    maxStreakDays: 15
   },
 
   // 학습 목표
   learningGoals: {
-    dailyGoal: 2,      // 일일 목표 Day 수
-    monthlyGoal: 30,   // 월간 목표 학습일
-    targetAccuracy: 80  // 목표 정답률 (%)
+    dailyGoal: 2,           // 오늘의 퀴즈 일일 학습목표
+    weeklyAttendance: 3,    // 주간 출석일
+    weeklyTotalQuiz: 30     // 주간 푼 문제수
   },
 
   // 학습 관리 메뉴 아이템들
@@ -107,45 +103,6 @@ export const mypageData = {
     }
   ],
 
-  // 앱 설정 (MyPage에서 표시되는 간단한 토글들)
-  appSettings: [
-    {
-      id: 'notifications',
-      title: '학습 알림',
-      description: '매일 오후 8시',
-      icon: 'IoNotifications',
-      bgColor: 'bg-accent-mint',
-      type: 'toggle',
-      value: true
-    },
-    {
-      id: 'autoplay',
-      title: '음성 자동 재생',
-      description: null,
-      icon: 'IoVolumeHigh',
-      bgColor: 'bg-accent-mint',
-      type: 'toggle',
-      value: false
-    },
-    {
-      id: 'feedback',
-      title: '피드백 보내기',
-      description: null,
-      icon: 'noto:memo',
-      bgColor: 'bg-accent-mint',
-      type: 'link',
-      path: '/feedback'
-    },
-    {
-      id: 'help',
-      title: '도움말',
-      description: null,
-      icon: 'noto:speech-balloon',
-      bgColor: 'bg-accent-mint',
-      type: 'link',
-      path: '/help'
-    }
-  ],
 
   // 아바타 시스템 데이터
   avatarSystem: {

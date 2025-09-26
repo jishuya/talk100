@@ -15,9 +15,9 @@ const SummaryCards = ({ summary }) => {
       suffix: ''
     },
     {
-      value: summary.accuracy,
-      label: '정답률',
-      suffix: '%'
+      value: summary.maxStreakDays,
+      label: '최장연속일',
+      suffix: ''
     }
   ];
 
