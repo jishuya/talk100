@@ -1,7 +1,7 @@
 // 환경 설정
 export const ENV = {
   // 개발 환경에서는 Mock 데이터 사용, 프로덕션에서는 실제 API 사용
-  USE_MOCK_DATA: import.meta.env.MODE === 'development',
+  USE_MOCK_DATA: false, // 실제 API 테스트를 위해 false로 변경
 
   // API 기본 URL
   API_BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000',

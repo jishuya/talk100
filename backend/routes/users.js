@@ -19,7 +19,7 @@ router.get('/profile', verifyToken, (req, res) => {
 
     res.json({
       success: true,
-      user: {
+      data: {
         uid, name, email, profile_image,
         voice_gender, default_difficulty,
         stats: {

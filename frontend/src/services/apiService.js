@@ -84,10 +84,13 @@ class ApiService {
   // 실제 API 호출
   async apiCall(endpoint, options = {}) {
     const url = `${ENV.API_BASE_URL}${endpoint}`;
+    const token = localStorage.getItem('jwt_token');
+
     const config = {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
       },
       ...options,
     };
