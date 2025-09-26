@@ -7,6 +7,7 @@ import StudyHistorySection from '../components/home/StudyHistorySection';
 
 // 새로운 데이터 훅들
 import { useUserData, useBadgesData, useProgressData } from '../hooks/useApi';
+import { MOCK_HOME_DATA } from '../mocks/homePageData';
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -16,7 +17,10 @@ const HomePage = () => {
   const { data: progressData, isLoading: progressLoading } = useProgressData();
   const { data: badgesData } = useBadgesData();
 
-  // Mock 데이터 사용 (추후 API 구현 시 제거)
+  // Mock 데이터를 fallback으로 사용
+  const finalUserData = userData || MOCK_HOME_DATA.user;
+  const finalProgressData = progressData || MOCK_HOME_DATA.progress;
+  const finalBadgesData = badgesData || MOCK_HOME_DATA.badges;
   const categoriesData = null;
   const personalQuizzesData = null;
   const historyData = null;
@@ -59,9 +63,9 @@ const HomePage = () => {
     <div>
       {/* Character Section */}
       <CharacterSection
-        user={userData}
-        progress={progressData}
-        badges={badgesData}
+        user={finalUserData}
+        progress={finalProgressData}
+        badges={finalBadgesData}
         onStartLearning={handleStartLearning}
       />
 

@@ -68,6 +68,7 @@ CREATE TABLE users (
     total_days_studied INTEGER DEFAULT 0,  -- 총 학습일수
     current_streak INTEGER DEFAULT 0,      -- 현재 연속 학습일
     longest_streak INTEGER DEFAULT 0,      -- 최장 연속 학습일
+    level INTEGER DEFAULT 1,
     
     -- PostgreSQL 배열 타입
     weekly_attendance INTEGER[] DEFAULT ARRAY[0,0,0,0,0,0,0]  -- 주간 출석 [월,화,수,목,금,토,일]
@@ -139,10 +140,14 @@ CREATE TABLE user_progress (
     total_attempts INTEGER DEFAULT 0,
     correct_attempts INTEGER DEFAULT 0,
     last_attempt_timestamp TIMESTAMP,
+    last_studied_day INTEGER DEFAULT 1,
     last_is_correct BOOLEAN,
-    
+
+
     -- 상태
-    status VARCHAR(20) DEFAULT 'new' CHECK (status IN ('new', 'learning', 'mastered')),
+    
+    
+    -- tus VARCHAR(20) DEFAULT 'new' CHECK (status IN ('new', 'learning', 'mastered')),
     
     -- 유니크 제약
     UNIQUE(user_id, question_id)
