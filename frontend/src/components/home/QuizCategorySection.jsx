@@ -35,7 +35,8 @@ const QuizCategorySection = ({ categories, onCategoryClick }) => {
               {category.title}
             </div>
             <div className="text-xs text-text-secondary">
-              {category.count}
+              {/* {category.count} */}
+              { 'Day 1-100' }
             </div>
           </div>
         ))}

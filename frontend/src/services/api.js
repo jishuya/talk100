@@ -26,9 +26,15 @@ api.interceptors.request.use(
   }
 );
 
-// 응답 인터셉터 - 에러 처리
+// 응답 인터셉터 - 에러 처리 및 데이터 구조 정규화
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // 백엔드 응답이 { success: true, data: {...} } 구조인 경우 data만 추출
+    if (response.data.success && response.data.data) {
+      response.data = response.data.data;
+    }
+    return response;
+  },
   (error) => {
     if (error.response?.status === 401) {
       // 토큰 만료 또는 인증 오류

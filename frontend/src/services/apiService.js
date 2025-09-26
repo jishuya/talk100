@@ -98,7 +98,15 @@ class ApiService {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
-    return response.json();
+    const jsonResponse = await response.json();
+
+    // 백엔드 응답이 { success: true, data: {...} } 구조인 경우 data만 추출
+    if (jsonResponse.success && jsonResponse.data) {
+      return jsonResponse.data;
+    }
+
+    // 그렇지 않으면 전체 응답 반환
+    return jsonResponse;
   }
 
   // 에러 처리
