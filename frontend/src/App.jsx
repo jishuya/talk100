@@ -5,6 +5,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AppProvider } from './contexts/AppContext';
 import AppLayout from './components/layout/AppLayout';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 // 페이지 컴포넌트들
 import HomePage from './pages/HomePage';
@@ -47,13 +48,41 @@ function App() {
                 <AppLayout>
                   <Routes>
                     <Route path="/login" element={<LoginPage />} />
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/quiz" element={<QuizPage />} />
-                    <Route path="/quiz/:category" element={<QuizPage />} />
-                    <Route path="/quiz/:category/:day" element={<QuizPage />} />
-                    <Route path="/status" element={<StatusPage />} />
-                    <Route path="/mypage" element={<MyPage />} />
-                    <Route path="/settings" element={<SettingsPage />} />
+                    <Route path="/" element={
+                      <ProtectedRoute>
+                        <HomePage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/quiz" element={
+                      <ProtectedRoute>
+                        <QuizPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/quiz/:category" element={
+                      <ProtectedRoute>
+                        <QuizPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/quiz/:category/:day" element={
+                      <ProtectedRoute>
+                        <QuizPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/status" element={
+                      <ProtectedRoute>
+                        <StatusPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/mypage" element={
+                      <ProtectedRoute>
+                        <MyPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/settings" element={
+                      <ProtectedRoute>
+                        <SettingsPage />
+                      </ProtectedRoute>
+                    } />
                   </Routes>
                 </AppLayout>
               </div>

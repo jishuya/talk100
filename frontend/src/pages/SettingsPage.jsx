@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 
 // Settings 관련 훅들
 import { useSettingsData, useUpdateSettings } from '../hooks/useApi';
@@ -13,14 +12,6 @@ import DangerZone from '../components/settings/DangerZone';
 
 const SettingsPage = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
-
-  // 인증 체크
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login');
-    }
-  }, [isAuthenticated, navigate]);
 
   // 데이터 훅들
   const { data: allSettings, isLoading, error, refetch } = useSettingsData();

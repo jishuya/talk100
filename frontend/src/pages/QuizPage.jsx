@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 // QuizPage 관련 훅들
 import { useQuizData, useSubmitAnswer } from '../hooks/useApi';
 
@@ -14,7 +13,6 @@ import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 const QuizPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { isAuthenticated } = useAuth();
 
   // URL 파라미터에서 세션 ID 추출 (실제로는 퀴즈 시작시 생성)
   const sessionId = searchParams.get('session') || 'mock_session_001';
@@ -42,12 +40,6 @@ const QuizPage = () => {
   const [showAnswer, setShowAnswer] = useState(false);
   const [keywordInputs, setKeywordInputs] = useState({});
 
-  // 인증 체크
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login');
-    }
-  }, [isAuthenticated, navigate]);
 
   // 키워드 입력 변경 핸들러
   const handleKeywordInputChange = (keyword, value) => {

@@ -1,5 +1,4 @@
 import React from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import CharacterSection from '../components/home/CharacterSection';
 import QuizCategorySection from '../components/home/QuizCategorySection';
@@ -10,7 +9,6 @@ import StudyHistorySection from '../components/home/StudyHistorySection';
 import { useUserData, useBadgesData, useProgressData } from '../hooks/useApi';
 
 const HomePage = () => {
-  const { loading: authLoading, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   // 새로운 데이터 훅들 사용
@@ -24,7 +22,7 @@ const HomePage = () => {
   const historyData = null;
 
   // 통합 로딩 상태
-  const isLoading = authLoading || userLoading || progressLoading;
+  const isLoading = userLoading || progressLoading;
 
   if (isLoading) {
     return (
@@ -35,11 +33,6 @@ const HomePage = () => {
         </div>
       </div>
     );
-  }
-
-  if (!isAuthenticated) {
-    navigate('/login');
-    return null;
   }
 
   const handleStartLearning = () => {
