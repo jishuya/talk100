@@ -56,8 +56,8 @@ async function submitAnswerHandler(req, res) {
         grading: gradingResult,
         progress: progressResult,
         question: {
-          korean_content: question.korean_content,
-          english_content: question.english_content,
+          korean: question.korean,
+          english: question.english,
           keywords: question.keywords
         }
       }
