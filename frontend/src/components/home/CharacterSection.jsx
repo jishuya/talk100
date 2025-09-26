@@ -1,13 +1,18 @@
 import React from 'react';
 import { TrophyBadge, StarBadge, CircularProgress } from '../ui';
 import { getIcon } from '../../utils/iconMap';
+import { getAvatarEmoji, getAvatarByLevel } from '../../utils/avatarUtils';
 
 const CharacterSection = ({
-  user = { name: '삔이', goal: 20, avatar: '👨‍🎓' },
+  user = { name: '삔이', goal: 20, avatar: '👨‍🎓', level: 1 },
   progress = { current: 0, total: 20, percentage: 35 },
   // badges = { trophy: 182, star: 4203 },
   onStartLearning
 }) => {
+  // 사용자 레벨에 따른 아바타 정보 가져오기
+  const avatarInfo = getAvatarByLevel(user.level);
+  const displayAvatar = getAvatarEmoji(user.level || 1);
+
   return (
     <div className="character-card animate-fade-in">
       {/* 우측 상단 뱃지 */}
@@ -19,8 +24,8 @@ const CharacterSection = ({
       </div>
 
       {/* 캐릭터 아바타 */}
-      <div className="w-25 h-25 mx-auto mb-3 bg-surface rounded-full flex items-center justify-center text-5xl">
-        {user.avatar}
+      <div className="w-25 h-25 mx-auto mb-3 bg-surface rounded-full flex items-center justify-center text-5xl" title={`${avatarInfo.name} (레벨 ${user.level || 1}) - ${avatarInfo.desc}`}>
+        {displayAvatar}
       </div>
 
       {/* 캐릭터 정보 */}
