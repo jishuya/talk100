@@ -13,6 +13,9 @@ const ICON_MAP = {
   IoCheckmark: 'fluent:checkmark-circle-24-filled',
   IoArrowForward: 'tabler:arrow-right',
   IoSettingsOutline: 'fluent:settings-24-regular',
+  OpenFolder: 'fluent:folder-open-24-regular',
+  Home : 'fluent:home-24-regular',
+
 
   // === Bottom Navigation ===
   IoBook: 'fluent:book-24-filled',
@@ -86,7 +89,19 @@ const ICON_MAP = {
   IoSchoolOutline: 'noto:school',
   IoTimeOutline: 'noto:alarm-clock',
   'noto:red-heart': 'noto:red-heart',
-  'fluent:settings-24-regular': 'fluent:settings-24-regular'
+  'fluent:settings-24-regular': 'fluent:settings-24-regular',
+
+  // === Avartar ===
+  HatchingChick: 'noto:hatching-chick',
+  Rabbit: 'rabbit',
+  Dog: 'dog',
+  Cat: 'cat',
+  Fox: 'fox',
+  Lion: 'lion',
+  Unicorn: 'unicorn',
+  Dragon: 'dragon', 
+  Eagle: 'eagle',
+  Crown: 'crown',
 };
 
 export const getIcon = (iconName, { size = 'xl', color, className = '', ...props } = {}) => {

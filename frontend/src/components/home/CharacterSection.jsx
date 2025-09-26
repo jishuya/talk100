@@ -5,7 +5,7 @@ import { getIcon } from '../../utils/iconMap';
 const CharacterSection = ({
   user = { name: '삔이', goal: 20, avatar: '👨‍🎓' },
   progress = { current: 0, total: 20, percentage: 35 },
-  badges = { trophy: 182, star: 4203 },
+  // badges = { trophy: 182, star: 4203 },
   onStartLearning
 }) => {
   return (

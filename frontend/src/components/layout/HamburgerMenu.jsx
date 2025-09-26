@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -12,14 +12,14 @@ const HamburgerMenu = ({ isOpen, onClose }) => {
     {
       id: 'home',
       title: '홈',
-      icon: 'IoHomeOutline',
+      icon: 'Home',
       path: '/',
       description: '대시보드'
     },
     {
       id: 'categories',
       title: '카테고리',
-      icon: 'solar:folder-with-files-line-duotone',
+      icon: 'OpenFolder',
       path: '/categories',
       description: '학습 카테고리'
     },
