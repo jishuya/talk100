@@ -15,12 +15,17 @@ router.get('/profile', verifyToken, (req, res) => {
   try {
     const { uid, name, email, profile_image, voice_gender, default_difficulty,
             total_days_studied, current_streak, longest_streak,
-            total_questions_attempted, total_correct_answers, weekly_attendance } = req.user;
+            total_questions_attempted, total_correct_answers, weekly_attendance,
+            daily_goal, level, created_at } = req.user;
 
     res.json({
       success: true,
       data: {
-        uid, name, email, profile_image,
+        uid, name, email,
+        avatar: profile_image,           // profile_image → avatar 별칭
+        joinDate: created_at,            // created_at → joinDate 별칭
+        goal: daily_goal,                // daily_goal → goal 별칭
+        level,                           // level 추가
         voice_gender, default_difficulty,
         stats: {
           total_days_studied,
