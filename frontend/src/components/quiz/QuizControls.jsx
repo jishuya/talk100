@@ -28,23 +28,23 @@ export const QuizControls = ({
           <div className="flex gap-2 mb-3">
             <button
               onClick={onShowFirstLetters}
-              className={`${BUTTON_BASE_STYLE} ${showHint ? 'border-primary bg-primary-light' : ''}`}
+              className={`flex-1 p-3 border border-gray-border rounded-brand-sm transition-all duration-200 active:scale-[0.97] flex flex-col items-center gap-1 ${showHint ? 'bg-primary-light border-primary' : 'bg-white active:bg-primary-light active:border-primary'}`}
             >
               {getIcon('AiOutlineQuestionCircle', {
                 size: 'xl',
-                className: showHint ? 'text-[#55AD9B]' : 'text-gray-600'
+                className: showHint ? 'text-white' : 'text-gray-600'
               })}
-              <span className={`${LABEL_STYLE} ${showHint ? 'text-[#55AD9B]' : ''}`}>힌트보기</span>
+              <span className={`${LABEL_STYLE} font-semibold ${showHint ? 'text-white' : ''}`}>힌트보기</span>
             </button>
             <button
               onClick={onShowFullAnswer}
-              className={`${BUTTON_BASE_STYLE} ${showAnswer ? 'border-primary bg-primary-light' : ''}`}
+              className={`flex-1 p-3 border border-gray-border rounded-brand-sm transition-all duration-200 active:scale-[0.97] flex flex-col items-center gap-1 ${showAnswer ? 'bg-primary-light border-primary' : 'bg-white active:bg-primary-light active:border-primary'}`}
             >
               {getIcon('AiOutlineCheckCircle', {
                 size: 'xl',
-                className: showAnswer ? 'text-[#55AD9B]' : 'text-gray-600'
+                className: showAnswer ? 'text-white' : 'text-gray-600'
               })}
-              <span className={`${LABEL_STYLE} ${showAnswer ? 'text-[#55AD9B]' : ''}`}>정답보기</span>
+              <span className={`${LABEL_STYLE} font-semibold ${showAnswer ? 'text-white' : ''}`}>정답보기</span>
             </button>
           </div>
         )}

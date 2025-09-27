@@ -282,16 +282,20 @@ const QuizPage = () => {
     }
   };
 
-  // 힌트 보기 (첫 글자)
+  // 힌트 보기 (첫 글자) - 토글 기능
   const handleShowFirstLetters = () => {
-    setShowHint(true);
-    setShowAnswer(false);
+    setShowHint(!showHint);
+    if (!showHint) {
+      setShowAnswer(false);
+    }
   };
 
-  // 정답 보기 (전체)
+  // 정답 보기 (전체) - 토글 기능
   const handleShowFullAnswer = () => {
-    setShowAnswer(true);
-    setShowHint(false);
+    setShowAnswer(!showAnswer);
+    if (!showAnswer) {
+      setShowHint(false);
+    }
   };
 
   // 즐겨찾기 토글
@@ -388,6 +392,8 @@ const QuizPage = () => {
         inputMode={inputMode}
         quizMode={quizMode}
         isRecording={isRecording}
+        showHint={showHint}
+        showAnswer={showAnswer}
         onMainAction={handleMainAction}
         onPlayAudio={handlePlayAudio}
         onShowHint={handleShowHint}
