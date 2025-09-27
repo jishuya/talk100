@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // Settings 관련 훅들
@@ -201,7 +201,7 @@ const SettingsPage = () => {
     {
       id: 'connectedAccount',
       title: '연결된 계정',
-      rightText: allSettings?.account?.connectedAccounts?.[0]?.provider || 'Google',
+      rightText: allSettings?.account?.connectedAccounts?.[0]?.provider,
       type: 'link'
     }
   ];
@@ -212,7 +212,7 @@ const SettingsPage = () => {
       title: '난이도',
       description: '채점 기준: 초급 50%, 중급 70%, 고급 90%',
       type: 'buttonGroup',
-      value: localSettings.learning.difficulty || 2,
+      value: localSettings.learning.difficulty,
       options: [
         { value: 1, label: '초급' },
         { value: 2, label: '중급' },
@@ -222,9 +222,9 @@ const SettingsPage = () => {
     {
       id: 'voiceSpeed',
       title: '음성 재생 속도',
-      displayValue: `${localSettings.learning.voiceSpeed || 1.0}x`,
+      displayValue: `${localSettings.learning.voiceSpeed}x`,
       type: 'slider',
-      value: localSettings.learning.voiceSpeed || 1.0,
+      value: localSettings.learning.voiceSpeed,
       min: 0.5,
       max: 2,
       step: 0.25,
@@ -234,9 +234,9 @@ const SettingsPage = () => {
       id: 'reviewCount',
       title: '복습 문제 개수',
       description: 'Day 복습 시 출제되는 문제 개수',
-      displayValue: `${localSettings.learning.reviewCount || 6}개`,
+      displayValue: `${localSettings.learning.reviewCount}개`,
       type: 'slider',
-      value: localSettings.learning.reviewCount || 6,
+      value: localSettings.learning.reviewCount,
       min: 3,
       max: 10,
       step: 1,
@@ -247,7 +247,7 @@ const SettingsPage = () => {
       title: '자동 음성 재생',
       description: '문제 표시 시 자동으로 음성 재생',
       type: 'toggle',
-      value: localSettings.learning.autoPlay || false,
+      value: localSettings.learning.autoPlay,
       borderBottom: false
     }
   ];
@@ -257,7 +257,7 @@ const SettingsPage = () => {
       id: 'learningReminder',
       title: '학습 리마인더',
       type: 'toggle',
-      value: localSettings.notifications.learningReminder !== false
+      value: localSettings.notifications.learningReminder
     },
     {
       id: 'reminderTime',
@@ -271,14 +271,14 @@ const SettingsPage = () => {
       title: '복습 알림',
       description: '복습 예정일에 알림',
       type: 'toggle',
-      value: localSettings.notifications.reviewReminder !== false
+      value: localSettings.notifications.reviewReminder
     },
     {
       id: 'weeklyReport',
       title: '주간 리포트',
       description: '매주 일요일 학습 통계 알림',
       type: 'toggle',
-      value: localSettings.notifications.weeklyReport || false,
+      value: localSettings.notifications.weeklyReport,
       borderBottom: false
     }
   ];
@@ -289,7 +289,7 @@ const SettingsPage = () => {
       title: '테마',
       displayValue: getThemeLabel(localSettings.display.theme),
       type: 'buttonGroup',
-      value: localSettings.display.theme || 'light',
+      value: localSettings.display.theme,
       options: [
         { value: 'light', label: '라이트' },
         { value: 'dark', label: '다크' },
@@ -301,7 +301,7 @@ const SettingsPage = () => {
       title: '글꼴 크기',
       displayValue: getFontSizeLabel(localSettings.display.fontSize),
       type: 'buttonGroup',
-      value: localSettings.display.fontSize || 'medium',
+      value: localSettings.display.fontSize,
       options: [
         { value: 'small', label: '작게' },
         { value: 'medium', label: '보통' },
@@ -327,7 +327,7 @@ const SettingsPage = () => {
     {
       id: 'clearCache',
       title: '캐시 삭제',
-      rightText: `${allSettings?.data?.cacheSize || 125} MB`,
+      rightText: `${allSettings?.data?.cacheSize} MB`,
       type: 'button',
       borderBottom: false
     }

@@ -40,36 +40,6 @@ export const settingsData = {
     totalData: 2.3 // GB
   },
 
-  // 설정 옵션 정의
-  settingOptions: {
-    difficulty: [
-      { value: 1, label: '초급', description: '채점 기준: 50%' },
-      { value: 2, label: '중급', description: '채점 기준: 70%' },
-      { value: 3, label: '고급', description: '채점 기준: 90%' }
-    ],
-    theme: [
-      { value: 'light', label: '라이트' },
-      { value: 'dark', label: '다크' },
-      { value: 'auto', label: '자동' }
-    ],
-    fontSize: [
-      { value: 'small', label: '작게' },
-      { value: 'medium', label: '보통' },
-      { value: 'large', label: '크게' }
-    ]
-  }
-};
-
-// 설정값 포맷팅 헬퍼들
-export const formatVoiceSpeed = (speed) => `${speed}x`;
-export const formatReviewCount = (count) => `${count}개`;
-export const formatCacheSize = (size) => `${size} MB`;
-
-export const formatReminderTime = (hour, minute) => {
-  const period = hour >= 12 ? '오후' : '오전';
-  const displayHour = hour > 12 ? hour - 12 : (hour === 0 ? 12 : hour);
-  const displayMinute = minute.toString().padStart(2, '0');
-  return `${period} ${displayHour}:${displayMinute}`;
 };
 
 // API 시뮬레이션 함수들
