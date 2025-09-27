@@ -168,8 +168,8 @@ class ApiService {
   // 퀴즈 관련 API
   // ==============================================
 
-  getQuizSession(categoryId) {
-    return this.request(`/api/quiz/session/${categoryId}`, 'quizSession');
+  getQuizSession(sessionId) {
+    return this.request(`/api/quiz/session/${sessionId}`, 'quizSession');
   }
 
   submitAnswer(data) {

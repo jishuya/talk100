@@ -74,12 +74,12 @@ export const useUpdateProgress = () => {
 // 퀴즈 관련 훅
 // ==============================================
 
-export const useQuizData = (categoryId) => {
+export const useQuizData = (sessionId) => {
   return useQuery({
-    queryKey: ['quiz', 'session', categoryId],
-    queryFn: () => api.getQuizSession(categoryId),
+    queryKey: ['quiz', 'session', sessionId],
+    queryFn: () => api.getQuizSession(sessionId),
     staleTime: ENV.CACHE_TIMES.QUIZ_SESSION,
-    enabled: !!categoryId,
+    enabled: !!sessionId,
     retry: 2,
   });
 };

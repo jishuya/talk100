@@ -14,10 +14,10 @@ const QuizPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // URL 파라미터에서 세션 ID 추출 (실제로는 퀴즈 시작시 생성)
+  // URL 파라미터에서 세션 ID 추출
   const sessionId = searchParams.get('session') || 'mock_session_001';
 
-  // 퀴즈 데이터 및 상태 훅들
+  // 퀴즈 데이터 및 상태 훅들 - sessionId를 categoryId로 사용
   const { data: quizData, isLoading, error, refetch } = useQuizData(sessionId);
 
   // 액션 훅들
@@ -149,11 +149,11 @@ const QuizPage = () => {
       setKeywordInputs({});
     }
 
-    // 설정 업데이트
-    updateSettingsMutation.mutate({
-      sessionId,
-      settings: { inputMode: mode }
-    });
+    // TODO: 설정 업데이트 API 연동
+    // updateSettingsMutation.mutate({
+    //   sessionId,
+    //   settings: { inputMode: mode }
+    // });
   };
 
   // 답변 제출
@@ -191,7 +191,8 @@ const QuizPage = () => {
   // 다음 문제로 이동
   const handleNextQuestion = async () => {
     try {
-      await moveToNextMutation.mutateAsync(sessionId);
+      // TODO: API 연동
+      // await moveToNextMutation.mutateAsync(sessionId);
 
       // 상태 초기화
       setUserAnswer('');
@@ -212,10 +213,11 @@ const QuizPage = () => {
   const handleSkipQuestion = async () => {
     if (confirm('이 문제를 건너뛰시겠습니까?')) {
       try {
-        await skipQuestionMutation.mutateAsync({
-          sessionId,
-          questionId: question.id
-        });
+        // TODO: API 연동
+        // await skipQuestionMutation.mutateAsync({
+        //   sessionId,
+        //   questionId: question.id
+        // });
 
         // 상태 초기화
         setUserAnswer('');
@@ -234,15 +236,11 @@ const QuizPage = () => {
       // 녹음 중지
       setIsRecording(false);
 
-      // Mock 음성 인식 (실제로는 MediaRecorder API 사용)
+      // TODO: 실제 음성 인식 구현 (MediaRecorder API)
       try {
-        const mockAudioBlob = new Blob([], { type: 'audio/wav' });
-        const result = await speechRecognitionMutation.mutateAsync({
-          audioBlob: mockAudioBlob,
-          sessionId
-        });
-
-        setUserAnswer(result.transcription);
+        // Mock 음성 인식 결과
+        const mockTranscription = 'I see no point in continuing this interview';
+        setUserAnswer(mockTranscription);
 
       } catch (error) {
         console.error('Speech recognition error:', error);
@@ -299,7 +297,9 @@ const QuizPage = () => {
   // 즐겨찾기 토글
   const handleToggleFavorite = async () => {
     try {
-      await toggleFavoriteMutation.mutateAsync(question.id);
+      // TODO: API 연동
+      // await toggleFavoriteMutation.mutateAsync(question.id);
+      console.log('Toggle favorite for question:', question.id);
     } catch (error) {
       console.error('Toggle favorite error:', error);
     }
@@ -308,7 +308,9 @@ const QuizPage = () => {
   // 틀린문제 별표 토글
   const handleToggleStar = async () => {
     try {
-      await toggleStarMutation.mutateAsync(question.id);
+      // TODO: API 연동
+      // await toggleStarMutation.mutateAsync(question.id);
+      console.log('Toggle star for question:', question.id);
     } catch (error) {
       console.error('Toggle star error:', error);
     }
