@@ -380,6 +380,8 @@ const QuizPage = () => {
         showHint={showHint}
         showAnswer={showAnswer}
         keywordInputs={keywordInputs}
+        isFavorite={question?.isFavorite}
+        isStarred={question?.isStarred}
         onKeywordInputChange={handleKeywordInputChange}
         onKeywordKeyDown={handleKeywordKeyDown}
         onInputModeChange={handleInputModeChange}

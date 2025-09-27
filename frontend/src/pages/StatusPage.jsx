@@ -20,12 +20,12 @@ const StatusPage = () => {
   const { data: patternData, isLoading: patternLoading } = useLearningPattern();
 
 
-  // Mock 데이터에서 값 추출 (올바른 경로)
-  const summary = statisticsData?.summaryStats?.[selectedPeriod] || statisticsData?.summaryStats?.week;
+  // Mock 데이터에서 값 추출
+  const summary = statisticsData?.summaryStats?.[selectedPeriod];
   const streak = statisticsData?.streakData;
-  const weeklyPattern = weeklyData?.[selectedPeriod] || weeklyData?.week;
+  const weeklyPattern = weeklyData?.[selectedPeriod];
   const categoryProgress = categoryData;
-  const learningPattern = patternData?.[selectedPeriod] || patternData?.week;
+  const learningPattern = patternData?.[selectedPeriod];
   const badges = statisticsData?.badges;
 
   // 통합 로딩 상태
