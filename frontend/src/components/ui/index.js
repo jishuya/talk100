@@ -8,7 +8,7 @@ export { default as Button, IconButton } from './Button';
 export { default as Card } from './Card';
 
 // Badge 컴포넌트들
-export { default as Badge, TrophyBadge, StarBadge } from './Badge';
+export { default as Badge, CalendarBadge, HitBadge } from './Badge';
 
 // Progress 컴포넌트들
 export { default as ProgressBar, CircularProgress } from './ProgressBar';

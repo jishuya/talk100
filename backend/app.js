@@ -16,12 +16,12 @@ const passport = require('./config/passport');
 
 // 라우트 import
 const authRoutes = require('./routes/auth');
-const questionRoutes = require('./routes/questions');
-const progressRoutes = require('./routes/progress');
-const reviewRoutes = require('./routes/review');
-const wrongAnswersRoutes = require('./routes/wrongAnswers');
-const favoritesRoutes = require('./routes/favorites');
-const quizRoutes = require('./routes/quiz');
+// const questionRoutes = require('./routes/questions');
+// const progressRoutes = require('./routes/progress');
+// const reviewRoutes = require('./routes/review');
+// const wrongAnswersRoutes = require('./routes/wrongAnswers');
+// const favoritesRoutes = require('./routes/favorites');
+// const quizRoutes = require('./routes/quiz');
 const usersRoutes = require('./routes/users');
 
 const app = express();
@@ -85,12 +85,12 @@ app.get('/health', (req, res) => {
 
 // API 라우트
 app.use('/auth', authRoutes);
-app.use('/api/questions', questionRoutes);
-app.use('/api/progress', progressRoutes);
-app.use('/api/review', reviewRoutes);
-app.use('/api/wrong-answers', wrongAnswersRoutes);
-app.use('/api/favorites', favoritesRoutes);
-app.use('/api/quiz', quizRoutes);
+// app.use('/api/questions', questionRoutes);
+// app.use('/api/progress', progressRoutes);
+// app.use('/api/review', reviewRoutes);
+// app.use('/api/wrong-answers', wrongAnswersRoutes);
+// app.use('/api/favorites', favoritesRoutes);
+// app.use('/api/quiz', quizRoutes);
 app.use('/api/users', usersRoutes);
 
 // 404 처리

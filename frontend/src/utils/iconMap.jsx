@@ -66,6 +66,8 @@ const ICON_MAP = {
   IoSunny: 'noto:sun',
 
   // === Stats & Achievements ===
+  Questions: 'noto:direct-hit',
+  Days: 'fluent-emoji:spiral-calendar',
   IoTrophy: 'noto:trophy',
   'noto:fire': 'noto:fire',
   'noto:bar-chart': 'noto:bar-chart',

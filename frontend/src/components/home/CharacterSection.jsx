@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrophyBadge, StarBadge, CircularProgress } from '../ui';
+import { CalendarBadge, HitBadge, CircularProgress } from '../ui';
 import { getIcon } from '../../utils/iconMap';
 import { getAvatarEmoji, getAvatarByLevel } from '../../utils/avatarUtils';
 
@@ -17,8 +17,8 @@ const CharacterSection = ({
     <div className="character-card animate-fade-in">
       {/* 우측 상단 뱃지 */}
       <div className="absolute top-3 right-3 flex gap-2">
-        <TrophyBadge count={badges?.days || 0} />
-        <StarBadge count={badges?.questions || 0} />
+        <CalendarBadge count={badges?.days || 0} />
+        <HitBadge count={badges?.questions || 0} />
       </div>
 
       {/* 캐릭터 아바타 */}
@@ -30,8 +30,8 @@ const CharacterSection = ({
       <div className="mb-4">
         <div className="text-xl font-bold text-text-primary mb-1">{user?.name || '사용자'}</div>
         <div className="flex items-center justify-center text-sm text-text-secondary">
-          학습 목표: {user?.goal || 20}개
-          {getIcon('IoChevronDownOutline', { size: 'md', className: 'ml-1' })}
+          학습 목표: {user?.goal || 20}Day
+          {/* {getIcon('IoChevronDownOutline', { size: 'md', className: 'ml-1' })} */}
         </div>
       </div>
 

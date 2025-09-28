@@ -58,16 +58,16 @@ const Badge = React.forwardRef(({
 Badge.displayName = 'Badge';
 
 // Trophy Badge 컴포넌트
-export const TrophyBadge = ({ count, className = '', ...props }) => (
+export const CalendarBadge = ({ count, className = '', ...props }) => (
   <span className={cn('badge-trophy', className)} {...props}>
-    {getIcon('IoTrophy', { size: 'md', className: 'inline mr-1' })} {count}
+    {getIcon('Days', { size: 'md', className: 'inline mr-1' })} {count}
   </span>
 );
 
 // Star Badge 컴포넌트
-export const StarBadge = ({ count, className = '', ...props }) => (
+export const HitBadge = ({ count, className = '', ...props }) => (
   <span className={cn('badge-star', className)} {...props}>
-    {getIcon('noto:star', { size: 'md', className: 'inline mr-1' })} {typeof count === 'number' ? count.toLocaleString() : count}
+    {getIcon('Questions', { size: 'md', className: 'inline mr-1' })} {typeof count === 'number' ? count.toLocaleString() : count}
   </span>
 );
 
