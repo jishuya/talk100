@@ -1,10 +1,30 @@
 import React from 'react';
-import { MOCK_HOME_DATA } from '../../mocks/homePageData';
 import { getIcon } from '../../utils/iconMap';
 
 const QuizPersonalSection = ({ personalQuizzes, onPersonalQuizClick }) => {
-  // Mock 데이터를 fallback으로 사용 (API 실패시)
-  const quizzes = personalQuizzes || MOCK_HOME_DATA.personalQuizzes;
+  const baseQuizzes = [
+    {
+      id: 'wrong-answers',
+      icon: 'fluent:star-24-filled',
+      title: '틀린문제',
+      path: '/quiz/wrong-answers'
+    },
+    {
+      id: 'favorites',
+      icon: 'fluent:heart-24-filled',
+      title: '즐겨찾기',
+      path: '/quiz/favorites'
+    }
+  ];
+
+  // personalQuizzes에서 count 값을 id로 매칭하여 합치기
+  const quizzes = baseQuizzes.map(baseQuiz => {
+    const dynamicQuiz = personalQuizzes?.find(quiz => quiz.id === baseQuiz.id);
+    return {
+      ...baseQuiz,
+      count: dynamicQuiz?.count || 0
+    };
+  });
 
   const handleQuizClick = (quiz) => {
     if (onPersonalQuizClick) {

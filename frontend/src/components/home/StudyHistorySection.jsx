@@ -1,10 +1,37 @@
 import React from 'react';
-import { MOCK_HOME_DATA } from '../../mocks/homePageData';
 import { getIcon } from '../../utils/iconMap.jsx';
 
 const StudyHistorySection = ({ historyItems, onHistoryItemClick }) => {
-  // Mock 데이터를 fallback으로 사용 (API 실패시)
-  const history = historyItems || MOCK_HOME_DATA.history;
+  const baseHistory = [
+    {
+      id: 1,
+      icon: 'tabler:bulb',
+      title: 'Model Example Day 1',
+      category: 1
+    },
+    {
+      id: 2,
+      icon: 'tabler:message-circle',
+      title: 'Small Talk Day 3',
+      category: 2
+    },
+    {
+      id: 3,
+      icon: 'tabler:file-text',
+      title: 'Cases in Point Day 2',
+      category: 3
+    }
+  ];
+
+  // historyItems에서 time, score 값을 id로 매칭하여 합치기
+  const history = baseHistory.map(baseItem => {
+    const dynamicItem = historyItems?.find(item => item.id === baseItem.id);
+    return {
+      ...baseItem,
+      time: dynamicItem?.time || '-',
+      score: dynamicItem?.score || 0
+    };
+  });
 
   const handleItemClick = (item) => {
     if (onHistoryItemClick) {

@@ -1,10 +1,30 @@
 import React from 'react';
-import { MOCK_HOME_DATA } from '../../mocks/homePageData';
 import { getIcon } from '../../utils/iconMap';
 
-const QuizCategorySection = ({ categories, onCategoryClick }) => {
-  // Mock 데이터를 fallback으로 사용 (API 실패시)
-  const quizCategories = categories || MOCK_HOME_DATA.categories;
+const QuizCategorySection = ({ onCategoryClick }) => {
+  const quizCategories = [
+    {
+      id: 1,
+      icon: 'tabler:bulb',
+      title: 'Model Example',
+      path: '/quiz/1',
+      count: '1-100'
+    },
+    {
+      id: 2,
+      icon: 'tabler:message-circle',
+      title: 'Small Talk',
+      path: '/quiz/2',
+      count: '1-100'
+    },
+    {
+      id: 3,
+      icon: 'tabler:file-text',
+      title: 'Cases in Point',
+      path: '/quiz/3',
+      count: '1-100'
+    }
+  ];
 
   const handleCardClick = (category) => {
     if (onCategoryClick) {
@@ -35,8 +55,7 @@ const QuizCategorySection = ({ categories, onCategoryClick }) => {
               {category.title}
             </div>
             <div className="text-xs text-text-secondary">
-              {/* {category.count} */}
-              { 'Day 1-100' }
+              {category.count}
             </div>
           </div>
         ))}

@@ -217,12 +217,22 @@ class ApiService {
 
   // 🏠 HomePage.jsx에서 사용 - 학습 진행률 (현재/전체 진행도)
   getProgress() {
-    return this.request('/api/progress', 'progress');
+    return this.request('/api/users/progress', 'progress');
   }
 
   // 🏠 HomePage.jsx > StudyHistorySection에서 사용 - 최근 학습 기록
   getQuizHistory() {
     return this.request('/api/quiz/history', 'history');
+  }
+
+  // 🏠 HomePage.jsx에서 사용 - 즐겨찾기 문제 개수
+  getFavorites() {
+    return this.request('/api/users/favorites', 'favorites');
+  }
+
+  // 🏠 HomePage.jsx에서 사용 - 틀린문제 개수
+  getWrongAnswers() {
+    return this.request('/api/users/wrong-answers', 'wrongAnswers');
   }
 
   // ==============================================

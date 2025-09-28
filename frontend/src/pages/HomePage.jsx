@@ -21,9 +21,8 @@ const HomePage = () => {
   const finalUserData = userData || MOCK_HOME_DATA.user;
   const finalProgressData = progressData || MOCK_HOME_DATA.progress;
   const finalBadgesData = badgesData || MOCK_HOME_DATA.badges;
-  const categoriesData = null;
-  const personalQuizzesData = null;
-  const historyData = null;
+  const personalQuizzesData = MOCK_HOME_DATA.personalQuizzes;
+  const historyData = MOCK_HOME_DATA.history;
 
   // 통합 로딩 상태
   const isLoading = userLoading || progressLoading;
@@ -71,7 +70,6 @@ const HomePage = () => {
 
       {/* Quiz Category Section */}
       <QuizCategorySection
-        categories={categoriesData}
         onCategoryClick={handleCategoryClick}
       />
 
