@@ -14,9 +14,9 @@ async function createDayReview(userId, dayNumber) {
   try {
     const result = await safeQuery(`
       INSERT INTO review_queue
-      (user_id, source_day, scheduled_for, interval_days)
+      (user_id, day, scheduled_for, interval_days)
       VALUES ($1, $2, NOW() + INTERVAL '1 day', 1)
-      ON CONFLICT (user_id, source_day) DO NOTHING
+      ON CONFLICT (user_id, day) DO NOTHING
       RETURNING queue_id
     `, [userId, dayNumber]);
 
@@ -40,7 +40,7 @@ async function createDayReview(userId, dayNumber) {
  */
 async function getNextReviewDay(userId) {
   const result = await safeQuery(`
-    SELECT source_day, queue_id, interval_days, scheduled_for
+    SELECT day, queue_id, interval_days, scheduled_for
     FROM review_queue
     WHERE user_id = $1
       AND scheduled_for <= CURRENT_TIMESTAMP
@@ -159,7 +159,7 @@ async function updateReviewSchedule(queueId, isCorrect) {
 async function getReviewSchedule(userId) {
   const query = `
     SELECT
-      source_day,
+      day,
       interval_days,
       scheduled_for,
       review_count,

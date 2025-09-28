@@ -17,8 +17,8 @@ const CharacterSection = ({
     <div className="character-card animate-fade-in">
       {/* 우측 상단 뱃지 */}
       <div className="absolute top-3 right-3 flex gap-2">
-        <TrophyBadge count={badges?.trophy || 0} />
-        <StarBadge count={badges?.star || 0} />
+        <TrophyBadge count={badges?.days || 0} />
+        <StarBadge count={badges?.questions || 0} />
       </div>
 
       {/* 캐릭터 아바타 */}

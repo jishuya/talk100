@@ -16,8 +16,8 @@ export const MOCK_HOME_DATA = {
   },
 
   badges: {
-    trophy: 182,
-    star: 4203
+    days: 182,
+    questions: 4203
   },
 
   categories: [

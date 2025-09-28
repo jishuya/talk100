@@ -161,15 +161,14 @@ CREATE TABLE user_progress (
 CREATE TABLE review_queue (
     queue_id SERIAL PRIMARY KEY,
     user_id VARCHAR(255) REFERENCES users(uid) ON DELETE CASCADE,
-    source_day INTEGER NOT NULL,        -- 복습할 Day 번호만 저장
-
+    day INTEGER NOT NULL REFERENCES questions(day),        -- 복습할 questions의 day
     interval_days INTEGER DEFAULT 1,    -- 1,3,7,14,30,60,90,120
     scheduled_for TIMESTAMP,
     added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_reviewed TIMESTAMP,
     review_count INTEGER DEFAULT 0,
 
-    UNIQUE(user_id, source_day)
+    UNIQUE(user_id, day)
 );
 
 -- ================================================
