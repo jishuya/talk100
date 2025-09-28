@@ -26,9 +26,9 @@ const QuizCategorySection = ({ categories, onCategoryClick }) => {
             <div className="w-12 h-12 mx-auto mb-2 flex items-center justify-center">
               {typeof category.icon === 'string' ? getIcon(category.icon, {
                 size: '3xl',
-                className: category.id === 'model-example' ? 'text-green-400' :
-                          category.id === 'small-talk' ? 'text-purple-400' :
-                          category.id === 'cases-in-point' ? 'text-blue-400' : ''
+                className: category.id === 1 ? 'text-green-400' :
+                          category.id === 2 ? 'text-purple-400' :
+                          category.id === 3 ? 'text-blue-400' : ''
               }) : category.icon}
             </div>
             <div className="text-sm font-bold text-text-primary mb-1">

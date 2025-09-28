@@ -61,9 +61,9 @@ async function getFavoritesHandler(req, res) {
         byCategory,
         summary: {
           total: totalCount,
-          model_example: byCategory.model_example?.length || 0,
-          small_talk: byCategory.small_talk?.length || 0,
-          cases_in_point: byCategory.cases_in_point?.length || 0
+          model_example: byCategory[1]?.length || 0,
+          small_talk: byCategory[2]?.length || 0,
+          cases_in_point: byCategory[3]?.length || 0
         }
       }
     });

@@ -1,6 +1,16 @@
 import { IconButton } from '../ui/Button';
 import { getIcon } from '../../utils/iconMap';
 
+// 카테고리 ID를 이름으로 변환하는 함수
+const getCategoryName = (categoryId) => {
+  const categoryMap = {
+    1: 'Model Example',
+    2: 'Small Talk',
+    3: 'Cases in Point'
+  };
+  return categoryMap[categoryId] || 'Unknown Category';
+};
+
 export const QuizContent = ({
   question,
   userAnswer = '',
@@ -34,7 +44,7 @@ export const QuizContent = ({
             Day {question.day}
           </span>
           <span className="px-3 py-1.5 bg-primary text-white rounded-full text-sm font-bold shadow-soft">
-            {question.category}
+            {getCategoryName(question.category)}
           </span>
         </div>
         {/* 문제 영역 */}

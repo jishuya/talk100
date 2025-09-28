@@ -22,22 +22,22 @@ export const MOCK_HOME_DATA = {
 
   categories: [
     {
-      id: 'model-example',
+      id: 1,
       icon: 'tabler:bulb',
       title: 'Model Example',
-      path: '/quiz/model-example'
+      path: '/quiz/1'
     },
     {
-      id: 'small-talk',
+      id: 2,
       icon: 'tabler:message-circle',
       title: 'Small Talk',
-      path: '/quiz/small-talk'
+      path: '/quiz/2'
     },
     {
-      id: 'cases-in-point',
+      id: 3,
       icon: 'tabler:file-text',
       title: 'Cases in Point',
-      path: '/quiz/cases-in-point'
+      path: '/quiz/3'
     }
   ],
 
@@ -65,7 +65,7 @@ export const MOCK_HOME_DATA = {
       title: 'Model Example Day 1',
       time: '10분 전',
       score: 85,
-      category: 'model-example'
+      category: 1
     },
     {
       id: 2,
@@ -73,7 +73,7 @@ export const MOCK_HOME_DATA = {
       title: 'Small Talk Day 3',
       time: '2시간 전',
       score: 92,
-      category: 'small-talk'
+      category: 2
     },
     {
       id: 3,
@@ -81,7 +81,7 @@ export const MOCK_HOME_DATA = {
       title: 'Cases in Point Day 2',
       time: '어제',
       score: 78,
-      category: 'cases-in-point'
+      category: 3
     }
   ]
 };

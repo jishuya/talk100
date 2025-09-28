@@ -5,7 +5,7 @@ export const MOCK_QUIZ_DATA = {
     id: 'mock_session_001',
     type: 'daily', // 'daily' | 'category' | 'wrong' | 'favorites'
     title: '오늘의 퀴즈',
-    category: 'Small Talk',
+    category: 2,
     day: 14,
     totalQuestions: 20,
     currentQuestion: 7,
@@ -15,7 +15,7 @@ export const MOCK_QUIZ_DATA = {
   // 현재 문제 데이터
   currentQuestion: {
     id: 'q_st_14_003',
-    category: 'Small Talk',
+    category: 2,
     day: 14,
     difficulty: 2,
     context: '면접이 잘 진행되지 않는 상황에서',

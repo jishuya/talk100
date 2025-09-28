@@ -79,7 +79,7 @@ CREATE TABLE users (
 -- 목적: 카테고리 정보 관리
 -- ================================================
 CREATE TABLE categories (
-    category_id VARCHAR(50) PRIMARY KEY,
+    category_id INTEGER PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     display_name VARCHAR(100),
     order_num INTEGER DEFAULT 0,
@@ -95,7 +95,7 @@ CREATE TABLE questions (
     question_id VARCHAR(100) PRIMARY KEY,
     
     -- 분류 정보
-    category VARCHAR(50) REFERENCES categories(category_id),
+    category INTEGER REFERENCES categories(category_id),
     day INTEGER NOT NULL,
     question_number INTEGER NOT NULL,
     
@@ -228,9 +228,9 @@ CREATE INDEX idx_wrong_answers_user ON wrong_answers(user_id);
 
 -- Categories 데이터
 INSERT INTO categories (category_id, name, display_name, order_num) VALUES
-('model_example', 'Model Example', '모범 예문', 1),
-('small_talk', 'Small Talk', '스몰 토크', 2),
-('cases_in_point', 'Cases in Point', '사례 연구', 3);
+(1, 'Model Example', '모범 예문', 1),
+(2, 'Small Talk', '스몰 토크', 2),
+(3, 'Cases in Point', '사례 연구', 3);
 
 -- ================================================
 -- Questions 테이블 - MODEL EXAMPLE (Day 14)
@@ -241,42 +241,42 @@ INSERT INTO questions (
     audio_male_full, audio_female_full,
     keywords
 ) VALUES
-('model_example_14_1', 'model_example', 14, 1, 'single',
+('model_example_14_1', 1, 14, 1, 'single',
  'BTS는 뭔가 좀 달라.',
  'There is something different about BTS.',
  '/audio/model_example/day14/1_male.mp3', 
  '/audio/model_example/day14/1_female.mp3',
  ARRAY['something', 'different', 'BTS']),
 
-('model_example_14_2', 'model_example', 14, 2, 'single',
+('model_example_14_2', 1, 14, 2, 'single',
  '이번에 면접 봤는데 뭔가 이상했어요.',
  'There was something weird about the interview.',
  '/audio/model_example/day14/2_male.mp3',
  '/audio/model_example/day14/2_female.mp3',
  ARRAY['something', 'weird', 'interview']),
 
-('model_example_14_3', 'model_example', 14, 3, 'single',
+('model_example_14_3', 1, 14, 3, 'single',
  '이 브랜드에 사람들이 열광하는 이유가 있지.',
  'There is something about this brand people are crazy about.',
  '/audio/model_example/day14/3_male.mp3',
  '/audio/model_example/day14/3_female.mp3',
  ARRAY['something', 'brand', 'people', 'crazy']),
 
-('model_example_14_4', 'model_example', 14, 4, 'single',
+('model_example_14_4', 1, 14, 4, 'single',
  '그 사람에게는 뭔가 끌리는 점이 있어요.',
  'There is something about him that I attracted to.',
  '/audio/model_example/day14/4_male.mp3',
  '/audio/model_example/day14/4_female.mp3',
  ARRAY['something', 'him', 'attracted']),
 
-('model_example_14_5', 'model_example', 14, 5, 'single',
+('model_example_14_5', 1, 14, 5, 'single',
  '유재석은 뭔가 사람을 편하게 해 주는 게 있어.',
  'There is something about Yu Jae-seok that puts people at ease.',
  '/audio/model_example/day14/5_male.mp3',
  '/audio/model_example/day14/5_female.mp3',
  ARRAY['something', 'Yu Jae-seok', 'puts', 'people', 'ease']),
 
-('model_example_14_6', 'model_example', 14, 6, 'single',
+('model_example_14_6', 1, 14, 6, 'single',
  '그 코치에게는 선수들의 잠재력을 이끌어내는 뭔가가 있어.',
  'There is something about the coach that brings out the best in players.',
  '/audio/model_example/day14/6_male.mp3',
@@ -292,42 +292,42 @@ INSERT INTO questions (
     audio_male_full, audio_female_full,
     keywords
 ) VALUES
-('model_example_15_1', 'model_example', 15, 1, 'single',
+('model_example_15_1', 1, 15, 1, 'single',
  '다 먹은거니?',
  'Are you done with your plate?',
  '/audio/model_example/day15/1_male.mp3',
  '/audio/model_example/day15/1_female.mp3',
  ARRAY['done', 'plate']),
 
-('model_example_15_2', 'model_example', 15, 2, 'single',
+('model_example_15_2', 1, 15, 2, 'single',
  '이 스쾃 기구 다 쓰신 거죠? 제가 써도 될까요?',
  'Are you done with this squat rack? Is it alright if I use it?',
  '/audio/model_example/day15/2_male.mp3',
  '/audio/model_example/day15/2_female.mp3',
  ARRAY['done', 'squat rack', 'alright', 'use']),
 
-('model_example_15_3', 'model_example', 15, 3, 'single',
+('model_example_15_3', 1, 15, 3, 'single',
  '샌드위치 그만 먹을래. 너무 커.',
  'I think I''m done with my sandwich. It''s just way too big.',
  '/audio/model_example/day15/3_male.mp3',
  '/audio/model_example/day15/3_female.mp3',
  ARRAY['done', 'sandwich', 'way', 'too', 'big']),
 
-('model_example_15_4', 'model_example', 15, 4, 'single',
+('model_example_15_4', 1, 15, 4, 'single',
  '제가 빌려준 책 다 읽은 거죠? 그럼 돌려주세요.',
  'Are you done with the book I lent you? I''d like to have it back.',
  '/audio/model_example/day15/4_male.mp3',
  '/audio/model_example/day15/4_female.mp3',
  ARRAY['done', 'book', 'lent', 'have', 'back']),
 
-('model_example_15_5', 'model_example', 15, 5, 'single',
+('model_example_15_5', 1, 15, 5, 'single',
  '차량 점검 마쳤습니다. 어디가 고장인지 말씀드릴게요.',
  'I''m done taking a look at your car. I''ll tell you what you''ve got here.',
  '/audio/model_example/day15/5_male.mp3',
  '/audio/model_example/day15/5_female.mp3',
  ARRAY['done', 'taking', 'look', 'car', 'tell']),
 
-('model_example_15_6', 'model_example', 15, 6, 'single',
+('model_example_15_6', 1, 15, 6, 'single',
  '들어오지 마! 나 아직 옷 덜 갈아입었다고.',
  'Don''t come in! I''m not done changing.',
  '/audio/model_example/day15/6_male.mp3',
@@ -345,7 +345,7 @@ INSERT INTO questions (
     audio_male_person_b, audio_female_person_b,
     keywords
 ) VALUES
-('small_talk_14_1', 'small_talk', 14, 1, 'dialogue',
+('small_talk_14_1', 2, 14, 1, 'dialogue',
  '요즘 차 알아보고 있는데, 포르쉐에는 거부할 수 없는 뭔가가 있어.',
  'I''ve been shopping around for a car and, there''s something about Porches that I can''t resist.',
  '스포츠카에 그렇게 큰돈을 쓸 생각을 하다니. 돈 모으고 투자해서 빨리 은퇴해야지.',
@@ -356,7 +356,7 @@ INSERT INTO questions (
  '/audio/small_talk/day14/1_B_female.mp3',
  ARRAY['shopping', 'car', 'Porches', 'resist', 'sports car', 'save', 'invest', 'retire']),
 
-('small_talk_14_2', 'small_talk', 14, 2, 'dialogue',
+('small_talk_14_2', 2, 14, 2, 'dialogue',
  '터치스크린이 딸린 기기에는 익숙하지 않은 것 같네, 그렇지?',
  'It looks like you''re not used to devices with a touch screen, right?',
  '응. 실물 마우스랑 키보드가 뭔가 더 편해.',
@@ -367,7 +367,7 @@ INSERT INTO questions (
  '/audio/small_talk/day14/2_B_female.mp3',
  ARRAY['looks', 'used', 'devices', 'touch screen', 'something', 'mouse', 'keyboard', 'comfortable']),
 
-('small_talk_14_3', 'small_talk', 14, 3, 'dialogue',
+('small_talk_14_3', 2, 14, 3, 'dialogue',
  '그 사람은 뭔가 달라. 내가 만난 다른 남자들이랑 달라.',
  'There is something different about him. He is not like other guys I have met.',
  '그렇긴 하지만 이제 겨우 한 번 만난 거잖아. 좀 천천히 시간을 가진 다음에 공식적으로 만나.',
@@ -389,7 +389,7 @@ INSERT INTO questions (
     audio_male_person_b, audio_female_person_b,
     keywords
 ) VALUES
-('small_talk_15_1', 'small_talk', 15, 1, 'dialogue',
+('small_talk_15_1', 2, 15, 1, 'dialogue',
  '컴퓨터는 다 쓴 거야? 내 회사 이메일 확인해야 하는데.',
  'Are you done with the computer? I need to check my work emails.',
  '근데 이 게임 너무 재미있어. 당신 전화기로 확인하면 안 돼?',
@@ -400,7 +400,7 @@ INSERT INTO questions (
  '/audio/small_talk/day15/1_B_female.mp3',
  ARRAY['done', 'computer', 'need', 'check', 'work', 'emails', 'really', 'game', 'phone']),
 
-('small_talk_15_2', 'small_talk', 15, 2, 'dialogue',
+('small_talk_15_2', 2, 15, 2, 'dialogue',
  '옷은 다 입어 본 거야? 여기 너한테 어울리는 옷이 없는 것 같아.',
  'Are you done trying on clothes? I don''t think anything here really suits you.',
  '응, 거의 다 입어 봤어. 잠깐만! 이 스커트 너무 귀엽다!',
@@ -411,7 +411,7 @@ INSERT INTO questions (
  '/audio/small_talk/day15/2_B_female.mp3',
  ARRAY['done', 'trying', 'clothes', 'think', 'anything', 'suits', 'Yeah', 'Wait', 'cute', 'skirt']),
 
-('small_talk_15_3', 'small_talk', 15, 3, 'dialogue',
+('small_talk_15_3', 2, 15, 3, 'dialogue',
  '신규 환자분들이 작성해야 하는 양식 세 장 여기 있습니다. 다 작성하시면 말해 주세요.',
  'Here are three forms what we ask all new patients to fill out. Please let me know when you are done.',
  '네. 근데 펜이 있을까요?',
@@ -431,7 +431,7 @@ INSERT INTO questions (
     audio_male_full, audio_female_full,
     keywords
 ) VALUES
-('cases_in_point_14_1', 'cases_in_point', 14, 1, 'single',
+('cases_in_point_14_1', 3, 14, 1, 'single',
  '남성분들은 이해를 못 합니다. 저희 차가 너무 비싸다거나 너무 작다거나 장거리 운행에는 별로라는 말을 합니다. 미니 쿠퍼에는 여성들이 거부할 수 없는 무언가가 있습니다. 누가 봐도 귀여운 건 당연하고, 운전의 재미도 있으며 좁은 공간에서 주차하기도 더 편합니다.',
  'Guys just don''t get it. They say our cars are overpriced, or too small, or impractical for long distances. There is something about Mini Coopers that women find irresistible. And besides obviously looking cute, our cars are fun to drive, and also easier to park in cramped spaces.',
  '/audio/cases_in_point/day14/1_male.mp3',
@@ -447,7 +447,7 @@ INSERT INTO questions (
     audio_male_full, audio_female_full,
     keywords
 ) VALUES
-('cases_in_point_15_1', 'cases_in_point', 15, 1, 'single',
+('cases_in_point_15_1', 3, 15, 1, 'single',
  '기구를 다 쓴 뒤에는 꼭 제자리에 놔두실 것을 당부드립니다. 아무렇게나 놔두면 다른 사람들이 찾을 수가 없습니다. 1회 위반자는 경고 조치하며 2회 위반자는 일주일간 헬스장 출입이 금지됩니다. 모두가 즐길 수 있는 헬스장을 만드는 데 협조해 주시면 감사하겠습니다.',
  'Please make sure to put away the weights when you''re done. If you leave them out, others can''t find what they need. Violators will be warned the first time, and then suspended for a week the second time. We appreciate your cooperation in making the gym a place everyone can enjoy.',
  '/audio/cases_in_point/day15/1_male.mp3',

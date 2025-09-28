@@ -18,11 +18,11 @@ const MobileHeader = () => {
     if (pathSegments[1] === 'quiz' && pathSegments[2]) {
       const category = pathSegments[2];
       switch (category) {
-        case 'cases-in-point':
+        case '3':
           return 'Cases in Point';
-        case 'model-example':
+        case '1':
           return 'Model Example';
-        case 'small-talk':
+        case '2':
           return 'Small Talk';
         case 'wrong-answers':
           return '틀린 문제';

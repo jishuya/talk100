@@ -62,21 +62,21 @@ export const statisticsData = {
   // 카테고리별 진행률
   categoryProgress: [
     {
-      id: 'model-example',
+      id: 1,
       name: 'Model Example',
       progress: 85,
       currentDay: 25,
       totalDays: 30
     },
     {
-      id: 'small-talk',
+      id: 2,
       name: 'Small Talk',
       progress: 60,
       currentDay: 18,
       totalDays: 30
     },
     {
-      id: 'cases-in-point',
+      id: 3,
       name: 'Cases in Point',
       progress: 45,
       currentDay: 13,

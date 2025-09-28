@@ -218,9 +218,9 @@ async function getFavoritesStats(userId) {
       COUNT(*) as total_favorites,
       COUNT(CASE WHEN q.question_type = 'single' THEN 1 END) as single_questions,
       COUNT(CASE WHEN q.question_type = 'dialogue' THEN 1 END) as dialogue_questions,
-      COUNT(CASE WHEN q.category = 'model_example' THEN 1 END) as model_example_count,
-      COUNT(CASE WHEN q.category = 'small_talk' THEN 1 END) as small_talk_count,
-      COUNT(CASE WHEN q.category = 'cases_in_point' THEN 1 END) as cases_in_point_count,
+      COUNT(CASE WHEN q.category = 1 THEN 1 END) as model_example_count,
+      COUNT(CASE WHEN q.category = 2 THEN 1 END) as small_talk_count,
+      COUNT(CASE WHEN q.category = 3 THEN 1 END) as cases_in_point_count,
       MIN(f.added_at) as first_favorite_date,
       MAX(f.added_at) as latest_favorite_date
     FROM favorites f

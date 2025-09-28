@@ -62,7 +62,7 @@ async function getReviewQuestions(dayNumber) {
     // Model Example 3문제 랜덤
     const modelQuestions = await safeQuery(`
       SELECT * FROM questions
-      WHERE day = $1 AND category = 'model_example'
+      WHERE day = $1 AND category = 1
       ORDER BY RANDOM()
       LIMIT 3
     `, [dayNumber]);
@@ -71,7 +71,7 @@ async function getReviewQuestions(dayNumber) {
     // Small Talk 2세트 랜덤
     const talkQuestions = await safeQuery(`
       SELECT * FROM questions
-      WHERE day = $1 AND category = 'small_talk'
+      WHERE day = $1 AND category = 2
       ORDER BY RANDOM()
       LIMIT 2
     `, [dayNumber]);
@@ -80,7 +80,7 @@ async function getReviewQuestions(dayNumber) {
     // Cases in Point 1문제 랜덤
     const caseQuestions = await safeQuery(`
       SELECT * FROM questions
-      WHERE day = $1 AND category = 'cases_in_point'
+      WHERE day = $1 AND category = 3
       ORDER BY RANDOM()
       LIMIT 1
     `, [dayNumber]);
