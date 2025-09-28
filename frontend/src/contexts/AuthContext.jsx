@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { apiService } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -49,14 +48,13 @@ export const AuthProvider = ({ children }) => {
   // 로그아웃
   const logout = async () => {
     try {
-      await apiService.auth.logout();
-    } catch (error) {
-      console.error('Logout API call failed:', error);
-    } finally {
+      // 간단한 로그아웃 처리 - localStorage만 정리
       localStorage.removeItem('jwt_token');
       localStorage.removeItem('user_info');
       setUser(null);
       window.location.href = '/login';
+    } catch (error) {
+      console.error('Logout failed:', error);
     }
   };
 

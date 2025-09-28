@@ -1,13 +1,14 @@
 import React from 'react';
-import { apiService } from '../services/api';
 
 const LoginPage = () => {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
   const handleGoogleLogin = () => {
-    apiService.auth.googleLogin();
+    window.location.href = `${API_BASE_URL}/auth/google`;
   };
 
   const handleNaverLogin = () => {
-    apiService.auth.naverLogin();
+    window.location.href = `${API_BASE_URL}/auth/naver`;
   };
 
   return (
