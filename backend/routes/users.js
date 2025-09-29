@@ -10,4 +10,7 @@ router.get('/profile', verifyToken, userController.getUserProfile);
 // GET /api/users/badges - 사용자 뱃지 정보 조회
 router.get('/badges', verifyToken, userController.getBadges);
 
+// GET /api/users/progress - 사용자 진행률 조회
+router.get('/progress', verifyToken, userController.getProgress);
+
 module.exports = router;

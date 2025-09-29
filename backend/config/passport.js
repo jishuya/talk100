@@ -1,7 +1,7 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const NaverStrategy = require('passport-naver-v2').Strategy;
-const { findOrCreateUser } = require('../queries/userQueries');
+const userQueries = require('../queries/userQueries');
 
 require('dotenv').config();
 
@@ -13,8 +13,7 @@ passport.serializeUser((user, done) => {
 // 세션에서 사용자 ID로 사용자 정보 복원
 passport.deserializeUser(async (uid, done) => {
   try {
-    const { findUserByUid } = require('../queries/userQueries');
-    const user = await findUserByUid(uid);
+    const user = await userQueries.findUserByUid(uid);
 
     if (user) {
       done(null, user);
@@ -32,26 +31,29 @@ passport.use(new GoogleStrategy({
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
   callbackURL: process.env.GOOGLE_CALLBACK_URL || "http://localhost:5000/auth/google/callback"
 }, async (accessToken, refreshToken, profile, done) => {
-  console.log('🔍 Google OAuth 콜백 시작:', { profileId: profile?.id, email: profile?.emails?.[0]?.value });
   try {
-    console.log('Google OAuth Profile:', {
-      id: profile.id,
-      name: profile.displayName,
-      email: profile.emails?.[0]?.value,
-      picture: profile.photos?.[0]?.value
-    });
+    // 필수 정보 검증
+    if (!profile.id) {
+      console.error('Google OAuth Error: No profile ID');
+      return done(new Error('Google profile ID is missing'), null);
+    }
+
+    if (!profile.emails || !profile.emails[0] || !profile.emails[0].value) {
+      console.error('Google OAuth Error: No email in profile');
+      return done(new Error('Google profile email is missing'), null);
+    }
 
     // Google 프로필 정보를 우리 형식으로 변환
     const userData = {
-      uid: `google_${profile.id}`, // Google ID에 prefix 추가
-      name: profile.displayName,
-      email: profile.emails?.[0]?.value,
-      profile_image: profile.photos?.[0]?.value,
-      voice_gender: 'male', // 기본값
+      uid: `google_${profile.id}`,
+      name: profile.displayName || 'Google User',
+      email: profile.emails[0].value,
+      profile_image: profile.photos?.[0]?.value || '🦊',
+      voice_gender: 'male',
       default_difficulty: 2
     };
 
-    const user = await findOrCreateUser(userData);
+    const user = await userQueries.findOrCreateUser(userData);
     return done(null, user);
 
   } catch (error) {
@@ -67,24 +69,28 @@ passport.use(new NaverStrategy({
   callbackURL: process.env.NAVER_CALLBACK_URL || "http://localhost:5000/auth/naver/callback"
 }, async (accessToken, refreshToken, profile, done) => {
   try {
-    console.log('Naver OAuth Profile:', {
-      id: profile.id,
-      name: profile.name,
-      email: profile.email,
-      picture: profile.profile_image
-    });
+    // 필수 정보 검증
+    if (!profile.id) {
+      console.error('Naver OAuth Error: No profile ID');
+      return done(new Error('Naver profile ID is missing'), null);
+    }
+
+    if (!profile.email) {
+      console.error('Naver OAuth Error: No email in profile');
+      return done(new Error('Naver profile email is missing'), null);
+    }
 
     // Naver 프로필 정보를 우리 형식으로 변환
     const userData = {
-      uid: `naver_${profile.id}`, // Naver ID에 prefix 추가
-      name: profile.name || profile.nickname,
+      uid: `naver_${profile.id}`,
+      name: profile.name || profile.nickname || 'Naver User',
       email: profile.email,
-      profile_image: profile.profile_image,
-      voice_gender: 'male', // 기본값
+      profile_image: profile.profile_image || '🦊',
+      voice_gender: 'male',
       default_difficulty: 2
     };
 
-    const user = await findOrCreateUser(userData);
+    const user = await userQueries.findOrCreateUser(userData);
     return done(null, user);
 
   } catch (error) {

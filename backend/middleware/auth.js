@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { findUserByUid } = require('../queries/userQueries');
+const userQueries = require('../queries/userQueries');
 
 require('dotenv').config();
 
@@ -46,17 +46,12 @@ async function verifyToken(req, res, next) {
     // 토큰 검증
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // 사용자 정보 조회
-    const user = await findUserByUid(decoded.uid);
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-
-    // req.user에 사용자 정보 추가
-    req.user = user;
+    // req.user에 토큰의 사용자 정보 추가
+    req.user = {
+      uid: decoded.uid,
+      email: decoded.email,
+      name: decoded.name
+    };
     req.token = token;
 
     next();
@@ -108,9 +103,12 @@ async function optionalAuth(req, res, next) {
 
     // 토큰이 있으면 검증
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await findUserByUid(decoded.uid);
 
-    req.user = user;
+    req.user = {
+      uid: decoded.uid,
+      email: decoded.email,
+      name: decoded.name
+    };
     req.token = token;
 
     next();

@@ -10,12 +10,23 @@ router.get('/google', passport.authenticate('google', {
 }));
 
 // Google OAuth 콜백 처리
-router.get('/google/callback',
-  passport.authenticate('google', { failureRedirect: '/login' }),
-  async (req, res) => {
+router.get('/google/callback', (req, res, next) => {
+  passport.authenticate('google', (err, user, info) => {
+    if (err) {
+      console.error('Google OAuth authentication error:', err);
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      return res.redirect(`${frontendUrl}?login=error&reason=auth_error`);
+    }
+
+    if (!user) {
+      console.error('Google OAuth failed - no user:', info);
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      return res.redirect(`${frontendUrl}?login=error&reason=no_user`);
+    }
+
     try {
       // JWT 토큰 생성
-      const token = generateToken(req.user);
+      const token = generateToken(user);
 
       // 쿠키에 토큰 설정
       res.cookie('token', token, {
@@ -26,28 +37,39 @@ router.get('/google/callback',
       });
 
       // 프론트엔드로 리디렉트 (사용자 정보 포함)
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-      const userParam = encodeURIComponent(JSON.stringify(req.user));
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      const userParam = encodeURIComponent(JSON.stringify(user));
       res.redirect(`${frontendUrl}?token=${token}&user=${userParam}&login=success`);
 
     } catch (error) {
       console.error('Google OAuth callback error:', error.message);
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-      res.redirect(`${frontendUrl}?login=error`);
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      res.redirect(`${frontendUrl}?login=error&reason=token_error`);
     }
-  }
-);
+  })(req, res, next);
+});
 
 // Naver OAuth 로그인 시작
 router.get('/naver', passport.authenticate('naver'));
 
 // Naver OAuth 콜백 처리
-router.get('/naver/callback',
-  passport.authenticate('naver', { failureRedirect: '/login' }),
-  async (req, res) => {
+router.get('/naver/callback', (req, res, next) => {
+  passport.authenticate('naver', (err, user, info) => {
+    if (err) {
+      console.error('Naver OAuth authentication error:', err);
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      return res.redirect(`${frontendUrl}?login=error&reason=auth_error`);
+    }
+
+    if (!user) {
+      console.error('Naver OAuth failed - no user:', info);
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      return res.redirect(`${frontendUrl}?login=error&reason=no_user`);
+    }
+
     try {
       // JWT 토큰 생성
-      const token = generateToken(req.user);
+      const token = generateToken(user);
 
       // 쿠키에 토큰 설정
       res.cookie('token', token, {
@@ -58,17 +80,17 @@ router.get('/naver/callback',
       });
 
       // 프론트엔드로 리디렉트 (사용자 정보 포함)
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-      const userParam = encodeURIComponent(JSON.stringify(req.user));
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      const userParam = encodeURIComponent(JSON.stringify(user));
       res.redirect(`${frontendUrl}?token=${token}&user=${userParam}&login=success`);
 
     } catch (error) {
       console.error('Naver OAuth callback error:', error.message);
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-      res.redirect(`${frontendUrl}?login=error`);
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      res.redirect(`${frontendUrl}?login=error&reason=token_error`);
     }
-  }
-);
+  })(req, res, next);
+});
 
 // 로그아웃
 router.post('/logout', verifyToken, (req, res) => {

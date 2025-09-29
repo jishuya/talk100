@@ -77,6 +77,45 @@ class UserController {
       });
     }
   }
+
+  // GET /api/users/progress
+  async getProgress(req, res) {
+    try {
+      const uid = req.user?.uid;
+
+      if (!uid) {
+        return res.status(401).json({
+          success: false,
+          message: 'User not authenticated'
+        });
+      }
+
+      const progress = await userQueries.getUserProgress(uid);
+
+      if (!progress) {
+        return res.status(404).json({
+          success: false,
+          message: 'User progress not found'
+        });
+      }
+
+      res.json({
+        success: true,
+        data: {
+          current: progress.current,
+          total: progress.total,
+          percentage: progress.percentage
+        }
+      });
+
+    } catch (error) {
+      console.error('getProgress controller error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch user progress'
+      });
+    }
+  }
 }
 
 module.exports = new UserController();
