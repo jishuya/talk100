@@ -16,8 +16,8 @@ export const MOCK_HOME_DATA = {
   },
 
   badges: {
-    days: 182,
-    questions: 4203
+    days: 100,
+    questions: 200
   },
 
   personalQuizzes: [

@@ -39,6 +39,44 @@ class UserController {
       });
     }
   }
+
+  // GET /api/users/badges
+  async getBadges(req, res) {
+    try {
+      const uid = req.user?.uid;
+
+      if (!uid) {
+        return res.status(401).json({
+          success: false,
+          message: 'User not authenticated'
+        });
+      }
+
+      const badges = await userQueries.getUserBadges(uid);
+
+      if (!badges) {
+        return res.status(404).json({
+          success: false,
+          message: 'User badges not found'
+        });
+      }
+
+      res.json({
+        success: true,
+        data: {
+          days: badges.days || 0,
+          questions: badges.questions || 0
+        }
+      });
+
+    } catch (error) {
+      console.error('getBadges controller error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch user badges'
+      });
+    }
+  }
 }
 
 module.exports = new UserController();
