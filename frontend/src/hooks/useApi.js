@@ -93,10 +93,10 @@ export const useQuizData = (sessionId) => {
   });
 };
 
-export const useQuizHistory = () => {
+export const useHistoryData = () => {
   return useQuery({
-    queryKey: ['quiz', 'history'],
-    queryFn: () => api.getQuizHistory(),
+    queryKey: ['user', 'history'],
+    queryFn: () => api.getHistory(),
     staleTime: ENV.CACHE_TIMES.HISTORY,
     retry: 2,
   });

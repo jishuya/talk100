@@ -151,6 +151,77 @@ class UserController {
       });
     }
   }
+
+  // GET /api/users/history
+  async getHistory(req, res) {
+    try {
+      const uid = req.user?.uid;
+
+      if (!uid) {
+        return res.status(401).json({
+          success: false,
+          message: 'User not authenticated'
+        });
+      }
+
+      const historyData = await userQueries.getUserHistory(uid);
+
+      // 시간 계산 및 퍼센트 계산
+      const processedHistory = historyData.map(item => {
+        // percent 계산: question_number / total_questions * 100
+        // question_number는 이미 Day 내에서 몇 번째 문제인지를 나타냄
+        const totalQuestions = parseInt(item.total_questions) || 1;
+        const completedQuestionNumber = parseInt(item.completed_question_number) || 0;
+        const percent = Math.round((completedQuestionNumber / totalQuestions) * 100);
+
+        // 시간 차이 계산 (1분 미만은 "방금 전")
+        const now = new Date();
+        const timestamp = new Date(item.timestamp);
+        const diffMs = now - timestamp;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+        const diffWeeks = Math.floor(diffMs / (86400000 * 7));
+        const diffMonths = Math.floor(diffMs / (86400000 * 30));
+        const diffYears = Math.floor(diffMs / (86400000 * 365));
+
+        let time;
+        if (diffMins < 1) {
+          time = '방금 전';
+        } else if (diffMins < 60) {
+          time = `${diffMins}분 전`;
+        } else if (diffHours < 24) {
+          time = `${diffHours}시간 전`;
+        } else if (diffDays < 14) {
+          time = diffDays === 1 ? '어제' : `${diffDays}일 전`;
+        } else if (diffWeeks < 4) {
+          time = `${diffWeeks}주 전`;
+        } else if (diffMonths < 12) {
+          time = `${diffMonths}달 전`;
+        } else {
+          time = `${diffYears}년 전`;
+        }
+
+        return {
+          id: item.id,
+          time: time,
+          percent: percent
+        };
+      });
+
+      res.json({
+        success: true,
+        data: processedHistory
+      });
+
+    } catch (error) {
+      console.error('getHistory controller error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch user history'
+      });
+    }
+  }
 }
 
 module.exports = new UserController();

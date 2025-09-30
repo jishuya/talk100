@@ -35,17 +35,17 @@ export const MOCK_HOME_DATA = {
     {
       id: 1,
       time: '10분 전',
-      score: 85,
+      percent: 85,  // 해당 day의 문제를 몇 퍼센트 풀었는지 (푼 문제수/총 문제수 *100)  
     },
     {
       id: 2,
       time: '2시간 전',
-      score: 92,
+      percent: 92,
     },
     {
       id: 3,
       time: '어제',
-      score: 78,
+      percent: 78,
     }
   ]
 };

@@ -165,6 +165,36 @@ class UserQueries {
       throw new Error('Failed to fetch personal quizzes');
     }
   }
+
+  // 최근 학습 기록 조회 (Model Example, Small Talk, Cases in Point만)
+  async getUserHistory(uid) {
+    try {
+      const result = await db.manyOrNone(
+        `SELECT
+          up.category_id as id,
+          up.last_studied_timestamp as timestamp,
+          -- Day 내 총 문제 수
+          (SELECT COUNT(*)
+           FROM questions
+           WHERE category_id = up.category_id AND day = up.last_studied_day) as total_questions,
+          -- 마지막으로 푼 문제의 question_number (Day 내 순서)
+          (SELECT question_number
+           FROM questions
+           WHERE question_id = up.last_studied_question_id) as completed_question_number
+        FROM user_progress up
+        WHERE up.user_id = $1
+          AND up.category_id IN (1, 2, 3)
+          AND up.last_studied_timestamp IS NOT NULL
+        ORDER BY up.last_studied_timestamp DESC`,
+        [uid]
+      );
+
+      return result || [];
+    } catch (error) {
+      console.error('getUserHistory query error:', error);
+      throw new Error('Failed to fetch user history');
+    }
+  }
 }
 
 module.exports = new UserQueries();

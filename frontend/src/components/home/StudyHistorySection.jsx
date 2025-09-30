@@ -18,7 +18,7 @@ const StudyHistorySection = ({ historyItems, onHistoryItemClick }) => {
     {
       id: 3,
       icon: 'tabler:file-text',
-      title: 'Cases in Point Day 2',
+      title: 'Cases in Point Day 1',
       category: 3
     }
   ];
@@ -29,7 +29,7 @@ const StudyHistorySection = ({ historyItems, onHistoryItemClick }) => {
     return {
       ...baseItem,
       time: dynamicItem?.time || '-',
-      score: dynamicItem?.score || 0
+      percent: dynamicItem?.percent || 0
     };
   });
 
@@ -39,9 +39,9 @@ const StudyHistorySection = ({ historyItems, onHistoryItemClick }) => {
     }
   };
 
-  const getScoreColorClass = (score) => {
-    if (score >= 90) return 'text-success';
-    if (score >= 70) return 'text-warning';
+  const getScoreColorClass = (percent) => {
+    if (percent >= 90) return 'text-success';
+    if (percent >= 70) return 'text-warning';
     return 'text-error';
   };
 
@@ -68,7 +68,7 @@ const StudyHistorySection = ({ historyItems, onHistoryItemClick }) => {
               <div className="text-xs text-text-secondary">{item.time}</div>
             </div>
             <div className={`text-sm font-bold ${getScoreColorClass(item.score)}`}>
-              {item.score}%
+              {item.percent}%
             </div>
           </div>
         ))}

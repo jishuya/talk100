@@ -6,7 +6,7 @@ import QuizPersonalSection from '../components/home/QuizPersonalSection';
 import StudyHistorySection from '../components/home/StudyHistorySection';
 
 // 새로운 데이터 훅들
-import { useUserData, useBadgesData, useProgressData, usePersonalQuizzesData } from '../hooks/useApi';
+import { useUserData, useBadgesData, useProgressData, usePersonalQuizzesData, useHistoryData } from '../hooks/useApi';
 import { MOCK_HOME_DATA } from '../mocks/homePageData';
 
 const HomePage = () => {
@@ -17,13 +17,14 @@ const HomePage = () => {
   const { data: progressData, isLoading: progressLoading } = useProgressData();
   const { data: badgesData } = useBadgesData();
   const { data: personalQuizzesData, isLoading: personalQuizzesLoading } = usePersonalQuizzesData();
+  const { data: historyData } = useHistoryData();
 
   // Mock 데이터를 fallback으로 사용
   const finalUserData = userData || MOCK_HOME_DATA.user;
   const finalProgressData = progressData || MOCK_HOME_DATA.progress;
   const finalBadgesData = badgesData || MOCK_HOME_DATA.badges;
   const finalPersonalQuizzesData = personalQuizzesData || MOCK_HOME_DATA.personalQuizzes;
-  const historyData = MOCK_HOME_DATA.history;
+  const finalHistoryData = historyData || MOCK_HOME_DATA.history;
 
   // 통합 로딩 상태
   const isLoading = userLoading || progressLoading || personalQuizzesLoading;
@@ -82,7 +83,7 @@ const HomePage = () => {
 
       {/* Study History Section */}
       <StudyHistorySection
-        historyItems={historyData}
+        historyItems={finalHistoryData}
         onHistoryItemClick={handleHistoryItemClick}
       />
     </div>
