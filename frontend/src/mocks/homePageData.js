@@ -34,16 +34,22 @@ export const MOCK_HOME_DATA = {
   history: [
     {
       id: 1,
+      last_day: 5,
+      last_question_id: 123,
       time: '10분 전',
-      percent: 85,  // 해당 day의 문제를 몇 퍼센트 풀었는지 (푼 문제수/총 문제수 *100)  
+      percent: 85,  // 해당 day의 문제를 몇 퍼센트 풀었는지 (푼 문제수/총 문제수 *100)
     },
     {
       id: 2,
+      last_day: 4,
+      last_question_id: 98,
       time: '2시간 전',
       percent: 92,
     },
     {
       id: 3,
+      last_day: 3,
+      last_question_id: 76,
       time: '어제',
       percent: 78,
     }

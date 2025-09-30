@@ -6,22 +6,24 @@ const StudyHistorySection = ({ historyItems, onHistoryItemClick }) => {
     {
       id: 1,
       icon: 'tabler:bulb',
-      title: 'Model Example Day 1',
+      title: 'Model Example Day',
       category: 1
     },
     {
       id: 2,
       icon: 'tabler:message-circle',
-      title: 'Small Talk Day 3',
+      title: 'Small Talk Day',
       category: 2
     },
     {
       id: 3,
       icon: 'tabler:file-text',
-      title: 'Cases in Point Day 1',
+      title: 'Cases in Point Day',
       category: 3
     }
   ];
+
+  console.log(11111, historyItems)
 
   // historyItems에서 time, score 값을 id로 매칭하여 합치기
   const history = baseHistory.map(baseItem => {
@@ -29,7 +31,8 @@ const StudyHistorySection = ({ historyItems, onHistoryItemClick }) => {
     return {
       ...baseItem,
       time: dynamicItem?.time || '-',
-      percent: dynamicItem?.percent || 0
+      percent: dynamicItem?.percent || 0, 
+      lastDay: dynamicItem?.last_day || 1
     };
   });
 
@@ -64,7 +67,7 @@ const StudyHistorySection = ({ historyItems, onHistoryItemClick }) => {
               }) : item.icon}
             </div>
             <div className="flex-1">
-              <div className="text-sm font-semibold text-text-primary mb-0.5">{item.title}</div>
+              <div className="text-sm font-semibold text-text-primary mb-0.5">{item.title}{item.lastDay}</div>
               <div className="text-xs text-text-secondary">{item.time}</div>
             </div>
             <div className={`text-sm font-bold ${getScoreColorClass(item.score)}`}>

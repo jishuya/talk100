@@ -172,6 +172,8 @@ class UserQueries {
       const result = await db.manyOrNone(
         `SELECT
           up.category_id as id,
+          up.last_studied_day,
+          up.last_studied_question_id,
           up.last_studied_timestamp as timestamp,
           -- Day 내 총 문제 수
           (SELECT COUNT(*)
