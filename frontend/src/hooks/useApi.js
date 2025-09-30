@@ -26,6 +26,15 @@ export const useBadgesData = () => {
   });
 };
 
+export const usePersonalQuizzesData = () => {
+  return useQuery({
+    queryKey: ['user', 'personalQuizzes'],
+    queryFn: () => api.getPersonalQuizzes(),
+    staleTime: ENV.CACHE_TIMES.USER_DATA,
+    retry: 2,
+  });
+};
+
 export const useUpdateProfile = () => {
   const queryClient = useQueryClient();
 

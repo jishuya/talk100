@@ -13,4 +13,7 @@ router.get('/badges', verifyToken, userController.getBadges);
 // GET /api/users/progress - 사용자 진행률 조회
 router.get('/progress', verifyToken, userController.getProgress);
 
+// GET /api/users/personal-quizzes - 개인 퀴즈 데이터 조회 (즐겨찾기, 틀린문제 개수)
+router.get('/personal-quizzes', verifyToken, userController.getPersonalQuizzes);
+
 module.exports = router;

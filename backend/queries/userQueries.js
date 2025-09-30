@@ -106,64 +106,63 @@ class UserQueries {
     try {
       const result = await db.oneOrNone(
         `SELECT
-           -- 오늘 공부해야 할 DAY 번호 (마지막 학습 Day + 1)
-           COALESCE(
-             (SELECT MAX(last_studied_day) + 1 FROM user_progress WHERE user_id = $1),
-             1
-           ) as today_day,
-
-           -- 해당 DAY의 총 문제 수
-           (SELECT COUNT(*)
-            FROM questions q
-            WHERE q.day = COALESCE(
-              (SELECT MAX(last_studied_day) + 1 FROM user_progress WHERE user_id = $1),
-              1
-            )
-           ) as day_total_questions,
-
-           -- 사용자 일일 목표
-           u.daily_goal,
-
-           -- 해당 DAY에서 푼 문제 수 (정답 여부 상관없이)
-           COALESCE(
-             (SELECT COUNT(*)
-              FROM user_progress up
-              JOIN questions q ON up.question_id = q.question_id
-              WHERE up.user_id = $1
-              AND q.day = COALESCE(
-                (SELECT MAX(last_studied_day) + 1 FROM user_progress WHERE user_id = $1),
-                1
-              )
-              AND up.total_attempts > 0
-             ), 0
-           ) as day_solved_questions
-
-         FROM users u
-         WHERE u.uid = $1`,
+          u.daily_goal,
+          COALESCE(up.last_studied_day, 1) as current_day,
+          COALESCE(up.last_studied_question_id, 0) as last_question_id,
+          (SELECT COUNT(*) FROM questions WHERE day = COALESCE(up.last_studied_day, 1) AND category IN (1,2,3)) * u.daily_goal as total,
+          (SELECT COUNT(*) FROM questions WHERE day = COALESCE(up.last_studied_day, 1) AND category IN (1,2,3) AND question_id <= COALESCE(up.last_studied_question_id, 0)) as current
+        FROM users u
+        LEFT JOIN user_progress up ON u.uid = up.user_id
+        WHERE u.uid = $1`,
         [uid]
       );
 
-      if (!result) {
-        return null;
+      if (result) {
+        const percentage = result.total > 0 ? Math.round((result.current / result.total) * 100) : 0;
+        return {
+          current: result.current,
+          total: result.total,
+          percentage: percentage
+        };
       }
 
-      // total = daily_goal × 해당 DAY의 문제 수
-      const total = (result.daily_goal || 1) * (result.day_total_questions || 0);
-
-      // current = 해당 DAY에서 푼 문제 수
-      const current = result.day_solved_questions || 0;
-
-      // percentage 계산
-      const percentage = total > 0 ? Math.round((current / total) * 100) : 0;
-
-      return {
-        current,
-        total,
-        percentage
-      };
+      return { current: 0, total: 0, percentage: 0 };
     } catch (error) {
       console.error('getUserProgress query error:', error);
       throw new Error('Failed to fetch user progress');
+    }
+  }
+
+  // 개인 퀴즈 데이터 조회 (즐겨찾기, 틀린문제 개수)
+  async getPersonalQuizzes(uid) {
+    try {
+      const result = await db.oneOrNone(
+        `SELECT
+          (SELECT COUNT(*) FROM favorites WHERE user_id = $1) as favorites_count,
+          (SELECT COUNT(*) FROM wrong_answers WHERE user_id = $1 AND is_starred = true) as wrong_answers_count`,
+        [uid]
+      );
+
+      if (result) {
+        return [
+          {
+            id: 'wrong-answers',
+            count: parseInt(result.wrong_answers_count) || 0
+          },
+          {
+            id: 'favorites',
+            count: parseInt(result.favorites_count) || 0
+          }
+        ];
+      }
+
+      return [
+        { id: 'wrong-answers', count: 0 },
+        { id: 'favorites', count: 0 }
+      ];
+    } catch (error) {
+      console.error('getPersonalQuizzes query error:', error);
+      throw new Error('Failed to fetch personal quizzes');
     }
   }
 }

@@ -116,6 +116,41 @@ class UserController {
       });
     }
   }
+
+  // GET /api/users/personal-quizzes
+  async getPersonalQuizzes(req, res) {
+    try {
+      const uid = req.user?.uid;
+
+      if (!uid) {
+        return res.status(401).json({
+          success: false,
+          message: 'User not authenticated'
+        });
+      }
+
+      const personalQuizzes = await userQueries.getPersonalQuizzes(uid);
+
+      if (!personalQuizzes) {
+        return res.status(404).json({
+          success: false,
+          message: 'Personal quizzes not found'
+        });
+      }
+
+      res.json({
+        success: true,
+        data: personalQuizzes
+      });
+
+    } catch (error) {
+      console.error('getPersonalQuizzes controller error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch personal quizzes'
+      });
+    }
+  }
 }
 
 module.exports = new UserController();

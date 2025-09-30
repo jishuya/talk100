@@ -16,12 +16,6 @@ const passport = require('./config/passport');
 
 // 라우트 import
 const authRoutes = require('./routes/auth');
-// const questionRoutes = require('./routes/questions');
-// const progressRoutes = require('./routes/progress');
-// const reviewRoutes = require('./routes/review');
-// const wrongAnswersRoutes = require('./routes/wrongAnswers');
-// const favoritesRoutes = require('./routes/favorites');
-// const quizRoutes = require('./routes/quiz');
 const usersRoutes = require('./routes/users');
 
 const app = express();

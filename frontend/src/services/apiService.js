@@ -225,14 +225,9 @@ class ApiService {
     return this.request('/api/quiz/history', 'history');
   }
 
-  // 🏠 HomePage.jsx에서 사용 - 즐겨찾기 문제 개수
-  getFavorites() {
-    return this.request('/api/users/favorites', 'favorites');
-  }
-
-  // 🏠 HomePage.jsx에서 사용 - 틀린문제 개수
-  getWrongAnswers() {
-    return this.request('/api/users/wrong-answers', 'wrongAnswers');
+  // 🏠 HomePage.jsx에서 사용 - 개인 퀴즈 데이터 (즐겨찾기, 틀린문제 개수 포함)
+  getPersonalQuizzes() {
+    return this.request('/api/users/personal-quizzes', 'personalQuizzes');
   }
 
   // ==============================================

@@ -23,11 +23,11 @@ export const MOCK_HOME_DATA = {
   personalQuizzes: [
     {
       id: 'wrong-answers',
-      count: 15,
+      count: 2,
     },
     {
       id: 'favorites',
-      count: 8,
+      count: 3,
     }
   ],
 

@@ -25,7 +25,7 @@ DROP TABLE IF EXISTS daily_progress CASCADE;
 DROP TABLE IF EXISTS review_queue CASCADE;
 DROP TABLE IF EXISTS user_progress CASCADE;
 DROP TABLE IF EXISTS questions CASCADE;
-DROP TABLE IF EXISTS quiz_type CASCADE;
+DROP TABLE IF EXISTS category CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS session CASCADE;
 
@@ -75,11 +75,11 @@ CREATE TABLE users (
 );
 
 -- ================================================
--- 3. quiz_type 테이블
+-- 3. category 테이블
 -- 목적: 카테고리 정보 관리
 -- ================================================
-CREATE TABLE quiz_type (
-    type_id INTEGER PRIMARY KEY,
+CREATE TABLE category (
+    category_id INTEGER PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     display_name VARCHAR(100),
     order_num INTEGER DEFAULT 0,
@@ -95,7 +95,7 @@ CREATE TABLE questions (
     question_id INTEGER NOT NULL PRIMARY KEY,
 
     -- 분류 정보
-    category INTEGER REFERENCES quiz_type(type_id),
+    category_id INTEGER REFERENCES category(category_id),
     day INTEGER NOT NULL,
     question_number INTEGER NOT NULL,
 
@@ -124,24 +124,25 @@ CREATE TABLE questions (
     keywords TEXT[],  -- 핵심 단어 배열
 
     -- 유니크 제약
-    UNIQUE(category, day, question_number)
+    UNIQUE(category_id, day, question_number)
 );
 -- ================================================
 -- 5. USER_PROGRESS 테이블
 -- 목적: 사용자별 문제 학습 진행상황
 -- ================================================
 CREATE TABLE user_progress (
-      progress_id SERIAL PRIMARY KEY,
-      user_id VARCHAR(255) REFERENCES users(uid) ON DELETE CASCADE,
-
-      -- 마지막 학습 정보
-      last_studied_day INTEGER DEFAULT 1,
-      last_studied_question_id INTEGER REFERENCES questions(question_id) ON DELETE CASCADE,
-      last_studied_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-      -- 사용자당 하나의 레코드만 유지
-      UNIQUE(user_id)
-  );
+    progress_id SERIAL PRIMARY KEY,
+    user_id VARCHAR(255) REFERENCES users(uid) ON DELETE CASCADE,
+    category_id INTEGER REFERENCES quiz_type(type_id) ON DELETE CASCADE,
+    
+    -- 마지막 학습 정보
+    last_studied_day INTEGER DEFAULT 1,
+    last_studied_question_id INTEGER REFERENCES questions(question_id) ON DELETE CASCADE,
+    last_studied_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    -- 사용자+카테고리별 하나의 레코드만 유지
+    UNIQUE(user_id, category_id)
+);
 
 -- ================================================
 -- 6. REVIEW_QUEUE 테이블
@@ -196,7 +197,6 @@ CREATE TABLE wrong_answers (
     question_id INTEGER REFERENCES questions(question_id) ON DELETE CASCADE,
     added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     wrong_count INTEGER DEFAULT 1,
-    is_starred BOOLEAN DEFAULT true,  -- ⭐ 버튼 활성화 상태
     
     PRIMARY KEY (user_id, question_id)
 );
@@ -205,8 +205,8 @@ CREATE TABLE wrong_answers (
 -- 인덱스 생성
 -- 자주 사용되는 쿼리 최적화
 -- ================================================
-CREATE INDEX idx_questions_category_day ON questions(category, day, question_number);
-CREATE INDEX idx_user_progress_user ON user_progress(user_id);
+CREATE INDEX idx_questions_category_day ON questions(category_id, day, question_number);
+CREATE INDEX idx_user_progress_user ON user_progress(user_id, category_id);
 CREATE INDEX idx_review_queue_user_scheduled ON review_queue(user_id, scheduled_for);
 CREATE INDEX idx_daily_progress_user_date ON daily_progress(user_id, date);
 CREATE INDEX idx_favorites_user ON favorites(user_id);
@@ -216,12 +216,14 @@ CREATE INDEX idx_wrong_answers_user ON wrong_answers(user_id);
 -- 샘플 데이터 입력
 -- ================================================
 
--- quiz_type 데이터
-INSERT INTO quiz_type (type_id, name, display_name, order_num) VALUES
+-- category 데이터
+INSERT INTO category (category_id, name, display_name, order_num) VALUES
 (1, 'Model Example', '모범 예문', 1),
 (2, 'Small Talk', '스몰 토크', 2),
 (3, 'Cases in Point', '사례 연구', 3),
-(4, 'Today Quiz', '오늘의 퀴즈', 4);
+(4, 'Today Quiz', '오늘의 퀴즈', 4),
+(5, 'Wrong Answer', '틀린문제', 5),
+(6, 'Favorites', '즐겨찾기', 6);
 
 -- ================================================
 -- Questions 테이블 - MODEL EXAMPLE (Day 1~4)
@@ -232,7 +234,7 @@ INSERT INTO quiz_type (type_id, name, display_name, order_num) VALUES
 
 -- Day 01 단문 문제들
 INSERT INTO questions (
-    question_id, category, day, question_number, question_type,
+    question_id, category_id, day, question_number, question_type,
     korean, english,
     audio_male, audio_female,
     keywords
@@ -275,7 +277,7 @@ INSERT INTO questions (
 
 -- Day 01 대화문 문제들 (A와 B 분리)
 INSERT INTO questions (
-    question_id, category, day, question_number, question_type,
+    question_id, category_id, day, question_number, question_type,
     korean_a, english_a,
     audio_male_a, audio_female_a,
     keywords
@@ -318,7 +320,7 @@ INSERT INTO questions (
 
 -- Day 01 장문 문제
 INSERT INTO questions (
-    question_id, category, day, question_number, question_type,
+    question_id, category_id, day, question_number, question_type,
     korean, english,
     audio_male, audio_female,
     keywords
@@ -331,7 +333,7 @@ INSERT INTO questions (
 
 -- Day 02 단문 문제들
 INSERT INTO questions (
-    question_id, category, day, question_number, question_type,
+    question_id, category_id, day, question_number, question_type,
     korean, english,
     audio_male, audio_female,
     keywords
@@ -374,7 +376,7 @@ INSERT INTO questions (
 
 -- Day 02 대화문 문제들 (A와 B 분리)
 INSERT INTO questions (
-    question_id, category, day, question_number, question_type,
+    question_id, category_id, day, question_number, question_type,
     korean_a, english_a,
     audio_male_a, audio_female_a,
     keywords
@@ -417,7 +419,7 @@ INSERT INTO questions (
 
 -- Day 02 장문 문제
 INSERT INTO questions (
-    question_id, category, day, question_number, question_type,
+    question_id, category_id, day, question_number, question_type,
     korean, english,
     audio_male, audio_female,
     keywords
@@ -430,7 +432,7 @@ INSERT INTO questions (
 
 -- Day 03 단문 문제들
 INSERT INTO questions (
-    question_id, category, day, question_number, question_type,
+    question_id, category_id, day, question_number, question_type,
     korean, english,
     audio_male, audio_female,
     keywords
@@ -473,7 +475,7 @@ INSERT INTO questions (
 
 -- Day 03 대화문 문제들 (A와 B 분리)
 INSERT INTO questions (
-    question_id, category, day, question_number, question_type,
+    question_id, category_id, day, question_number, question_type,
     korean_a, english_a,
     audio_male_a, audio_female_a,
     keywords
@@ -516,7 +518,7 @@ INSERT INTO questions (
 
 -- Day 03 장문 문제
 INSERT INTO questions (
-    question_id, category, day, question_number, question_type,
+    question_id, category_id, day, question_number, question_type,
     korean, english,
     audio_male, audio_female,
     keywords
@@ -531,7 +533,7 @@ I always look forward to our 2 p.m. Tuesday conference call. However, this week,
 
 -- Day 04 단문 문제들
 INSERT INTO questions (
-    question_id, category, day, question_number, question_type,
+    question_id, category_id, day, question_number, question_type,
     korean, english,
     audio_male, audio_female,
     keywords
@@ -574,7 +576,7 @@ INSERT INTO questions (
 
 -- Day 04 대화문 문제들 (A와 B 분리)
 INSERT INTO questions (
-    question_id, category, day, question_number, question_type,
+    question_id, category_id, day, question_number, question_type,
     korean_a, english_a,
     audio_male_a, audio_female_a,
     keywords
@@ -617,7 +619,7 @@ INSERT INTO questions (
 
 -- Day 04 장문 문제
 INSERT INTO questions (
-    question_id, category, day, question_number, question_type,
+    question_id, category_id, day, question_number, question_type,
     korean, english,
     audio_male, audio_female,
     keywords
@@ -639,13 +641,16 @@ INSERT INTO users (uid, name, email, voice_gender, default_difficulty, daily_goa
 -- ================================================
 -- 샘플 학습 진행 데이터
 -- ================================================
-INSERT INTO user_progress (user_id, last_studied_day, last_studied_question_id, last_studied_timestamp) VALUES
-  ('user001', 1, 1, '2024-01-16 14:30:00'),
-  ('user002', 2, 22, '2024-01-16 16:45:00'),
-  ('user003', 3, 28, '2024-01-16 09:15:00'),
-  ('google_116458393760270019201', 1, 1, '2024-01-26 09:15:00'),
-  ('naver_IkQGr-fk1gVw2es4wbHnpCW42yMDTgYoKnEXe7A2sWc', 2, 17, '2024-01-16 09:15:00'),
-  ('test_user_123', 4, 44, '2024-01-16 09:15:00');
+INSERT INTO user_progress (user_id, category_id, last_studied_day, last_studied_question_id) VALUES
+('google_116458393760270019201', 1, 1, 1), 
+('google_116458393760270019201', 2, 1, 1),
+('google_116458393760270019201', 3, 1, 1),
+('google_116458393760270019201', 4, 3, 1),
+('google_116458393760270019201', 5, 3, 2),
+('user001', 1, 3, 1),   
+('user001', 2, 1, 1),
+('user001', 3, 1, 1); 
+
 
 -- ================================================
 -- 샘플 틀린 문제 데이터
@@ -684,7 +689,7 @@ SELECT 'Session:' as table_name, COUNT(*) as count FROM session
 UNION ALL
 SELECT 'Users:', COUNT(*) FROM users
 UNION ALL
-SELECT 'Quiz Type:', COUNT(*) FROM quiz_type
+SELECT 'Quiz Type:', COUNT(*) FROM category
 UNION ALL
 SELECT 'Questions:', COUNT(*) FROM questions
 UNION ALL

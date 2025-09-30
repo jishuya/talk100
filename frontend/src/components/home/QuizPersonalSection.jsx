@@ -7,13 +7,15 @@ const QuizPersonalSection = ({ personalQuizzes, onPersonalQuizClick }) => {
       id: 'wrong-answers',
       icon: 'fluent:star-24-filled',
       title: '틀린문제',
-      path: '/quiz/wrong-answers'
+      path: '/quiz/wrong-answers',
+      count:5
     },
     {
       id: 'favorites',
       icon: 'fluent:heart-24-filled',
       title: '즐겨찾기',
-      path: '/quiz/favorites'
+      path: '/quiz/favorites',
+      count: 2
     }
   ];
 
