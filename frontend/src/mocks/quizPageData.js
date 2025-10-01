@@ -8,8 +8,7 @@ export const MOCK_QUIZ_DATA = {
     category: 2,
     day: 14,
     totalQuestions: 20,
-    currentQuestion: 7,
-    timeStarted: '2024-01-15T09:30:00Z'
+    currentQuestion: 7
   },
 
   // 현재 문제 데이터
@@ -33,15 +32,6 @@ export const MOCK_QUIZ_DATA = {
     total: 20,
     percentage: 30,
     correctAnswers: 5,
-    incorrectAnswers: 1,
-    skippedQuestions: 0,
-    averageScore: 85
-  },
-
-  // 에러 상태
-  errors: {
-    loading: false,
-    network: null,
-    submission: null
+    incorrectAnswers: 1
   }
 };

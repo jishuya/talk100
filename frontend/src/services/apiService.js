@@ -21,8 +21,6 @@ const MOCK_DATA = {
   mypageData: mypageData,
 
   // QuizData 키들
-  session: MOCK_QUIZ_DATA.session,
-  currentQuestion: MOCK_QUIZ_DATA.currentQuestion,
   quizSession: MOCK_QUIZ_DATA, // 전체 퀴즈 데이터
 
   // SettingsData 키들

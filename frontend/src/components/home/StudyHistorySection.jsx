@@ -23,8 +23,6 @@ const StudyHistorySection = ({ historyItems, onHistoryItemClick }) => {
     }
   ];
 
-  console.log(11111, historyItems)
-
   // historyItems에서 time, score 값을 id로 매칭하여 합치기
   const history = baseHistory.map(baseItem => {
     const dynamicItem = historyItems?.find(item => item.id === baseItem.id);

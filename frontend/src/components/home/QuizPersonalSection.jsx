@@ -52,7 +52,7 @@ const QuizPersonalSection = ({ personalQuizzes, onPersonalQuizClick }) => {
                           quiz.id === 'favorites' ? 'text-red-400' : ''
               }) : quiz.icon}
             </div>
-            <div className="text-sm font-bold text-text-primary mb-1">
+            <div className="text-sm font-bold text-gray-700 mb-1">
               {quiz.title}
             </div>
             <div className="text-xs text-text-secondary">

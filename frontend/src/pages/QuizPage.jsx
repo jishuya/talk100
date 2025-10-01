@@ -13,6 +13,7 @@ import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 const QuizPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  
 
   // URL 파라미터에서 세션 ID 추출
   const sessionId = searchParams.get('session') || 'mock_session_001';
