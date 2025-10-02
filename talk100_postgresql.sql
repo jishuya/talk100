@@ -133,7 +133,7 @@ CREATE TABLE questions (
 CREATE TABLE user_progress (
     progress_id SERIAL PRIMARY KEY,
     user_id VARCHAR(255) REFERENCES users(uid) ON DELETE CASCADE,
-    category_id INTEGER REFERENCES quiz_type(type_id) ON DELETE CASCADE,
+    category_id INTEGER REFERENCES category(category_id) ON DELETE CASCADE,
     
     -- 마지막 학습 정보
     last_studied_day INTEGER DEFAULT 1,
@@ -689,7 +689,7 @@ SELECT 'Session:' as table_name, COUNT(*) as count FROM session
 UNION ALL
 SELECT 'Users:', COUNT(*) FROM users
 UNION ALL
-SELECT 'Quiz Type:', COUNT(*) FROM category
+SELECT 'Category:', COUNT(*) FROM category
 UNION ALL
 SELECT 'Questions:', COUNT(*) FROM questions
 UNION ALL

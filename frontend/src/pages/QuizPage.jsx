@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 // QuizPage 관련 훅들
 import { useQuizData, useSubmitAnswer } from '../hooks/useApi';
 
@@ -7,39 +7,91 @@ import { useQuizData, useSubmitAnswer } from '../hooks/useApi';
 import { QuizProgressBar } from '../components/quiz/QuizProgressBar';
 import { QuizContent } from '../components/quiz/QuizContent';
 import { QuizControls } from '../components/quiz/QuizControls';
-import { FeedbackModal } from '../components/quiz/FeedbackModal';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 
+// 세션 관리 유틸리티
+import {
+  createSession,
+  getSession,
+  moveToNextQuestion,
+  markQuestionCompleted,
+  isQuizCompleted,
+  toggleFavorite,
+  toggleStar,
+  updateInputMode,
+  deleteSession
+} from '../utils/sessionStorage';
+
 const QuizPage = () => {
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  
+  const navigate = useNavigate();
 
   // URL 파라미터에서 세션 ID 추출
-  const sessionId = searchParams.get('session') || 'mock_session_001';
+  const sessionId = searchParams.get('session');
 
-  // 퀴즈 데이터 및 상태 훅들 - sessionId를 categoryId로 사용
-  const { data: quizData, isLoading, error, refetch } = useQuizData(sessionId);
+  // localStorage에서 세션 데이터 로드
+  const [session, setSession] = useState(null);
+
+  useEffect(() => {
+    if (sessionId) {
+      const sessionData = getSession(sessionId);
+      if (sessionData) {
+        setSession(sessionData);
+      } else {
+        // 세션이 없으면 홈으로
+        console.error('Session not found:', sessionId);
+        navigate('/');
+      }
+    } else {
+      // sessionId가 없으면 임시 테스트 세션 생성 (개발용)
+      console.warn('No session ID in URL - creating test session');
+
+      // 임시 테스트 문제 IDs
+      const mockQuestionIds = [1, 2, 3, 4, 5, 6];
+
+      // 임시 세션 생성 (카테고리 1: Model Example)
+      const testSessionId = createSession(1, 1, mockQuestionIds);
+
+      // 생성된 세션으로 리다이렉트
+      navigate(`/quiz?session=${testSessionId}`, { replace: true });
+    }
+  }, [sessionId, navigate]);
+
+  // 세션 데이터에서 현재 문제 ID 추출
+  const currentQuestionId = session?.currentQuestionId;
+
+  // 퀴즈 데이터 및 상태 훅들 - currentQuestionId로 서버에서 문제 데이터 가져오기
+  const { data: quizData, isLoading, error, refetch } = useQuizData(currentQuestionId);
 
   // 액션 훅들
   const submitAnswerMutation = useSubmitAnswer();
 
-  // Mock 데이터에서 값 추출
-  const session = quizData?.session;
+  // 📦 Session 데이터 (LocalStorage에서 관리)
+  const progress = session?.progress;
+  const userPreferences = session?.userPreferences;
+
+  // CurrentQuestion 데이터 추출 (Server에서 fetch)
   const question = quizData?.currentQuestion;
-  const progress = quizData?.progress;
   const audioUrl = question?.audioUrl;
+
+  const isFavorite = userPreferences?.favoriteIds?.includes(question?.id) || false;
+  const isStarred = userPreferences?.starredIds?.includes(question?.id) || false;
 
   // 로컬 상태
   const [userAnswer, setUserAnswer] = useState('');
-  const [inputMode, setInputMode] = useState('voice'); // 'voice' | 'keyboard'
+  const [inputMode, setInputMode] = useState(session?.inputMode || 'keyboard'); // 세션에서 로드
   const [quizMode, setQuizMode] = useState('solving'); // 'solving' | 'grading'
   const [isRecording, setIsRecording] = useState(false);
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [feedbackData, setFeedbackData] = useState(null);
   const [showHint, setShowHint] = useState(false);
   const [showAnswer, setShowAnswer] = useState(false);
   const [keywordInputs, setKeywordInputs] = useState({});
+
+  // 세션 inputMode 동기화
+  useEffect(() => {
+    if (session?.inputMode) {
+      setInputMode(session.inputMode);
+    }
+  }, [session?.inputMode]);
 
 
   // 키워드 입력 변경 핸들러
@@ -50,7 +102,7 @@ const QuizPage = () => {
         [keyword]: value
       };
 
-      // 즉시 답변 업데이트
+      // 완성된 답변을 실시간으로 userAnswer에 반영
       const completedAnswers = Object.entries(newInputs)
         .filter(([, val]) => val && val.trim() !== '')
         .map(([, val]) => val.trim())
@@ -87,10 +139,10 @@ const QuizPage = () => {
   // 다음 키워드 input으로 포커스 이동
   const moveToNextKeywordInput = (currentKeyword) => {
     if (!question?.keywords) return;
-
+    // 키워드 배열에서 현재 위치 찾기
     const keywords = question.keywords.map(k => k.toLowerCase());
     const currentIndex = keywords.indexOf(currentKeyword);
-
+    // DOM 쿼리로 다음 input 찾아서 포커스
     if (currentIndex !== -1 && currentIndex < keywords.length - 1) {
       const nextKeyword = keywords[currentIndex + 1];
       const nextInput = document.querySelector(`input[data-keyword="${nextKeyword}"]`);
@@ -116,6 +168,7 @@ const QuizPage = () => {
         }, 2000);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [keywordInputs, question, quizMode, inputMode]);
 
   // 음성 모드 실시간 채점 로직 (기존)
@@ -136,13 +189,14 @@ const QuizPage = () => {
         }, 2000);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userAnswer, question, quizMode, inputMode]);
 
   // ================================================================
   // 이벤트 핸들러들
   // ================================================================
 
-  // 입력 모드 변경
+  // 입력 모드 전환 (음성 ↔ 키보드)
   const handleInputModeChange = (mode) => {
     setInputMode(mode);
     if (mode === 'keyboard') {
@@ -150,11 +204,12 @@ const QuizPage = () => {
       setKeywordInputs({});
     }
 
-    // TODO: 설정 업데이트 API 연동
-    // updateSettingsMutation.mutate({
-    //   sessionId,
-    //   settings: { inputMode: mode }
-    // });
+    // localStorage의 세션 데이터 업데이트
+    if (sessionId) {
+      updateInputMode(sessionId, mode);
+      // 세션 상태 갱신
+      setSession(getSession(sessionId));
+    }
   };
 
   // 답변 제출
@@ -165,18 +220,14 @@ const QuizPage = () => {
     }
 
     try {
-      const result = await submitAnswerMutation.mutateAsync({
+      await submitAnswerMutation.mutateAsync({
         sessionId,
         questionId: question.id,
         answer: userAnswer.trim(),
         mode: inputMode
       });
 
-      // 피드백 표시
-      setFeedbackData(result);
-      setShowFeedback(true);
-
-      // 2초 후 자동으로 다음 문제 (설정에 따라)
+      // 자동으로 다음 문제로 이동 (설정에 따라)
       if (session?.settings?.autoNext) {
         setTimeout(() => {
           handleNextQuestion();
@@ -192,13 +243,31 @@ const QuizPage = () => {
   // 다음 문제로 이동
   const handleNextQuestion = async () => {
     try {
-      // TODO: API 연동
-      // await moveToNextMutation.mutateAsync(sessionId);
+      if (!sessionId) return;
+
+      // 현재 문제를 완료 처리
+      if (question?.id) {
+        markQuestionCompleted(sessionId, question.id);
+      }
+
+      // 다음 문제로 이동
+      const success = moveToNextQuestion(sessionId);
+
+      if (!success) {
+        // 퀴즈 완료
+        if (isQuizCompleted(sessionId)) {
+          alert('퀴즈를 모두 완료했습니다!');
+          deleteSession(sessionId);
+          navigate('/');
+          return;
+        }
+      }
+
+      // 세션 상태 갱신
+      setSession(getSession(sessionId));
 
       // 상태 초기화
       setUserAnswer('');
-      setFeedbackData(null);
-      setShowFeedback(false);
       setQuizMode('solving');
       setShowHint(false);
       setShowAnswer(false);
@@ -301,32 +370,45 @@ const QuizPage = () => {
 
   // 즐겨찾기 토글
   const handleToggleFavorite = async () => {
+    if (!question?.id || !sessionId) return;
+
     try {
-      // TODO: API 연동
-      // await toggleFavoriteMutation.mutateAsync(question.id);
-      console.log('Toggle favorite for question:', question.id);
+      // localStorage 세션 업데이트
+      toggleFavorite(sessionId, question.id);
+
+      // 세션 상태 갱신
+      setSession(getSession(sessionId));
+
+      // TODO: 백엔드 API에도 전송
+      console.log('Toggle favorite:', { sessionId, questionId: question.id, isFavorite });
+
     } catch (error) {
       console.error('Toggle favorite error:', error);
+      alert('즐겨찾기 변경에 실패했습니다.');
     }
   };
 
   // 틀린문제 별표 토글
   const handleToggleStar = async () => {
+    if (!question?.id || !sessionId) return;
+
     try {
-      // TODO: API 연동
-      // await toggleStarMutation.mutateAsync(question.id);
-      console.log('Toggle star for question:', question.id);
+      // localStorage 세션 업데이트
+      toggleStar(sessionId, question.id);
+
+      // 세션 상태 갱신
+      setSession(getSession(sessionId));
+
+      // TODO: 백엔드 API에도 전송
+      console.log('Toggle star:', { sessionId, questionId: question.id, isStarred });
+
     } catch (error) {
       console.error('Toggle star error:', error);
+      alert('별표 변경에 실패했습니다.');
     }
   };
 
 
-  // 피드백 모달 닫기
-  const handleCloseFeedback = () => {
-    setShowFeedback(false);
-    setFeedbackData(null);
-  };
 
   // ================================================================
   // 렌더링
@@ -381,8 +463,8 @@ const QuizPage = () => {
         showHint={showHint}
         showAnswer={showAnswer}
         keywordInputs={keywordInputs}
-        isFavorite={question?.isFavorite}
-        isStarred={question?.isStarred}
+        isFavorite={isFavorite}
+        isStarred={isStarred}
         onKeywordInputChange={handleKeywordInputChange}
         onKeywordKeyDown={handleKeywordKeyDown}
         onInputModeChange={handleInputModeChange}
@@ -406,14 +488,6 @@ const QuizPage = () => {
         isSubmitting={submitAnswerMutation.isPending}
       />
 
-      {/* 피드백 모달 */}
-      {showFeedback && feedbackData && (
-        <FeedbackModal
-          feedback={feedbackData}
-          onClose={handleCloseFeedback}
-          onNextQuestion={handleNextQuestion}
-        />
-      )}
     </div>
   );
 };

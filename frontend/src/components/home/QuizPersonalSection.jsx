@@ -5,13 +5,15 @@ const QuizPersonalSection = ({ personalQuizzes, onPersonalQuizClick }) => {
   const baseQuizzes = [
     {
       id: 'wrong-answers',
+      category_id: 5,
       icon: 'fluent:star-24-filled',
       title: '틀린문제',
       path: '/quiz/wrong-answers',
-      count:5
+      count: 5
     },
     {
       id: 'favorites',
+      category_id: 6,
       icon: 'fluent:heart-24-filled',
       title: '즐겨찾기',
       path: '/quiz/favorites',
@@ -19,9 +21,9 @@ const QuizPersonalSection = ({ personalQuizzes, onPersonalQuizClick }) => {
     }
   ];
 
-  // personalQuizzes에서 count 값을 id로 매칭하여 합치기
+  // personalQuizzes에서 count 값을 category_id로 매칭하여 합치기
   const quizzes = baseQuizzes.map(baseQuiz => {
-    const dynamicQuiz = personalQuizzes?.find(quiz => quiz.id === baseQuiz.id);
+    const dynamicQuiz = personalQuizzes?.find(quiz => quiz.category_id === baseQuiz.category_id);
     return {
       ...baseQuiz,
       count: dynamicQuiz?.count || 0

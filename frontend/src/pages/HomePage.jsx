@@ -8,6 +8,9 @@ import StudyHistorySection from '../components/home/StudyHistorySection';
 // 새로운 데이터 훅들
 import { useUserData, useBadgesData, useProgressData, usePersonalQuizzesData, useHistoryData } from '../hooks/useApi';
 
+// 세션 관리 유틸리티
+import { createSession } from '../utils/sessionStorage';
+
 const HomePage = () => {
   const navigate = useNavigate();
 
@@ -34,22 +37,47 @@ const HomePage = () => {
 
   const handleStartLearning = () => {
     console.log('오늘의 퀴즈 시작!');
-    navigate('/quiz');
+
+    // TODO: 백엔드에서 오늘의 퀴즈 문제 ID 목록 가져오기
+    const mockQuestionIds = [1, 2, 3, 4, 5, 6];
+
+    // 카테고리 4 = 오늘의 퀴즈
+    const sessionId = createSession(4, 1, mockQuestionIds);
+    navigate(`/quiz?session=${sessionId}`);
   };
 
   const handleCategoryClick = (category) => {
     console.log('카테고리 선택:', category);
-    navigate(category.path);
+
+    // TODO: 백엔드에서 해당 카테고리의 문제 ID 목록 가져오기
+    const mockQuestionIds = [1, 2, 3, 4, 5, 6];
+
+    // category.id가 카테고리 번호 (1=Model Example, 2=Small Talk, 3=Cases in Point)
+    const sessionId = createSession(category.id, 1, mockQuestionIds);
+    navigate(`/quiz?session=${sessionId}`);
   };
 
   const handlePersonalQuizClick = (quiz) => {
     console.log('개인 퀴즈 선택:', quiz);
-    navigate(quiz.path);
+
+    // TODO: 백엔드에서 틀린문제/즐겨찾기 문제 ID 목록 가져오기
+    const mockQuestionIds = [1, 2, 3];
+
+    // quiz.category_id를 사용 (5=Wrong Answers, 6=Favorites)
+    const sessionId = createSession(quiz.category_id, 1, mockQuestionIds);
+    navigate(`/quiz?session=${sessionId}`);
   };
 
   const handleHistoryItemClick = (item) => {
     console.log('학습 기록 선택:', item);
-    navigate(`/quiz/${item.category}/${item.day}`);
+
+    // TODO: 백엔드에서 해당 카테고리/Day의 문제 ID 목록 가져오기
+    const mockQuestionIds = [1, 2, 3, 4, 5, 6];
+
+    // item.category를 카테고리 ID로 변환 (필요시)
+    const categoryId = item.category_id || item.category;
+    const sessionId = createSession(categoryId, item.day, mockQuestionIds);
+    navigate(`/quiz?session=${sessionId}`);
   };
 
   return (

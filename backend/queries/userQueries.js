@@ -139,26 +139,26 @@ class UserQueries {
       const result = await db.oneOrNone(
         `SELECT
           (SELECT COUNT(*) FROM favorites WHERE user_id = $1) as favorites_count,
-          (SELECT COUNT(*) FROM wrong_answers WHERE user_id = $1 AND is_starred = true) as wrong_answers_count`,
+          (SELECT COUNT(*) FROM wrong_answers WHERE user_id = $1 ) as wrong_answers_count`,
         [uid]
       );
 
       if (result) {
         return [
           {
-            id: 'wrong-answers',
-            count: parseInt(result.wrong_answers_count) || 0
+            category_id: 5,
+            count: parseInt(result.wrong_answers_count) || 0,
           },
           {
-            id: 'favorites',
+            category_id: 6,
             count: parseInt(result.favorites_count) || 0
           }
         ];
       }
 
       return [
-        { id: 'wrong-answers', count: 0 },
-        { id: 'favorites', count: 0 }
+        { category_id: 5, count: 0 },
+        { category_id: 6, count: 0 }
       ];
     } catch (error) {
       console.error('getPersonalQuizzes query error:', error);
