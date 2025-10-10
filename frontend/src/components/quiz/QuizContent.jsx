@@ -44,7 +44,7 @@ export const QuizContent = ({
             Day {question.day}
           </span>
           <span className="px-3 py-1.5 bg-primary text-white rounded-full text-sm font-bold shadow-soft">
-            {getCategoryName(question.category)}
+            {getCategoryName(question.categoryId)}
           </span>
         </div>
         {/* 문제 영역 */}

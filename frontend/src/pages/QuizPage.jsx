@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 // QuizPage 관련 훅들
-import { useQuizData, useSubmitAnswer } from '../hooks/useApi';
+import { useQuizQuestions, useSubmitAnswer } from '../hooks/useApi';
 
 // UI 컴포넌트들
 import { QuizProgressBar } from '../components/quiz/QuizProgressBar';
@@ -57,11 +57,21 @@ const QuizPage = () => {
     }
   }, [sessionId, navigate]);
 
-  // 세션 데이터에서 현재 문제 ID 추출
-  const currentQuestionId = session?.currentQuestionId;
+  // 세션 데이터에서 카테고리와 Day 추출
+  const category = session?.category;
+  const day = session?.day;
+  const currentQuestionIndex = session?.currentQuestionIndex || 0;
 
-  // 퀴즈 데이터 및 상태 훅들 - currentQuestionId로 서버에서 문제 데이터 가져오기
-  const { data: quizData, isLoading, error, refetch } = useQuizData(currentQuestionId);
+  // 퀴즈 데이터 및 상태 훅들
+  // category=4(오늘의 퀴즈)는 session에 이미 questions가 있음, 다른 카테고리는 서버에서 조회
+  const shouldFetchFromServer = category && category !== 4;
+  const { data: fetchedQuestions, isLoading, error, refetch } = useQuizQuestions(
+    shouldFetchFromServer ? category : null,
+    shouldFetchFromServer ? day : null
+  );
+
+  // 최종 questionsData: category=4면 session에서, 아니면 서버에서
+  const questionsData = category === 4 ? session?.questions : fetchedQuestions;
 
   // 액션 훅들
   const submitAnswerMutation = useSubmitAnswer();
@@ -70,9 +80,51 @@ const QuizPage = () => {
   const progress = session?.progress;
   const userPreferences = session?.userPreferences;
 
-  // CurrentQuestion 데이터 추출 (Server에서 fetch)
-  const question = quizData?.currentQuestion;
-  const audioUrl = question?.audioUrl;
+  // 현재 문제 추출 (서버에서 가져온 전체 문제 중 현재 인덱스의 문제)
+  const question = useMemo(() => {
+    if (!questionsData || !Array.isArray(questionsData)) return null;
+
+    const currentQuestion = questionsData[currentQuestionIndex];
+    if (!currentQuestion) return null;
+
+    // 백엔드 데이터 형식을 QuizPage가 기대하는 형식으로 변환
+    let korean, english, maleAudioUrl, femaleAudioUrl;
+
+    if (currentQuestion.question_type === 'short' || currentQuestion.question_type === 'long') {
+      korean = currentQuestion.korean;
+      english = currentQuestion.english;
+      maleAudioUrl = currentQuestion.audio_male;
+      femaleAudioUrl = currentQuestion.audio_female;
+    } else if (currentQuestion.question_type === 'dialogue') {
+      if (currentQuestion.korean_a !== null) {
+        korean = currentQuestion.korean_a;
+        english = currentQuestion.english_a;
+        maleAudioUrl = currentQuestion.audio_male_a;
+        femaleAudioUrl = currentQuestion.audio_female_a;
+      } else {
+        korean = currentQuestion.korean_b;
+        english = currentQuestion.english_b;
+        maleAudioUrl = currentQuestion.audio_male_b;
+        femaleAudioUrl = currentQuestion.audio_female_b;
+      }
+    }
+
+    return {
+      id: currentQuestion.question_id,
+      day: currentQuestion.day,
+      categoryId: currentQuestion.category_id,
+      type: currentQuestion.question_type,
+      korean,
+      english,
+      maleAudioUrl,
+      femaleAudioUrl,
+      keywords: currentQuestion.keywords || [],
+      answer: english
+    };
+  }, [questionsData, currentQuestionIndex]);
+
+  const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+  const audioUrl = userInfo.voice_gender === 'female' ? question?.femaleAudioUrl : question?.maleAudioUrl;
 
   const isFavorite = userPreferences?.favoriteIds?.includes(question?.id) || false;
   const isStarred = userPreferences?.starredIds?.includes(question?.id) || false;

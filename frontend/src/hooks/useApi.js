@@ -83,6 +83,60 @@ export const useUpdateProgress = () => {
 // 퀴즈 관련 훅
 // ==============================================
 
+// Day별 전체 문제 조회
+export const useQuizQuestions = (category, day) => {
+  return useQuery({
+    queryKey: ['quiz', 'questions', category, day],
+    queryFn: () => api.getQuestions(category, day),
+    staleTime: ENV.CACHE_TIMES.QUIZ_SESSION,
+    enabled: !!category && !!day,
+    retry: 2,
+  });
+};
+
+// 특정 문제 조회
+export const useQuizQuestion = (questionId) => {
+  return useQuery({
+    queryKey: ['quiz', 'question', questionId],
+    queryFn: () => api.getQuestion(questionId),
+    staleTime: ENV.CACHE_TIMES.QUIZ_SESSION,
+    enabled: !!questionId,
+    retry: 2,
+  });
+};
+
+// 카테고리별 Day 범위 조회
+export const useDayRange = (category) => {
+  return useQuery({
+    queryKey: ['quiz', 'day-range', category],
+    queryFn: () => api.getDayRange(category),
+    staleTime: ENV.CACHE_TIMES.CATEGORIES,
+    enabled: !!category,
+    retry: 2,
+  });
+};
+
+// 즐겨찾기 문제 조회
+export const useFavoriteQuestions = () => {
+  return useQuery({
+    queryKey: ['quiz', 'favorites'],
+    queryFn: () => api.getFavoriteQuestions(),
+    staleTime: ENV.CACHE_TIMES.USER_DATA,
+    retry: 2,
+  });
+};
+
+// 틀린 문제 조회
+export const useWrongAnswerQuestions = () => {
+  return useQuery({
+    queryKey: ['quiz', 'wrong-answers'],
+    queryFn: () => api.getWrongAnswerQuestions(),
+    staleTime: ENV.CACHE_TIMES.USER_DATA,
+    retry: 2,
+  });
+};
+
+// 레거시 - 퀴즈 세션 데이터 조회
 export const useQuizData = (sessionId) => {
   return useQuery({
     queryKey: ['quiz', 'session', sessionId],

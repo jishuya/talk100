@@ -19,9 +19,6 @@ async function createDayReview(userId, dayNumber) {
       ON CONFLICT (user_id, day) DO NOTHING
       RETURNING queue_id
     `, [userId, dayNumber]);
-
-    console.log(`Day ${dayNumber} scheduled for review for user ${userId}`);
-
     return {
       success: true,
       dayNumber,

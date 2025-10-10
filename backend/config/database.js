@@ -2,18 +2,12 @@ const pgp = require('pg-promise')({
   // PostgreSQL 최적화 설정
   capSQL: true,
 
-  // 연결 해제시 로그
-  disconnect: (dc) => {
-    const cp = dc.client.connectionParameters;
-    console.log(`Disconnected from database: ${cp.database}@${cp.host}:${cp.port}`);
-  },
-
   // 쿼리 로그 (개발 환경에서만)
   query: (e) => {
     if (process.env.NODE_ENV === 'development') {
-      console.log('QUERY:', e.query);
+      console.log('🔒QUERY:', e.query);
       if (e.params) {
-        console.log('PARAMS:', e.params);
+        console.log('🔑PARAMS:', e.params);
       }
     }
   },

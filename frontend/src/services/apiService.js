@@ -21,7 +21,8 @@ const MOCK_DATA = {
   mypageData: mypageData,
 
   // QuizData 키들
-  quizSession: MOCK_QUIZ_DATA, // 전체 퀴즈 데이터
+  quizSession: MOCK_QUIZ_DATA, // 레거시 지원
+  quizData: MOCK_QUIZ_DATA, // Day별 전체 문제 데이터
 
   // SettingsData 키들
   settings: settingsData,
@@ -232,7 +233,32 @@ class ApiService {
   // 🧩 QuizPage - 퀴즈 관련 API
   // ==============================================
 
-  // 🧩 QuizPage.jsx에서 사용 - 퀴즈 세션 데이터 (문제, 진행상황 등)
+  // 🧩 QuizPage.jsx에서 사용 - Day별 전체 문제 조회
+  getQuestions(category, day) {
+    return this.request(`/api/quiz/questions?category=${category}&day=${day}`, 'quizData');
+  }
+
+  // 🧩 QuizPage.jsx에서 사용 - 특정 문제 조회
+  getQuestion(questionId) {
+    return this.request(`/api/quiz/question/${questionId}`, null);
+  }
+
+  // 🧩 QuizPage.jsx에서 사용 - 카테고리별 Day 범위 조회
+  getDayRange(category) {
+    return this.request(`/api/quiz/day-range?category=${category}`, null);
+  }
+
+  // 🧩 QuizPage.jsx에서 사용 - 즐겨찾기 문제 조회
+  getFavoriteQuestions() {
+    return this.request('/api/quiz/favorites', null);
+  }
+
+  // 🧩 QuizPage.jsx에서 사용 - 틀린 문제 조회
+  getWrongAnswerQuestions() {
+    return this.request('/api/quiz/wrong-answers', null);
+  }
+
+  // 🧩 QuizPage.jsx에서 사용 - 퀴즈 세션 데이터 (문제, 진행상황 등) - 레거시
   getQuizSession(sessionId) {
     return this.request(`/api/quiz/session/${sessionId}`, 'quizSession');
   }

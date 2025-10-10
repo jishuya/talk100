@@ -39,9 +39,18 @@ export const AuthProvider = ({ children }) => {
 
   // 로그인 처리 (OAuth 콜백에서 호출)
   const handleAuthSuccess = (token, userInfo) => {
+    // 필요한 정보만 필터링하여 localStorage에 저장
+    const filteredUserInfo = {
+      uid: userInfo.uid,
+      name: userInfo.name,
+      voice_gender: userInfo.voice_gender,
+      daily_goal: userInfo.daily_goal,
+      level: userInfo.level
+    };
+
     localStorage.setItem('jwt_token', token);
-    localStorage.setItem('user_info', JSON.stringify(userInfo));
-    setUser(userInfo);
+    localStorage.setItem('user_info', JSON.stringify(filteredUserInfo));
+    setUser(filteredUserInfo);
     setError(null);
   };
 

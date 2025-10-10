@@ -124,7 +124,7 @@ CREATE TABLE questions (
     keywords TEXT[],  -- 핵심 단어 배열
 
     -- 유니크 제약
-    UNIQUE(category_id, day, question_number)
+    UNIQUE(question_id, category_id, day)
 );
 -- ================================================
 -- 5. USER_PROGRESS 테이블

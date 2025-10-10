@@ -109,10 +109,10 @@ class UserQueries {
           u.daily_goal,
           COALESCE(up.last_studied_day, 1) as current_day,
           COALESCE(up.last_studied_question_id, 0) as last_question_id,
-          (SELECT COUNT(*) FROM questions WHERE day = COALESCE(up.last_studied_day, 1) AND category IN (1,2,3)) * u.daily_goal as total,
-          (SELECT COUNT(*) FROM questions WHERE day = COALESCE(up.last_studied_day, 1) AND category IN (1,2,3) AND question_id <= COALESCE(up.last_studied_question_id, 0)) as current
+          (SELECT COUNT(*) FROM questions WHERE day = COALESCE(up.last_studied_day, 1) AND category_id IN (1,2,3)) * u.daily_goal as total,
+          (SELECT COUNT(*) FROM questions WHERE day = COALESCE(up.last_studied_day, 1) AND category_id IN (1,2,3) AND question_id <= COALESCE(up.last_studied_question_id, 0)) as current
         FROM users u
-        LEFT JOIN user_progress up ON u.uid = up.user_id
+        LEFT JOIN user_progress up ON u.uid = up.user_id AND up.category_id = 4
         WHERE u.uid = $1`,
         [uid]
       );

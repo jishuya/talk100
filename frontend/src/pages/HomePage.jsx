@@ -35,15 +35,50 @@ const HomePage = () => {
     );
   }
 
-  const handleStartLearning = () => {
+  const handleStartLearning = async () => {
     console.log('오늘의 퀴즈 시작!');
 
-    // TODO: 백엔드에서 오늘의 퀴즈 문제 ID 목록 가져오기
-    const mockQuestionIds = [1, 2, 3, 4, 5, 6];
+    try {
+      // 백엔드에서 오늘의 퀴즈 세션 생성
+      const response = await fetch('/api/quiz/session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // 쿠키 포함 (인증)
+        body: JSON.stringify({ quiz_type: 'daily' })
+      });
 
-    // 카테고리 4 = 오늘의 퀴즈
-    const sessionId = createSession(4, 1, mockQuestionIds);
-    navigate(`/quiz?session=${sessionId}`);
+      if (!response.ok) {
+        throw new Error('Failed to create quiz session');
+      }
+
+      const result = await response.json();
+
+      if (result.success && result.data) {
+        const { day, questions } = result.data;
+
+        // 문제 ID 목록 추출
+        const question_ids = questions.map(q => q.question_id);
+
+        // 카테고리 4 = 오늘의 퀴즈, session 생성
+        const sessionId = createSession(4, day, question_ids);
+
+        // ✨ session에 questions도 저장 (QuizPage에서 바로 사용)
+        const session = JSON.parse(localStorage.getItem(`quiz_session_${sessionId}`));
+        session.questions = questions; // 전체 문제 데이터 저장
+        localStorage.setItem(`quiz_session_${sessionId}`, JSON.stringify(session));
+
+        console.log('Session created:', sessionId, 'Day:', day, 'Questions:', questions.length);
+        navigate(`/quiz?session=${sessionId}`);
+      } else {
+        console.error('Invalid response from server:', result);
+        alert('퀴즈 세션 생성에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('Error creating quiz session:', error);
+      alert('퀴즈를 시작할 수 없습니다. 다시 시도해주세요.');
+    }
   };
 
   const handleCategoryClick = (category) => {
