@@ -78,7 +78,6 @@ const QuizPage = () => {
 
   // 📦 Session 데이터 (LocalStorage에서 관리)
   const progress = session?.progress;
-  const userPreferences = session?.userPreferences;
 
   // 현재 문제 추출 (서버에서 가져온 전체 문제 중 현재 인덱스의 문제)
   const question = useMemo(() => {
@@ -119,15 +118,18 @@ const QuizPage = () => {
       maleAudioUrl,
       femaleAudioUrl,
       keywords: currentQuestion.keywords || [],
-      answer: english
+      answer: english,
+      isFavorite: currentQuestion.is_favorite || false,
+      isWrongAnswer: currentQuestion.is_wrong_answer || false
     };
   }, [questionsData, currentQuestionIndex]);
 
   const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
   const audioUrl = userInfo.voice_gender === 'female' ? question?.femaleAudioUrl : question?.maleAudioUrl;
 
-  const isFavorite = userPreferences?.favoriteIds?.includes(question?.id) || false;
-  const isStarred = userPreferences?.starredIds?.includes(question?.id) || false;
+  // 백엔드 데이터에서 직접 가져오기
+  const isFavorite = question?.isFavorite || false;
+  const isStarred = question?.isWrongAnswer || false;
 
   // 로컬 상태
   const [userAnswer, setUserAnswer] = useState('');

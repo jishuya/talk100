@@ -36,27 +36,27 @@ const HomePage = () => {
   }
 
   const handleStartLearning = async () => {
-    console.log('오늘의 퀴즈 시작!');
 
     try {
-      // 백엔드에서 오늘의 퀴즈 세션 생성
-      const response = await fetch('/api/quiz/session', {
-        method: 'POST',
+      const token = localStorage.getItem('jwt_token');
+      const response = await fetch('/api/quiz/daily', {
+        method: 'GET',
         headers: {
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         credentials: 'include', // 쿠키 포함 (인증)
-        body: JSON.stringify({ quiz_type: 'daily' })
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create quiz session');
+        throw new Error('Failed to fetch today\'s quiz');
       }
 
       const result = await response.json();
+      console.log('오늘의 퀴즈 데이터:', result.data);
 
       if (result.success && result.data) {
-        const { day, questions } = result.data;
+        const { day, questions, progress } = result.data;
 
         // 문제 ID 목록 추출
         const question_ids = questions.map(q => q.question_id);
@@ -64,19 +64,20 @@ const HomePage = () => {
         // 카테고리 4 = 오늘의 퀴즈, session 생성
         const sessionId = createSession(4, day, question_ids);
 
-        // ✨ session에 questions도 저장 (QuizPage에서 바로 사용)
+        // ✨ session에 questions와 progress 저장 (QuizPage에서 바로 사용)
         const session = JSON.parse(localStorage.getItem(`quiz_session_${sessionId}`));
         session.questions = questions; // 전체 문제 데이터 저장
+        session.progress = progress; // 백엔드 progress 데이터 저장
         localStorage.setItem(`quiz_session_${sessionId}`, JSON.stringify(session));
 
-        console.log('Session created:', sessionId, 'Day:', day, 'Questions:', questions.length);
+        console.log('Session created:', sessionId, 'Day:', day, 'Questions:', questions.length, 'Progress:', progress);
         navigate(`/quiz?session=${sessionId}`);
       } else {
         console.error('Invalid response from server:', result);
-        alert('퀴즈 세션 생성에 실패했습니다.');
+        alert('퀴즈 데이터를 가져올 수 없습니다.');
       }
     } catch (error) {
-      console.error('Error creating quiz session:', error);
+      console.error('Error fetching today\'s quiz:', error);
       alert('퀴즈를 시작할 수 없습니다. 다시 시도해주세요.');
     }
   };

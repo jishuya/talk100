@@ -13,7 +13,7 @@ export const QuizProgressBar = ({
           />
         </div>
         <span className="text-sm font-semibold text-primary min-w-[60px] text-right">
-          {progress.completed || 0}/{progress.total || 20}
+          {progress.completed || 0}/{progress.total || 13}
         </span>
       </div>
     </div>
