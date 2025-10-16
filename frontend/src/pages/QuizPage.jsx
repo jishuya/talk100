@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 // QuizPage 관련 훅들
-import { useQuizQuestions, useSubmitAnswer } from '../hooks/useApi';
+import { useSubmitAnswer } from '../hooks/useApi';
 
 // UI 컴포넌트들
 import { QuizProgressBar } from '../components/quiz/QuizProgressBar';
@@ -57,21 +57,14 @@ const QuizPage = () => {
     }
   }, [sessionId, navigate]);
 
-  // 세션 데이터에서 카테고리와 Day 추출
-  const category = session?.category;
-  const day = session?.day;
+  // 세션 데이터에서 현재 문제 인덱스 추출
   const currentQuestionIndex = session?.currentQuestionIndex || 0;
 
-  // 퀴즈 데이터 및 상태 훅들
-  // category=4(오늘의 퀴즈)는 session에 이미 questions가 있음, 다른 카테고리는 서버에서 조회
-  const shouldFetchFromServer = category && category !== 4;
-  const { data: fetchedQuestions, isLoading, error, refetch } = useQuizQuestions(
-    shouldFetchFromServer ? category : null,
-    shouldFetchFromServer ? day : null
-  );
-
-  // 최종 questionsData: category=4면 session에서, 아니면 서버에서
-  const questionsData = category === 4 ? session?.questions : fetchedQuestions;
+  // 퀴즈 데이터: 모든 카테고리에서 session에 이미 questions가 저장되어 있음
+  // HomePage에서 API를 통해 데이터를 가져와서 세션에 저장했으므로 추가 조회 불필요
+  const questionsData = session?.questions;
+  const isLoading = !session || !questionsData;
+  const error = null;
 
   // 액션 훅들
   const submitAnswerMutation = useSubmitAnswer();
@@ -483,10 +476,10 @@ const QuizPage = () => {
         <div className="text-center">
           <p className="text-error mb-4">퀴즈 로드에 실패했습니다.</p>
           <button
-            onClick={refetch}
+            onClick={() => navigate('/')}
             className="btn-primary"
           >
-            다시 시도
+            홈으로 돌아가기
           </button>
         </div>
       </div>
