@@ -77,8 +77,6 @@ const HomePage = () => {
 
   const handleCategoryClick = async (category) => {
     try {
-      console.log('카테고리 선택:', category);
-
       const token = localStorage.getItem('jwt_token');
       const response = await fetch(`/api/quiz/category/${category.id}`, {
         method: 'GET',
@@ -94,7 +92,6 @@ const HomePage = () => {
       }
 
       const result = await response.json();
-      console.log(`카테고리 ${category.id} 퀴즈:`, result.data);
 
       if (result.success && result.data) {
         const { category_id, day, questions, progress } = result.data;
@@ -117,15 +114,55 @@ const HomePage = () => {
     }
   };
 
-  const handlePersonalQuizClick = (quiz) => {
-    console.log('개인 퀴즈 선택:', quiz);
+  const handlePersonalQuizClick = async (quiz) => {
+    try {
+      // quiz.category_id에 따라 다른 엔드포인트 호출 (5: Wrong Answers, 6: Favorites)
+      const endpoint = quiz.category_id === 5
+        ? '/api/quiz/wrong-answers'
+        : '/api/quiz/favorites';
 
-    // TODO: 백엔드에서 틀린문제/즐겨찾기 문제 ID 목록 가져오기
-    const mockQuestionIds = [1, 2, 3];
+      const response = await fetch(endpoint, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`,
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
 
-    // quiz.category_id를 사용 (5=Wrong Answers, 6=Favorites)
-    const sessionId = createSession(quiz.category_id, 1, mockQuestionIds);
-    navigate(`/quiz?session=${sessionId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch personal quiz');
+      }
+
+      const result = await response.json();
+      console.log(1111 ,result.data)
+      if (result.success && result.data) {
+        const { category_id, questions, progress } = result.data;
+
+        // 문제가 없는 경우
+        if (!questions || questions.length === 0) {
+          const quizName = category_id === 5 ? '틀린 문제' : '즐겨찾기';
+          alert(`${quizName}가 없습니다.`);
+          return;
+        }
+
+        const question_ids = questions.map(q => q.question_id);
+
+        // 세션 생성 및 데이터 저장
+        const sessionId = createSession(category_id, 1, question_ids);
+        const session = JSON.parse(localStorage.getItem(`quiz_session_${sessionId}`));
+        session.questions = questions;
+        session.progress = progress;
+        localStorage.setItem(`quiz_session_${sessionId}`, JSON.stringify(session));
+
+        navigate(`/quiz?session=${sessionId}`);
+      } else {
+        alert('퀴즈 데이터를 가져올 수 없습니다.');
+      }
+    } catch (error) {
+      console.error('Error fetching personal quiz:', error);
+      alert('퀴즈를 시작할 수 없습니다. 다시 시도해주세요.');
+    }
   };
 
   const handleHistoryItemClick = (item) => {

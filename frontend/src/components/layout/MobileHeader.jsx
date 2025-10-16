@@ -1,46 +1,51 @@
-import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
-import { useAuth } from '../../contexts/AuthContext';
 import { getIcon } from '../../utils/iconMap';
 import HamburgerMenu from './HamburgerMenu';
+import { getSession } from '../../utils/sessionStorage';
 
 const MobileHeader = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { theme, changeTheme } = useTheme();
-  const { user } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [quizTitle, setQuizTitle] = useState('오늘의 퀴즈');
 
-  // 퀴즈 카테고리별 제목 매핑
-  const getQuizTitle = (pathname) => {
-    const pathSegments = pathname.split('/');
-    if (pathSegments[1] === 'quiz' && pathSegments[2]) {
-      const category = pathSegments[2];
-      switch (category) {
-        case '3':
-          return 'Cases in Point';
-        case '1':
-          return 'Model Example';
-        case '2':
-          return 'Small Talk';
-        case 'wrong-answers':
-          return '틀린 문제';
-        case 'favorites':
-          return '즐겨찾기';
-        default:
-          return '오늘의 퀴즈';
+  // 세션 기반 퀴즈 제목 가져오기
+  useEffect(() => {
+    if (location.pathname === '/quiz') {
+      const sessionId = searchParams.get('session');
+      if (sessionId) {
+        const session = getSession(sessionId);
+        if (session) {
+          const title = getCategoryTitle(session.category);
+          setQuizTitle(title);
+        }
       }
     }
-    return '오늘의 퀴즈';
+  }, [location.pathname, searchParams]);
+
+  // 카테고리 ID에 따른 제목 매핑
+  const getCategoryTitle = (categoryId) => {
+    const categoryMap = {
+      1: 'Model Example',
+      2: 'Small Talk',
+      3: 'Cases in Point',
+      4: '오늘의 퀴즈',
+      5: '틀린 문제',
+      6: '즐겨찾기'
+    };
+    return categoryMap[categoryId] || '퀴즈';
   };
 
   // 페이지별 헤더 설정
   const getHeaderConfig = () => {
-    // 퀴즈 페이지들 처리
-    if (location.pathname.startsWith('/quiz')) {
+    // 퀴즈 페이지들 처리 (세션 기반)
+    if (location.pathname === '/quiz') {
       return {
-        title: getQuizTitle(location.pathname),
+        title: quizTitle,
         showBackButton: true,
         showLogo: false,
         rightContent: '',

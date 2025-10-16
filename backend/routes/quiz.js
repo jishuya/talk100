@@ -10,4 +10,10 @@ router.get('/daily', verifyToken, quizController.getDailyQuiz);
 // GET /api/quiz/category/:categoryId - 카테고리별 퀴즈 조회 (인증 필요)
 router.get('/category/:categoryId', verifyToken, quizController.getCategoryQuiz);
 
+// GET /api/quiz/wrong-answers - 틀린 문제 퀴즈 조회 (인증 필요)
+router.get('/wrong-answers', verifyToken, quizController.getWrongAnswersQuiz);
+
+// GET /api/quiz/favorites - 즐겨찾기 퀴즈 조회 (인증 필요)
+router.get('/favorites', verifyToken, quizController.getFavoritesQuiz);
+
 module.exports = router;

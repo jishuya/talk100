@@ -72,6 +72,68 @@ class QuizController {
     }
   }
 
+  /**
+   * GET /api/quiz/wrong-answers
+   * 틀린 문제 퀴즈 조회 (인증 필수)
+   */
+  async getWrongAnswersQuiz(req, res) {
+    try {
+      const uid = req.user?.uid;
+
+      if (!uid) {
+        return res.status(401).json({
+          success: false,
+          message: 'Authentication required for wrong answers quiz'
+        });
+      }
+
+      const result = await quizQueries.getWrongAnswersQuiz(uid);
+
+      res.json({
+        success: true,
+        data: result
+      });
+
+    } catch (error) {
+      console.error('getWrongAnswersQuiz controller error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch wrong answers quiz'
+      });
+    }
+  }
+
+  /**
+   * GET /api/quiz/favorites
+   * 즐겨찾기 퀴즈 조회 (인증 필수)
+   */
+  async getFavoritesQuiz(req, res) {
+    try {
+      const uid = req.user?.uid;
+
+      if (!uid) {
+        return res.status(401).json({
+          success: false,
+          message: 'Authentication required for favorites quiz'
+        });
+      }
+
+      const result = await quizQueries.getFavoritesQuiz(uid);
+
+      res.json({
+        success: true,
+        data: result
+      });
+
+    } catch (error) {
+      console.error('getFavoritesQuiz controller error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch favorites quiz'
+      });
+    }
+  }
+
 }
 
 module.exports = new QuizController();

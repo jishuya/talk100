@@ -219,6 +219,119 @@ class QuizQueries {
     }
   }
 
+  /**
+   * 틀린 문제 퀴즈 조회 (Category ID: 5)
+   * @param {string} userId - 사용자 ID
+   * @returns {Object} { quiz_type, category_id, progress, questions }
+   */
+  async getWrongAnswersQuiz(userId) {
+    try {
+      // wrong_answers 테이블에서 사용자의 틀린 문제들 조회
+      const questions = await db.manyOrNone(
+        `SELECT
+          q.question_id,
+          q.category_id,
+          q.day,
+          q.question_number,
+          q.question_type,
+          q.korean,
+          q.english,
+          q.korean_a,
+          q.english_a,
+          q.korean_b,
+          q.english_b,
+          q.audio_male,
+          q.audio_female,
+          q.audio_male_a,
+          q.audio_female_a,
+          q.audio_male_b,
+          q.audio_female_b,
+          q.keywords,
+          EXISTS(SELECT 1 FROM favorites WHERE question_id = q.question_id AND user_id = $1) as is_favorite,
+          true as is_wrong_answer,
+          wa.wrong_count,
+          wa.added_at
+        FROM wrong_answers wa
+        JOIN questions q ON q.question_id = wa.question_id
+        WHERE wa.user_id = $1
+        ORDER BY wa.added_at ASC`,
+        [userId]
+      );
+
+      const total = questions.length;
+
+      return {
+        quiz_type: 'personal',
+        category_id: 5, // Wrong Answers
+        progress: {
+          completed: 0,
+          total,
+          percentage: 0
+        },
+        questions
+      };
+    } catch (error) {
+      console.error('getWrongAnswersQuiz query error:', error);
+      throw new Error('Failed to get wrong answers quiz');
+    }
+  }
+
+  /**
+   * 즐겨찾기 퀴즈 조회 (Category ID: 6)
+   * @param {string} userId - 사용자 ID
+   * @returns {Object} { quiz_type, category_id, progress, questions }
+   */
+  async getFavoritesQuiz(userId) {
+    try {
+      // favorites 테이블에서 사용자의 즐겨찾기 문제들 조회
+      const questions = await db.manyOrNone(
+        `SELECT
+          q.question_id,
+          q.category_id,
+          q.day,
+          q.question_number,
+          q.question_type,
+          q.korean,
+          q.english,
+          q.korean_a,
+          q.english_a,
+          q.korean_b,
+          q.english_b,
+          q.audio_male,
+          q.audio_female,
+          q.audio_male_a,
+          q.audio_female_a,
+          q.audio_male_b,
+          q.audio_female_b,
+          q.keywords,
+          true as is_favorite,
+          EXISTS(SELECT 1 FROM wrong_answers WHERE question_id = q.question_id AND user_id = $1) as is_wrong_answer,
+          f.added_at
+        FROM favorites f
+        JOIN questions q ON q.question_id = f.question_id
+        WHERE f.user_id = $1
+        ORDER BY f.added_at ASC`,
+        [userId]
+      );
+
+      const total = questions.length;
+
+      return {
+        quiz_type: 'personal',
+        category_id: 6, // Favorites
+        progress: {
+          completed: 0,
+          total,
+          percentage: 0
+        },
+        questions
+      };
+    } catch (error) {
+      console.error('getFavoritesQuiz query error:', error);
+      throw new Error('Failed to get favorites quiz');
+    }
+  }
+
 }
 
 module.exports = new QuizQueries();
