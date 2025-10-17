@@ -25,7 +25,8 @@ export const QuizContent = ({
   onFavoriteToggle,
   onStarToggle,
   isFavorited = false,
-  isStarred = false
+  isStarred = false,
+  gradingResult = null
 }) => {
   if (!question) {
     return (
@@ -234,8 +235,13 @@ export const QuizContent = ({
             <span>키보드</span>
           </button>
         </div>
-        <div className="text-xs text-text-secondary mb-2">
-          내 답변
+        <div className="text-xs text-text-secondary mb-2 flex items-center gap-2">
+          {gradingResult?.isAllCorrect && (
+            <span className="inline-flex items-center">
+              {getIcon('noto:check-mark', { size: 'sm' })}
+            </span>
+          )}
+          <span>내 답변</span>
         </div>
         <div className="text-base leading-relaxed text-text-primary min-h-[24px]">
           {userAnswer || (

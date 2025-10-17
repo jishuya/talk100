@@ -195,6 +195,8 @@ const QuizPage = () => {
     if (quizMode === 'solving' && inputMode === 'keyboard' && question?.keywords) {
       // 모든 키워드가 정답인지 확인
       if (checkAllKeywords(keywordInputs)) {
+        // 채점 결과 설정 (체크마크 표시를 위해)
+        submitAnswer(keywordInputs, userAnswer);
         // grading 모드로 전환 (자동으로 다음 문제로 이동하지 않음)
         setQuizMode('grading');
       }
@@ -417,6 +419,7 @@ const QuizPage = () => {
         keywordInputs={keywordInputs}
         isFavorite={isFavorite}
         isStarred={isStarred}
+        gradingResult={gradingResult}
         onKeywordInputChange={handleKeywordInputChange}
         onKeywordKeyDown={handleKeywordKeyDown}
         onInputModeChange={handleInputModeChange}

@@ -80,6 +80,7 @@ const ICON_MAP = {
   'noto:memo': 'noto:memo',
   'noto:keyboard': 'noto:keyboard',
   'noto:door': 'noto:door',
+  'noto:check-mark': 'noto:check-mark-button',
   logout: 'noto:door',
 
   // === File & Folder ===
