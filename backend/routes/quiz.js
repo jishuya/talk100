@@ -16,4 +16,7 @@ router.get('/wrong-answers', verifyToken, quizController.getWrongAnswersQuiz);
 // GET /api/quiz/favorites - 즐겨찾기 퀴즈 조회 (인증 필요)
 router.get('/favorites', verifyToken, quizController.getFavoritesQuiz);
 
+// POST /api/quiz/wrong-answers/toggle - 틀린 문제 토글 (인증 필요)
+router.post('/wrong-answers/toggle', verifyToken, quizController.toggleWrongAnswer);
+
 module.exports = router;

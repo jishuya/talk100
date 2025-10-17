@@ -249,12 +249,11 @@ class QuizQueries {
           q.keywords,
           EXISTS(SELECT 1 FROM favorites WHERE question_id = q.question_id AND user_id = $1) as is_favorite,
           true as is_wrong_answer,
-          wa.wrong_count,
           wa.added_at
         FROM wrong_answers wa
         JOIN questions q ON q.question_id = wa.question_id
         WHERE wa.user_id = $1
-        ORDER BY wa.added_at ASC`,
+        ORDER BY wa.added_at DESC`,
         [userId]
       );
 
@@ -329,6 +328,38 @@ class QuizQueries {
     } catch (error) {
       console.error('getFavoritesQuiz query error:', error);
       throw new Error('Failed to get favorites quiz');
+    }
+  }
+
+  /**
+   * 틀린 문제 토글 (추가 또는 삭제)
+   * @param {string} userId - 사용자 ID
+   * @param {number} questionId - 문제 ID
+   * @param {boolean} isStarred - 현재 별 상태 (true: 채워짐, false: 비어짐)
+   * @returns {Object} { isStarred: boolean }
+   */
+  async toggleWrongAnswer(userId, questionId, isStarred) {
+    try {
+      if (isStarred) {
+        // 채워진 별 → 빈 별 (DELETE)
+        await db.none(
+          `DELETE FROM wrong_answers WHERE user_id = $1 AND question_id = $2`,
+          [userId, questionId]
+        );
+        return { isStarred: false };
+      } else {
+        // 빈 별 → 채워진 별 (INSERT, added_at은 자동 생성)
+        await db.none(
+          `INSERT INTO wrong_answers (user_id, question_id)
+           VALUES ($1, $2)
+           ON CONFLICT (user_id, question_id) DO NOTHING`,
+          [userId, questionId]
+        );
+        return { isStarred: true };
+      }
+    } catch (error) {
+      console.error('toggleWrongAnswer query error:', error);
+      throw new Error('Failed to toggle wrong answer');
     }
   }
 

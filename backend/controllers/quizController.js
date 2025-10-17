@@ -134,6 +134,47 @@ class QuizController {
     }
   }
 
+  /**
+   * POST /api/quiz/wrong-answers/toggle
+   * 틀린 문제 토글 (인증 필수)
+   * Body: { questionId: number, isStarred: boolean }
+   */
+  async toggleWrongAnswer(req, res) {
+    try {
+      const uid = req.user?.uid;
+      const { questionId, isStarred } = req.body;
+
+      if (!uid) {
+        return res.status(401).json({
+          success: false,
+          message: 'Authentication required to toggle wrong answer'
+        });
+      }
+
+      // 유효성 검증
+      if (!questionId || typeof isStarred !== 'boolean') {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid request: questionId and isStarred are required'
+        });
+      }
+
+      const result = await quizQueries.toggleWrongAnswer(uid, questionId, isStarred);
+
+      res.json({
+        success: true,
+        data: result
+      });
+
+    } catch (error) {
+      console.error('toggleWrongAnswer controller error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to toggle wrong answer'
+      });
+    }
+  }
+
 }
 
 module.exports = new QuizController();

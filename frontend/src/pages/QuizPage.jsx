@@ -22,6 +22,9 @@ import {
 // 채점 훅
 import { useQuizGrading } from '../hooks/useQuizGrading';
 
+// API 훅
+import { useToggleWrongAnswer } from '../hooks/useApi';
+
 const QuizPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -108,10 +111,6 @@ const QuizPage = () => {
   const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
   const audioUrl = userInfo.voice_gender === 'female' ? question?.femaleAudioUrl : question?.maleAudioUrl;
 
-  // 백엔드 데이터에서 직접 가져오기
-  const isFavorite = question?.isFavorite || false;
-  const isStarred = question?.isWrongAnswer || false;
-
   // 로컬 상태
   const [userAnswer, setUserAnswer] = useState('');
   const [inputMode, setInputMode] = useState(session?.inputMode || 'keyboard'); // 세션에서 로드
@@ -121,8 +120,15 @@ const QuizPage = () => {
   const [showAnswer, setShowAnswer] = useState(false);
   const [keywordInputs, setKeywordInputs] = useState({});
 
+  // 즐겨찾기 & 별 상태 (로컬 상태로 관리하여 즉시 UI 업데이트)
+  const [isFavorite, setIsFavorite] = useState(question?.isFavorite || false);
+  const [isStarred, setIsStarred] = useState(question?.isWrongAnswer || false);
+
   // 채점 훅 사용
   const { gradingResult, checkKeyword, checkAllKeywords, submitAnswer, resetGrading } = useQuizGrading(question, inputMode);
+
+  // 틀린 문제 토글 mutation
+  const toggleWrongAnswerMutation = useToggleWrongAnswer();
 
   // 세션 inputMode 동기화
   useEffect(() => {
@@ -130,6 +136,14 @@ const QuizPage = () => {
       setInputMode(session.inputMode);
     }
   }, [session?.inputMode]);
+
+  // 문제가 바뀔 때마다 즐겨찾기 & 별 상태 초기화 (문제 ID가 변경될 때만)
+  useEffect(() => {
+    if (question) {
+      setIsFavorite(question.isFavorite || false);
+      setIsStarred(question.isWrongAnswer || false);
+    }
+  }, [question?.id]);
 
 
   // 키워드 입력 변경 핸들러
@@ -343,6 +357,9 @@ const QuizPage = () => {
     if (!question?.id || !sessionId) return;
 
     try {
+      // 즉시 UI 업데이트 (낙관적 업데이트)
+      setIsFavorite(!isFavorite);
+
       // localStorage 세션 업데이트
       toggleFavorite(sessionId, question.id);
 
@@ -350,10 +367,11 @@ const QuizPage = () => {
       setSession(getSession(sessionId));
 
       // TODO: 백엔드 API에도 전송
-      console.log('Toggle favorite:', { sessionId, questionId: question.id, isFavorite });
 
     } catch (error) {
       console.error('Toggle favorite error:', error);
+      // 에러 발생 시 원상복구
+      setIsFavorite(isFavorite);
       alert('즐겨찾기 변경에 실패했습니다.');
     }
   };
@@ -363,14 +381,23 @@ const QuizPage = () => {
     if (!question?.id || !sessionId) return;
 
     try {
-      // localStorage 세션 업데이트
-      toggleStar(sessionId, question.id);
+      // 백엔드 API 호출
+      const result = await toggleWrongAnswerMutation.mutateAsync({
+        questionId: question.id,
+        isStarred
+      });
 
-      // 세션 상태 갱신
-      setSession(getSession(sessionId));
+      // 성공 시 즉시 UI 업데이트
+      if (result?.isStarred !== undefined) {
+        // 1. 로컬 상태 업데이트 (즉시 UI 반영)
+        setIsStarred(result.isStarred);
 
-      // TODO: 백엔드 API에도 전송
-      console.log('Toggle star:', { sessionId, questionId: question.id, isStarred });
+        // 2. localStorage 세션 업데이트
+        toggleStar(sessionId, question.id);
+
+        // 3. 세션 상태 갱신
+        setSession(getSession(sessionId));
+      }
 
     } catch (error) {
       console.error('Toggle star error:', error);

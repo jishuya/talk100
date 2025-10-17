@@ -168,6 +168,21 @@ export const useSubmitAnswer = () => {
   });
 };
 
+// 틀린 문제 토글 (별 아이콘)
+export const useToggleWrongAnswer = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ questionId, isStarred }) => api.toggleWrongAnswer(questionId, isStarred),
+    onSuccess: () => {
+      // 틀린 문제 리스트 캐시 무효화
+      queryClient.invalidateQueries(['quiz', 'wrong-answers']);
+      // 개인 퀴즈 카운트 캐시 무효화 (홈 화면)
+      queryClient.invalidateQueries(['user', 'personalQuizzes']);
+    },
+  });
+};
+
 // ==============================================
 // 마이페이지 관련 훅
 // ==============================================

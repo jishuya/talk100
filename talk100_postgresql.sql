@@ -196,7 +196,6 @@ CREATE TABLE wrong_answers (
     user_id VARCHAR(255) REFERENCES users(uid) ON DELETE CASCADE,
     question_id INTEGER REFERENCES questions(question_id) ON DELETE CASCADE,
     added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    wrong_count INTEGER DEFAULT 1,
     
     PRIMARY KEY (user_id, question_id)
 );

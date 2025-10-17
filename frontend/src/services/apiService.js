@@ -279,6 +279,14 @@ class ApiService {
     });
   }
 
+  // 🧩 QuizPage.jsx에서 사용 - 틀린 문제 토글 (별 아이콘)
+  toggleWrongAnswer(questionId, isStarred) {
+    return this.request('/api/quiz/wrong-answers/toggle', null, {
+      method: 'POST',
+      body: { questionId, isStarred }
+    });
+  }
+
   // ==============================================
   // 👤 MyPage - 마이페이지 관련 API
   // ==============================================
