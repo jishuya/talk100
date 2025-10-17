@@ -228,407 +228,70 @@ INSERT INTO category (category_id, name, display_name, order_num) VALUES
 -- ================================================
 -- Questions 테이블 - MODEL EXAMPLE (Day 1~4)
 -- ================================================
--- ========================================
--- 1. 단문(short) 타입 예제
--- ========================================
+-- Day 1 Questions (question_id: 1-13)
+INSERT INTO public.questions (question_id,category_id,"day",question_number,question_type,korean,english,korean_a,english_a,korean_b,english_b,audio_male,audio_female,audio_male_a,audio_female_a,audio_male_b,audio_female_b,keywords) VALUES
+	 (1,1,1,1,'short','재택근무는 저랑 안 맞아요.','Working from home isn''t for me.',NULL,NULL,NULL,NULL,'/audio/day01/q1_male.mp3','/audio/day01/q1_female.mp3',NULL,NULL,NULL,NULL,'{working,home}'),
+	 (2,1,1,2,'short','저는 재택근무 체질이 아니예요. 늘 딴짓하게 되거든요.','Working from home isn''t for me. I always get distracted.',NULL,NULL,NULL,NULL,'/audio/day01/q2_male.mp3','/audio/day01/q2_female.mp3',NULL,NULL,NULL,NULL,'{for,distracted}'),
+	 (3,1,1,3,'short','소개팅은 저랑 안 맞아요.','Going on a date isn''t for me.',NULL,NULL,NULL,NULL,'/audio/day01/q3_male.mp3','/audio/day01/q3_female.mp3',NULL,NULL,NULL,NULL,'{going,date}'),
+	 (4,1,1,4,'short','노트북은 저랑 좀 안 맞아요','Laptops aren''t really for me. Something about the keyboard is super uncomfortable.',NULL,NULL,NULL,NULL,'/audio/day01/q4_male.mp3','/audio/day01/q4_female.mp3',NULL,NULL,NULL,NULL,'{laptops,uncomfortable}'),
+	 (5,1,1,5,'short','전기차는 좀 별로예요. 충전소는 요즘 늘었지만, 여전히 엄청 귀찮게 느껴져요.','Electronic cars aren''t for me. We have more charging stations around now, but it still feels like too much of hassle.',NULL,NULL,NULL,NULL,'/audio/day01/q5_male.mp3','/audio/day01/q5_female.mp3',NULL,NULL,NULL,NULL,'{electronic,hassle}'),
+	 (6,1,1,6,'short','그 사람 직업이 좋은 건 아는데, 그런 남자는 나는 별로야.','I know he has a decent job, but guys like him aren''t really for me.',NULL,NULL,NULL,NULL,'/audio/day01/q6_male.mp3','/audio/day01/q6_female.mp3',NULL,NULL,NULL,NULL,'{decent,aren''t}'),
+	 (7,2,1,7,'dialogue',NULL,NULL,'우리 나가서 맛난 회 먹을까?','Why don''t we go out and get some nice sashimi? My treat!',NULL,NULL,NULL,NULL,'/audio/day01/q1_male_a.mp3','/audio/day01/q1_female_a.mp3',NULL,NULL,'{sashimi,treat}'),
+	 (8,2,1,8,'dialogue',NULL,NULL,'너무 고맙긴 한데. 난 회를 별로 안 좋아해. 식감이 적응이 안 돼.','','너무 고맙긴 한데. 난 회를 별로 안 좋아해. 식감이 적응이 안 돼.','It''s kind of you to offer, but raw fish just isn''t for me. I can''t get used to the texture.',NULL,NULL,'/audio/day01/q2_male_b.mp3','/audio/day01/q2_female_b.mp3',NULL,NULL,'{raw,texture}'),
+	 (9,2,1,9,'dialogue',NULL,NULL,'청취 연습을 위해 <기묘한 이야기>를 시청할 것을 추천합니다.','I recommend watching Stranger Things to practice listening.',NULL,NULL,NULL,NULL,'/audio/day01/q3_male_a.mp3','/audio/day01/q3_female_a.mp3',NULL,NULL,'{Stranger,listening}'),
+	 (10,2,1,10,'dialogue',NULL,NULL,NULL,NULL,'좋은 생각이긴 한데, 저는 미국 프로그램이 체질에 안 맞아요. 스토리에 재미가 안 붙어요.','It''s a good idea, but American shows aren''t for me. I can''t really get into the stories.',NULL,NULL,'/audio/day01/q4_male_b.mp3','/audio/day01/q4_female_b.mp3',NULL,NULL,'{American,stories}'),
+	 (11,2,1,11,'dialogue',NULL,NULL,'애들하고 정말 잘 노는군요. 선생님 할 생각은 해보셨나요?','You''re really great around kids. Have you ever thought of being a teacher?',NULL,NULL,NULL,NULL,'/audio/day01/q5_male_a.mp3','/audio/day01/q5_female_a.mp3',NULL,NULL,'{great,teacher}'),
+	 (12,2,1,12,'dialogue',NULL,NULL,NULL,NULL,'아니요. 저는 가르치는 거랑 잘 안 맞아요. 애들이랑 노는 건 좋은데, 공부시키는 게 너무 힘들 듯해요.','No, no. Teaching isn''t really for me. I like to play with them but trying to make them study seems like hard work.',NULL,NULL,'/audio/day01/q6_male_b.mp3','/audio/day01/q6_female_b.mp3',NULL,NULL,'{teaching,hard}'),
+	 (13,3,1,13,'long','안녕, Greg. 내가 생일 선물로 받은 로잉 머신 기억하지? 혹시 관심있어? 나랑은 별로 안맞더라고.','Hey, Greg. Do you remember that rowing machine I got for my birthday? Are you interested in it? Turns out it''s not really for me.',NULL,NULL,NULL,NULL,'/audio/day01/q1_male.mp3','/audio/day01/q1_female.mp3',NULL,NULL,NULL,NULL,'{rowing,birthday}');
 
--- Day 01 단문 문제들
-INSERT INTO questions (
-    question_id, category_id, day, question_number, question_type,
-    korean, english,
-    audio_male, audio_female,
-    keywords
-) VALUES 
-(1, 1, 1, 1, 'short',
- '재택근무는 저랑 안 맞아요.',
- 'Working from home isn''t for me.',
- '/audio/day01/q1_male.mp3', '/audio/day01/q1_female.mp3',
- ARRAY['working', 'home', 'for', 'me']::TEXT[]),
+-- Day 2 Questions (question_id: 14-25)
+INSERT INTO public.questions (question_id,category_id,"day",question_number,question_type,korean,english,korean_a,english_a,korean_b,english_b,audio_male,audio_female,audio_male_a,audio_female_a,audio_male_b,audio_female_b,keywords) VALUES
+	 (14,1,2,1,'short','하루빨리 새 집으로 이사 가고 싶어요.','I can''t wait to move into new house.',NULL,NULL,NULL,NULL,'/audio/day02/q1_male.mp3','/audio/day02/q1_female.mp3',NULL,NULL,NULL,NULL,'{can''t,wait}'),
+	 (15,1,2,2,'short','다음 에피소드는 어떤 내용인지 궁금해 미치겠어.','I can''t wait to see what the next episode will bring.',NULL,NULL,NULL,NULL,'/audio/day02/q2_male.mp3','/audio/day02/q2_female.mp3',NULL,NULL,NULL,NULL,'{see,episode}'),
+	 (16,1,2,3,'short','아내가 제 선물을 개봉할 때 어떤 표정일지 궁금해 죽겠습니다.','I can''t wait to see the look on my wife''s face when she opens my gift.',NULL,NULL,NULL,NULL,'/audio/day02/q3_male.mp3','/audio/day02/q3_female.mp3',NULL,NULL,NULL,NULL,'{look,face}'),
+	 (17,1,2,4,'short','이 프로젝트가 빨리 끝났으면 좋겠어요. 너무 오래 걸립니다.','I can''t wait to be done with this project. It''s takes forever.',NULL,NULL,NULL,NULL,'/audio/day02/q4_male.mp3','/audio/day02/q4_female.mp3',NULL,NULL,NULL,NULL,'{done,forever}'),
+	 (18,1,2,5,'short','여보, 저녁 식사가 너무 맛있는 냄새가 나네. 어서 먹고 싶어.','That dinner smells delicious, honey. I can''t wait.',NULL,NULL,NULL,NULL,'/audio/day02/q5_male.mp3','/audio/day02/q5_female.mp3',NULL,NULL,NULL,NULL,'{dinner,delicious}'),
+	 (19,1,2,6,'short','<베이비 드라이버>가 미국에서는 몇 달 전에 개봉했어. 이곳에서도 어서 개봉했으면 좋겠다.','Baby Driver was released months ago in the United States. I can''t wait for it to come out here.',NULL,NULL,NULL,NULL,'/audio/day02/q6_male.mp3','/audio/day02/q6_female.mp3',NULL,NULL,NULL,NULL,'{released,come}'),
+	 (20,2,2,7,'dialogue',NULL,NULL,'그 책 드디어 영화로 만들었다며?','Did you here they finally made that book into a movie?',NULL,NULL,NULL,NULL,'/audio/day02/q1_male_a.mp3','/audio/day02/q1_female_a.mp3',NULL,NULL,'{book,movie}'),
+	 (21,2,2,8,'dialogue',NULL,NULL,'','','응! 어서 보고 싶어. 내가 제일 좋아하는 장면들이 다 포함되어 있기를.','Yes! I can''t wait to see it. I hope they included all my favorite scenes.',NULL,NULL,NULL,NULL,'/audio/day02/q2_male_b.mp3','/audio/day02/q2_female_b.mp3','{favorite,scenes}'),
+	 (22,2,2,9,'dialogue',NULL,NULL,'프로젝트는 잘 되어 가나요? 한동안 매달려 있으신 것 같던데.','How''s that project going? It seems like you''ve been working on it for a while.',NULL,NULL,NULL,NULL,'/audio/day02/q3_male_a.mp3','/audio/day02/q3_female_a.mp3',NULL,NULL,'{project,working}'),
+	 (23,2,2,10,'dialogue',NULL,NULL,NULL,NULL,'네 일주일 내내 이것을 하고 있습니다. 어서 끝내고 뭔가 다른 걸로 넘어가고 싶어요.','Yeah, I''ve been working on it all week. I can''t wait to finish it and finally move on to something else.',NULL,NULL,NULL,NULL,'/audio/day02/q4_male_b.mp3','/audio/day02/q4_female_b.mp3','{working,move}'),
+	 (24,2,2,11,'dialogue',NULL,NULL,'네가 뜨개질할 수 있는 걸 몰랐네. 뭐 만들고 있니?','I didn''t know you could knit. What are you making?',NULL,NULL,NULL,NULL,'/audio/day02/q5_male_a.mp3','/audio/day02/q5_female_a.mp3',NULL,NULL,'{knit,making}'),
+	 (25,2,2,12,'dialogue',NULL,NULL,NULL,NULL,'여동생에게 줄 스카프를 만들고 있어. 내가 자기 주려고 이걸 만든 걸 알면 어떤 표정일까 궁금해 죽겠어.','I''m making a scarf for my little sister. I can''t wait to see the look on her face when she realizes I made it for her.',NULL,NULL,NULL,NULL,'/audio/day02/q6_male_b.mp3','/audio/day02/q6_female_b.mp3','{scarf,look}');
 
-(2, 1, 1, 2, 'short',
- '저는 재택근무 체질이 아니예요. 늘 딴짓하게 되거든요.',
- 'Working from home isn''t for me. I always get distracted.',
- '/audio/day01/q2_male.mp3', '/audio/day01/q2_female.mp3',
- ARRAY['working', 'home', 'for', 'me', 'distracted']::TEXT[]),
+-- Day 3 Questions (question_id: 27-39)
+INSERT INTO public.questions (question_id,category_id,"day",question_number,question_type,korean,english,korean_a,english_a,korean_b,english_b,audio_male,audio_female,audio_male_a,audio_female_a,audio_male_b,audio_female_b,keywords) VALUES
+	 (27,1,3,1,'short','(사내 발표 상황)죄송한데 조금 짧게 해주시겠어요?','Do you mind keeping it a bit short?',NULL,NULL,NULL,NULL,'/audio/day03/q1_male.mp3','/audio/day03/q1_female.mp3',NULL,NULL,NULL,NULL,'{keeping,short}'),
+	 (28,1,3,2,'short','제가 마지막 남은 피자 한 조각 먹어도 될까요?','Do you mind if I finish off the last piece of pizza?',NULL,NULL,NULL,NULL,'/audio/day03/q2_male.mp3','/audio/day03/q2_female.mp3',NULL,NULL,NULL,NULL,'{mind,piece}'),
+	 (29,1,3,3,'short','미안한데, 오는 길에 커피 좀 사다 줄 수 있어요?','Do you mind grabbing me some coffee on your way?',NULL,NULL,NULL,NULL,'/audio/day03/q3_male.mp3','/audio/day03/q3_female.mp3',NULL,NULL,NULL,NULL,'{grabbing,way}'),
+	 (30,1,3,4,'short','제가 여유 시간이 겨우 5분 있어요. 짧게 해 주실 수 있을까요?','I''ve got only five minutes to spare. Do you mind keeping it short?',NULL,NULL,NULL,NULL,'/audio/day03/q4_male.mp3','/audio/day03/q4_female.mp3',NULL,NULL,NULL,NULL,'{five,spare}'),
+	 (31,1,3,5,'short','에어컨을 좀 줄이면 안 될까요? 좀 추워서요.','Do you mind turning down the air-conditioning? I feel a bit cold.',NULL,NULL,NULL,NULL,'/audio/day03/q5_male.mp3','/audio/day03/q5_female.mp3',NULL,NULL,NULL,NULL,'{turning,cold}'),
+	 (32,1,3,6,'short','개인적인 질문 하나 해도 될까요?','Do you mind if I ask you personal question?',NULL,NULL,NULL,NULL,'/audio/day03/q6_male.mp3','/audio/day03/q6_female.mp3',NULL,NULL,NULL,NULL,'{ask,question}'),
+	 (33,2,3,7,'dialogue',NULL,NULL,'죄송한데, 회의를 금요일로 옮겨도 될까요?','Do you mind if we move the meeting for Friday?',NULL,NULL,NULL,NULL,'/audio/day03/q1_male_a.mp3','/audio/day03/q1_female_a.mp3',NULL,NULL,'{move,Friday}'),
+	 (34,2,3,8,'dialogue',NULL,NULL,NULL,NULL,'네, 괜찮습니다. 사실 저희에겐 금요일이 더 좋아요.','Sure, Friday works better for us, actually.',NULL,NULL,NULL,NULL,'/audio/day03/q2_male_b.mp3','/audio/day03/q2_female_b.mp3','{works,better}'),
+	 (35,2,3,9,'dialogue',NULL,NULL,'죄송한데, 꼭대기 선반에 있는 저 시리얼 상자들 중 하나를 내려 줄 수 있을까요?','Excuse me, do you mind grabbing me one of those cereal boxes on the top shelf?',NULL,NULL,NULL,NULL,'/audio/day03/q3_male_a.mp3','/audio/day03/q3_female_a.mp3',NULL,NULL,'{grabbing,shelf}'),
+	 (36,2,3,10,'dialogue',NULL,NULL,NULL,NULL,'당연하죠. 얼마든지요!','Sure, Always happy to help!',NULL,NULL,NULL,NULL,'/audio/day03/q4_male_b.mp3','/audio/day03/q4_female_b.mp3','{happy,help}'),
+	 (37,2,3,11,'dialogue',NULL,NULL,'어디서 만나면 될까요?','Where would you like to meet?',NULL,NULL,NULL,NULL,'/audio/day03/q5_male_a.mp3','/audio/day03/q5_female_a.mp3',NULL,NULL,'{where,meet}'),
+	 (38,2,3,12,'dialogue',NULL,NULL,NULL,NULL,'제가 그쪽 사무실로 가도 상관없습니다.','I don''t mind coming over to your office.',NULL,NULL,NULL,NULL,'/audio/day03/q6_male_b.mp3','/audio/day03/q6_female_b.mp3','{coming,office}'),
+	 (39,3,3,13,'long','안녕하세요, Smith씨,
+저는 항상 화요일 오후 2시 콘퍼런스 콜이 기다려집니다. 그런데, 이번 주에는 유감스럽게도 1시 반에 다른 회의가 잡혀 있고 (2시에 맞춰) 저때 끝날지 확실하지 않습니다. 괜찮으시면 혹시 모르니까 이번에는 2시 30분에 시작해도 될까요?','Good afternoon, Mr. Smith,
+I always look forward to our 2 p.m. Tuesday conference call. However, this week, I''m afraid I have another meeting scheduled for 1:30, and I''m not sure if it will be over in time. If you don''t mind, could we start at 2:30 this time, just to be safe?',NULL,NULL,NULL,NULL,'/audio/day03/q1_male.mp3','/audio/day03/q1_female.mp3',NULL,NULL,NULL,NULL,'{scheduled,safe}');
 
-(3, 1, 1, 3, 'short',
- '소개팅은 저랑 안 맞아요.',
- 'Going on a date isn''t for me.',
- '/audio/day01/q3_male.mp3', '/audio/day01/q3_female.mp3',
- ARRAY['going', 'date', 'for', 'me']::TEXT[]),
-
-(4, 1, 1, 4, 'short',
- '노트북은 저랑 좀 안 맞아요',
- 'Laptops aren''t really for me. Something about the keyboard is super uncomfortable.',
- '/audio/day01/q4_male.mp3', '/audio/day01/q4_female.mp3',
- ARRAY['laptops', 'for', 'me', 'keyboard', 'uncomfortable']::TEXT[]),
-
-(5, 1, 1, 5, 'short',
- '전기차는 좀 별로예요. 충전소는 요즘 늘었지만, 여전히 엄청 귀찮게 느껴져요.',
- 'Electronic cars aren''t for me. We have more charging stations around now, but it still feels like too much of hassle.',
- '/audio/day01/q5_male.mp3', '/audio/day01/q5_female.mp3',
- ARRAY['electronic', 'cars', 'for', 'me', 'charging', 'stations', 'hassle']::TEXT[]),
-
-(6, 1, 1, 6, 'short',
- '그 사람 직업이 좋은 건 아는데, 그런 남자는 나는 별로야.',
- 'I know he has a decent job, but guys like him aren''t really for me.',
- '/audio/day01/q6_male.mp3', '/audio/day01/q6_female.mp3',
- ARRAY['decent', 'job', 'guys', 'for', 'me']::TEXT[]);
-
--- Day 01 대화문 문제들 (A와 B 분리)
-INSERT INTO questions (
-    question_id, category_id, day, question_number, question_type,
-    korean_a, english_a,
-    audio_male_a, audio_female_a,
-    keywords
-) VALUES 
-(7, 2, 1, 1, 'dialogue',
- '우리 나가서 맛난 회 먹을까?',
- 'Why don''t we go out and get some nice sashimi? My treat!',
- '/audio/day01/q1_male_a.mp3', '/audio/day01/q1_female_a.mp3',
- ARRAY['sashimi', 'treat']::TEXT[]),
-
-(8, 2, 1, 2, 'dialogue',
- '너무 고맙긴 한데. 난 회를 별로 안 좋아해. 식감이 적응이 안 돼.',
- 'It''s kind of you to offer, but raw fish just isn''t for me. I can''t get used to the texture.',
- '/audio/day01/q2_male_b.mp3', '/audio/day01/q2_female_b.mp3',
- ARRAY['raw', 'fish', 'for', 'me', 'texture']::TEXT[]),
-
-(9, 2, 1, 3, 'dialogue',
- '청취 연습을 위해 <기묘한 이야기>를 시청할 것을 추천합니다.',
- 'I recommend watching Stranger Things to practice listening.',
- '/audio/day01/q3_male_a.mp3', '/audio/day01/q3_female_a.mp3',
- ARRAY['Stranger', 'Things', 'listening']::TEXT[]),
-
-(10, 2, 1, 4, 'dialogue',
- '좋은 생각이긴 한데, 저는 미국 프로그램이 체질에 안 맞아요. 스토리에 재미가 안 붙어요.',
- 'It''s a good idea, but American shows aren''t for me. I can''t really get into the stories.',
- '/audio/day01/q4_male_b.mp3', '/audio/day01/q4_female_b.mp3',
- ARRAY['American', 'shows', 'for', 'me', 'stories']::TEXT[]),
-
-(11, 2, 1, 5, 'dialogue',
- '애들하고 정말 잘 노는군요. 선생님 할 생각은 해보셨나요?',
- 'You''re really great around kids. Have you ever thought of being a teacher?',
- '/audio/day01/q5_male_a.mp3', '/audio/day01/q5_female_a.mp3',
- ARRAY['great', 'kids', 'teacher']::TEXT[]),
-
-(12, 2, 1, 6, 'dialogue',
- '아니요. 저는 가르치는 거랑 잘 안 맞아요. 애들이랑 노는 건 좋은데, 공부시키는 게 너무 힘들 듯해요.',
- 'No, no. Teaching isn''t really for me. I like to play with them but trying to make them study seems like hard work.',
- '/audio/day01/q6_male_b.mp3', '/audio/day01/q6_female_b.mp3',
- ARRAY['teaching', 'for', 'me', 'study', 'hard', 'work']::TEXT[]);
-
--- Day 01 장문 문제
-INSERT INTO questions (
-    question_id, category_id, day, question_number, question_type,
-    korean, english,
-    audio_male, audio_female,
-    keywords
-) VALUES 
-(13, 3, 1, 1, 'long',
- '안녕, Greg. 내가 생일 선물로 받은 로잉 머신 기억하지? 혹시 관심있어? 나랑은 별로 안맞더라고.',
- 'Hey, Greg. Do you remember that rowing machine I got for my birthday? Are you interested in it? Turns out it''s not really for me.',
- '/audio/day01/q1_male.mp3', '/audio/day01/q1_female.mp3',
- ARRAY['rowing', 'machine', 'birthday', 'interested', 'not', 'for', 'me']::TEXT[]);
-
--- Day 02 단문 문제들
-INSERT INTO questions (
-    question_id, category_id, day, question_number, question_type,
-    korean, english,
-    audio_male, audio_female,
-    keywords
-) VALUES 
-(14, 1, 2, 1, 'short',
- '하루빨리 새 집으로 이사 가고 싶어요.',
- 'I can''t wait to move into new house.',
- '/audio/day02/q1_male.mp3', '/audio/day02/q1_female.mp3',
- ARRAY['can''t', 'wait', 'move', 'new', 'house']::TEXT[]),
-
-(15, 1, 2, 2, 'short',
- '다음 에피소드는 어떤 내용이지 궁금해 미치겠어.',
- 'I can''t wait to see what the next episode will bring.',
- '/audio/day02/q2_male.mp3', '/audio/day02/q2_female.mp3',
- ARRAY['can''t', 'wait', 'see', 'next', 'episode']::TEXT[]),
-
-(16, 1, 2, 3, 'short',
- '아내가 제 선물을 개봉할 때 어떤 표정일지 궁금해 죽겠습니다.',
- 'I can''t wait to see the look on my wife''s face when she opens my gift.',
- '/audio/day02/q3_male.mp3', '/audio/day02/q3_female.mp3',
- ARRAY['can''t', 'wait', 'see', 'look', 'wife', 'face', 'gift']::TEXT[]),
-
-(17, 1, 2, 4, 'short',
- '이 프로젝트가 빨리 끝났으면 좋겠어요. 너무 오래 걸립니다.',
- 'I can''t wait to be done with this project. It''s takes forever.',
- '/audio/day02/q4_male.mp3', '/audio/day02/q4_female.mp3',
- ARRAY['can''t', 'wait', 'done', 'project', 'forever']::TEXT[]),
-
-(18, 1, 2, 5, 'short',
- '여보, 저녁 식사가 너무 맛있는 냄새가 나네. 어서 먹고 싶어.',
- 'That dinner smells delicious, honey. I can''t wait.',
- '/audio/day02/q5_male.mp3', '/audio/day02/q5_female.mp3',
- ARRAY['dinner', 'smells', 'delicious', 'can''t', 'wait']::TEXT[]),
-
-(19, 1, 2, 6, 'short',
- '<베이비 드라이버>가 미국에서는 몇 달 전에 개봉했어. 이곳에서도 어서 개봉했으면 좋겠다.',
- 'Baby Driver was released months ago in the United States. I can''t wait for it to come out here.',
- '/audio/day02/q6_male.mp3', '/audio/day02/q6_female.mp3',
- ARRAY['Baby', 'Driver', 'released', 'can''t', 'wait', 'come', 'out']::TEXT[]);
-
--- Day 02 대화문 문제들 (A와 B 분리)
-INSERT INTO questions (
-    question_id, category_id, day, question_number, question_type,
-    korean_a, english_a,
-    audio_male_a, audio_female_a,
-    keywords
-) VALUES 
-(20, 2, 2, 1, 'dialogue',
- '그 책 드디어 영화로 만들었다며?',
- 'Did you here they finally made that book into a movie?',
- '/audio/day02/q1_male_a.mp3', '/audio/day02/q1_female_a.mp3',
- ARRAY['book', 'movie']::TEXT[]),
-
-(21, 2, 2, 2, 'dialogue',
- '응! 어서 보고 싶어. 내가 제일 좋아하는 장면들이 다 포함되어 있기를.',
- 'Yes! I can''t wait to see it. I hope they included all my favorite scenes.',
- '/audio/day02/q2_male_b.mp3', '/audio/day02/q2_female_b.mp3',
- ARRAY['can''t', 'wait', 'see', 'favorite', 'scenes']::TEXT[]),
-
-(22, 2, 2, 3, 'dialogue',
- '프로젝트는 잘 되어 가나요? 한동안 매달려 있으신 것 같던데.',
- 'How''s that project going? It seems like you''ve been working on it for a while.',
- '/audio/day02/q3_male_a.mp3', '/audio/day02/q3_female_a.mp3',
- ARRAY['project', 'working']::TEXT[]),
-
-(23, 2, 2, 4, 'dialogue',
- '네 일주일 내내 이것을 하고 있습니다. 어서 끝내고 뭔가 다른 걸로 넘어가고 싶어요.',
- 'Yeah, I''ve been working on it all week. I can''t wait to finish it and finally move on to something else.',
- '/audio/day02/q4_male_b.mp3', '/audio/day02/q4_female_b.mp3',
- ARRAY['working', 'can''t', 'wait', 'finish', 'move', 'on']::TEXT[]),
-
-(24, 2, 2, 5, 'dialogue',
- '네가 뜨개질할 수 있는 걸 몰랐네. 뭐 만들고 있니?',
- 'I didn''t know you could knit. What are you making?',
- '/audio/day02/q5_male_a.mp3', '/audio/day02/q5_female_a.mp3',
- ARRAY['knit', 'making']::TEXT[]),
-
-(25, 2, 2, 6, 'dialogue',
- '여동생에게 줄 스카프를 만들고 있어. 내가 자기 주려고 이걸 만든 걸 알면 어떤 표정일까 궁금해 죽겠어.',
- 'I''m making a scarf for my little sister. I can''t wait to see the look on her face when she realizes I made it for her.',
- '/audio/day02/q6_male_b.mp3', '/audio/day02/q6_female_b.mp3',
- ARRAY['scarf', 'sister', 'can''t', 'wait', 'look', 'face']::TEXT[]);
-
--- Day 02 장문 문제
-INSERT INTO questions (
-    question_id, category_id, day, question_number, question_type,
-    korean, english,
-    audio_male, audio_female,
-    keywords
-) VALUES 
-(26, 3, 2, 1, 'long',
- '신형 그랜저를 어서 보고 싶네요. 실은 일산 자유로에서 본 친구가 있긴 한데, 자세히는 못 봤다고 합니다. 현대가 이런 차들에 위장막을 씌우니까요. 위장막 때문에 스파이 샷이 의미가 없어서 너무 속상하네요.',
- 'I can''t wait to get a glimpse of the new Grandeur. I actually have a friend who spotted one on the Ilsan freeway, but he couldn''t really see any details. Hyundai uses these car camouflage wraps. They make spy shots useless and it''s really frustrating.',
- '/audio/day02/q1_male.mp3', '/audio/day02/q1_female.mp3',
- ARRAY['can''t', 'wait', 'glimpse', 'Grandeur', 'spotted', 'freeway', 'camouflage', 'wraps', 'spy', 'shots', 'frustrating']::TEXT[]);
-
--- Day 03 단문 문제들
-INSERT INTO questions (
-    question_id, category_id, day, question_number, question_type,
-    korean, english,
-    audio_male, audio_female,
-    keywords
-) VALUES 
-(27, 1, 3, 1, 'short',
- '(사내 발표 상황)죄송한데 조금 짧게 해주시겠어요?',
- 'Do you mind keeping it a bit short?',
- '/audio/day03/q1_male.mp3', '/audio/day03/q1_female.mp3',
- ARRAY['do', 'mind', 'keeping', 'short']::TEXT[]),
-
-(28, 1, 3, 2, 'short',
- '제가 마지막 남은 피자 한 조각 먹어도 될까요?',
- 'Do you mind if I finish off the last piece of pizza?',
- '/audio/day03/q2_male.mp3', '/audio/day03/q2_female.mp3',
- ARRAY['do', 'mind', 'finish', 'last', 'piece', 'pizza']::TEXT[]),
-
-(29, 1, 3, 3, 'short',
- '미안한데, 오는 길에 커피 좀 사다 줄 수 있어요?',
- 'Do you mind grabbing me some coffee on your way?',
- '/audio/day03/q3_male.mp3', '/audio/day03/q3_female.mp3',
- ARRAY['do', 'mind', 'grabbing', 'coffee', 'way']::TEXT[]),
-
-(30, 1, 3, 4, 'short',
- '제가 여유 시간이 겨우 5분 있어요. 짧게 해 주실 수 있을까요?',
- 'I''ve got only five minutes to spare. Do you mind keeping it short?',
- '/audio/day03/q4_male.mp3', '/audio/day03/q4_female.mp3',
- ARRAY['five', 'minutes', 'spare', 'do', 'mind', 'keeping', 'short']::TEXT[]),
-
-(31, 1, 3, 5, 'short',
- '에어컨을 좀 줄이면 안 될까요? 좀 추워서요.',
- 'Do you mind turning down the air-conditioning? I feel a bit cold.',
- '/audio/day03/q5_male.mp3', '/audio/day03/q5_female.mp3',
- ARRAY['do', 'mind', 'turning', 'down', 'air-conditioning', 'cold']::TEXT[]),
-
-(32, 1, 3, 6, 'short',
- '개인적인 질문 하나 해도 될까요?',
- 'Do you mind if I ask you personal question?',
- '/audio/day03/q6_male.mp3', '/audio/day03/q6_female.mp3',
- ARRAY['do', 'mind', 'ask', 'personal', 'question']::TEXT[]);
-
--- Day 03 대화문 문제들 (A와 B 분리)
-INSERT INTO questions (
-    question_id, category_id, day, question_number, question_type,
-    korean_a, english_a,
-    audio_male_a, audio_female_a,
-    keywords
-) VALUES 
-(33, 2, 3, 1, 'dialogue',
- '죄송한데, 회의를 금요일로 옮겨도 될까요?',
- 'Do you mind if we move the meeting for Friday?',
- '/audio/day03/q1_male_a.mp3', '/audio/day03/q1_female_a.mp3',
- ARRAY['do', 'mind', 'move', 'meeting', 'Friday']::TEXT[]),
-
-(34, 2, 3, 2, 'dialogue',
- '네, 괜찮습니다. 사실 저희에겐 금요일이 더 좋아요.',
- 'Sure, Friday works better for us, actually.',
- '/audio/day03/q2_male_b.mp3', '/audio/day03/q2_female_b.mp3',
- ARRAY['Friday', 'works', 'better']::TEXT[]),
-
-(35, 2, 3, 3, 'dialogue',
- '죄송한데, 꼭대기 선반에 있는 저 시리얼 상자들 중 하나를 내려 줄 수 있을까요?',
- 'Excuse me, do you mind grabbing me one of those cereal boxes on the top shelf?',
- '/audio/day03/q3_male_a.mp3', '/audio/day03/q3_female_a.mp3',
- ARRAY['do', 'mind', 'grabbing', 'cereal', 'boxes', 'shelf']::TEXT[]),
-
-(36, 2, 3, 4, 'dialogue',
- '당연하죠. 얼마든지요!',
- 'Sure, Always happy to help!',
- '/audio/day03/q4_male_b.mp3', '/audio/day03/q4_female_b.mp3',
- ARRAY['happy', 'help']::TEXT[]),
-
-(37, 2, 3, 5, 'dialogue',
- '어디서 만나면 될까요?',
- 'Where would you like to meet?',
- '/audio/day03/q5_male_a.mp3', '/audio/day03/q5_female_a.mp3',
- ARRAY['where', 'meet']::TEXT[]),
-
-(38, 2, 3, 6, 'dialogue',
- '제가 그쪽 사무실로 가도 상관없습니다.',
- 'I don''t mind coming over to your office.',
- '/audio/day03/q6_male_b.mp3', '/audio/day03/q6_female_b.mp3',
- ARRAY['don''t', 'mind', 'coming', 'office']::TEXT[]);
-
--- Day 03 장문 문제
-INSERT INTO questions (
-    question_id, category_id, day, question_number, question_type,
-    korean, english,
-    audio_male, audio_female,
-    keywords
-) VALUES 
-(39, 3, 3, 1, 'long',
- '안녕하세요, Smith씨,
-저는 항상 화요일 오후 2시 콘퍼런스 콜이 기다려집니다. 그런데, 이번 주에는 유감스럽게도 1시 반에 다른 회의가 잡혀 있고 (2시에 맞춰) 저때 끝날지 확실하지 않습니다. 괜찮으시면 혹시 모르니까 이번에는 2시 30분에 시작해도 될까요?',
- 'Good afternoon, Mr. Smith,
-I always look forward to our 2 p.m. Tuesday conference call. However, this week, I''m afraid I have another meeting scheduled for 1:30, and I''m not sure if it will be over in time. If you don''t mind, could we start at 2:30 this time, just to be safe?',
- '/audio/day03/q1_male.mp3', '/audio/day03/q1_female.mp3',
- ARRAY['afternoon', 'look', 'forward', 'Tuesday', 'conference', 'call', 'meeting', 'scheduled', 'don''t', 'mind', 'start', 'safe']::TEXT[]);
-
--- Day 04 단문 문제들
-INSERT INTO questions (
-    question_id, category_id, day, question_number, question_type,
-    korean, english,
-    audio_male, audio_female,
-    keywords
-) VALUES 
-(40, 1, 4, 1, 'short',
- '물가가 올라도 너무 올라요.',
- 'Everything is getting super expensive.',
- '/audio/day04/q1_male.mp3', '/audio/day04/q1_female.mp3',
- ARRAY['everything', 'getting', 'super', 'expensive']::TEXT[]),
-
-(41, 1, 4, 2, 'short',
- '그 여자분 키 엄청 커요.',
- 'She is super tall.',
- '/audio/day04/q2_male.mp3', '/audio/day04/q2_female.mp3',
- ARRAY['she', 'super', 'tall']::TEXT[]),
-
-(42, 1, 4, 3, 'short',
- '그 사람이 무지 바쁘거나, 아니면 저에 대한 관심이 식고 있는 거겠죠.',
- 'I''ve been super busy, or he is losing interest in me.',
- '/audio/day04/q3_male.mp3', '/audio/day04/q3_female.mp3',
- ARRAY['super', 'busy', 'losing', 'interest']::TEXT[]),
-
-(43, 1, 4, 4, 'short',
- '제가 요즘 이사 준비 때문에 엄청 바빴어요.',
- 'I''ve been super busy with my upcoming move.',
- '/audio/day04/q4_male.mp3', '/audio/day04/q4_female.mp3',
- ARRAY['super', 'busy', 'upcoming', 'move']::TEXT[]),
-
-(44, 1, 4, 5, 'short',
- '우와. 연세 있으신 분치고는 몸매가 너무 좋으시네요.',
- 'Wow. You''re in super good shape for an old guy.',
- '/audio/day04/q5_male.mp3', '/audio/day04/q5_female.mp3',
- ARRAY['super', 'good', 'shape', 'old', 'guy']::TEXT[]),
-
-(45, 1, 4, 6, 'short',
- '서울은 어디라도 다 너무 비싸. 근데 후암동은 상대적으로 저렴한 편이지.',
- 'All the neighborhoods in Seoul are super expensive, but Huam-dong is relatively cheap.',
- '/audio/day04/q6_male.mp3', '/audio/day04/q6_female.mp3',
- ARRAY['neighborhoods', 'Seoul', 'super', 'expensive', 'Huam-dong', 'cheap']::TEXT[]);
-
--- Day 04 대화문 문제들 (A와 B 분리)
-INSERT INTO questions (
-    question_id, category_id, day, question_number, question_type,
-    korean_a, english_a,
-    audio_male_a, audio_female_a,
-    keywords
-) VALUES 
-(46, 2, 4, 1, 'dialogue',
- '무슨 점심값이 만 원이 넘는 거야.',
- 'I never thought I''d have to pay over 10,000 won for lunch.',
- '/audio/day04/q1_male_a.mp3', '/audio/day04/q1_female_a.mp3',
- ARRAY['pay', 'lunch']::TEXT[]),
-
-(47, 2, 4, 2, 'dialogue',
- '그러게 요새 물가가 너무너무 비싸.',
- 'Yeah. Everything is getting super expensive.',
- '/audio/day04/q2_male_b.mp3', '/audio/day04/q2_female_b.mp3',
- ARRAY['everything', 'getting', 'super', 'expensive']::TEXT[]),
-
-(48, 2, 4, 3, 'dialogue',
- '제주도에서 선물 사 갈까?',
- 'Want me to get you a souvenir from Jeju?',
- '/audio/day04/q3_male_a.mp3', '/audio/day04/q3_female_a.mp3',
- ARRAY['souvenir', 'Jeju']::TEXT[]),
-
-(49, 2, 4, 4, 'dialogue',
- '오! 그럼 귤 한 박스 사다 줄래? 지금 제철이니 엄청 쌀 거야.',
- 'Oh! How about a box of tangerines? They should be super cheap since they''re in season.',
- '/audio/day04/q4_male_b.mp3', '/audio/day04/q4_female_b.mp3',
- ARRAY['tangerines', 'super', 'cheap', 'season']::TEXT[]),
-
-(50, 2, 4, 5, 'dialogue',
- '11월 말치고는 너무 따뜻하다. 지금쯤이면 보통은 훨씬 더 추운데.',
- 'It''s unusually warm for late November. It''s usually much colder by now.',
- '/audio/day04/q5_male_a.mp3', '/audio/day04/q5_female_a.mp3',
- ARRAY['warm', 'November', 'colder']::TEXT[]),
-
-(51, 2, 4, 6, 'dialogue',
- '맞아. 가을이 점점 짧아지고는 있는데 올해는 엄청 길다',
- 'Right. Autumn has been getting shorter, but this year, it''s been super long.',
- '/audio/day04/q6_male_b.mp3', '/audio/day04/q6_female_b.mp3',
- ARRAY['Autumn', 'shorter', 'super', 'long']::TEXT[]);
-
--- Day 04 장문 문제
-INSERT INTO questions (
-    question_id, category_id, day, question_number, question_type,
-    korean, english,
-    audio_male, audio_female,
-    keywords
-) VALUES 
-(52, 3, 4, 1, 'long',
- '저는 보통은 설명서대로 잘 못하는데, 이번 침대 프레임 조립은 정말 쉽더군요. 조립하는 데 한 시간도 안 걸렸습니다. 동봉된 육각 렌치 이외엔 별도의 도구도 필요 없었어요. 튼튼해 보이기까지 합니다. 이케아 가구가 좀 약하다는 평이 있는데, 이번 침대 프레임 보고는 많이 놀랐습니다.',
- 'I''m normally really bad at following instructions, but this bed frame was super easy to put together. It took me less than an hour. I didn''t need any extra tools, besides the included hex key. It looks sturdy too. The furniture from IKEA has a reputation for breaking easily, but this bed frame surprised me.',
- '/audio/day04/q1_male.mp3', '/audio/day04/q1_female.mp3',
- ARRAY['bad', 'instructions', 'bed', 'frame', 'super', 'easy', 'hour', 'tools', 'hex', 'key', 'sturdy', 'IKEA', 'reputation', 'surprised']::TEXT[]);
+-- Day 4 Questions (question_id: 40-52)
+INSERT INTO public.questions (question_id,category_id,"day",question_number,question_type,korean,english,korean_a,english_a,korean_b,english_b,audio_male,audio_female,audio_male_a,audio_female_a,audio_male_b,audio_female_b,keywords) VALUES
+	 (40,1,4,1,'short','물가가 올라도 너무 올라요.','Everything is getting super expensive.',NULL,NULL,NULL,NULL,'/audio/day04/q1_male.mp3','/audio/day04/q1_female.mp3',NULL,NULL,NULL,NULL,'{getting,expensive}'),
+	 (41,1,4,2,'short','그 여자분 키 엄청 커요.','She is super tall.',NULL,NULL,NULL,NULL,'/audio/day04/q2_male.mp3','/audio/day04/q2_female.mp3',NULL,NULL,NULL,NULL,'{super,tall}'),
+	 (42,1,4,3,'short','그 사람이 무지 바쁘거나, 아니면 저에 대한 관심이 식고 있는 거겠죠.','I''ve been super busy, or he is losing interest in me.',NULL,NULL,NULL,NULL,'/audio/day04/q3_male.mp3','/audio/day04/q3_female.mp3',NULL,NULL,NULL,NULL,'{super,interest}'),
+	 (43,1,4,4,'short','제가 요즘 이사 준비 때문에 엄청 바빴어요.','I''ve been super busy with my upcoming move.',NULL,NULL,NULL,NULL,'/audio/day04/q4_male.mp3','/audio/day04/q4_female.mp3',NULL,NULL,NULL,NULL,'{super,upcoming}'),
+	 (44,1,4,5,'short','우와. 연세 있으신 분치고는 몸매가 너무 좋으시네요.','Wow. You''re in super good shape for an old guy.',NULL,NULL,NULL,NULL,'/audio/day04/q5_male.mp3','/audio/day04/q5_female.mp3',NULL,NULL,NULL,NULL,'{super,shape}'),
+	 (45,1,4,6,'short','제가 지난 20년간 시간을 들여 만든 회사 웹사이트가 새랑 아무 느낌이네요. 지금 엄청 창피해요.','The company website I spent like 20 years building looks super janky compared to this new one. I''m super embarrassed now.',NULL,NULL,NULL,NULL,'/audio/day04/q6_male.mp3','/audio/day04/q6_female.mp3',NULL,NULL,NULL,NULL,'{janky,embarrassed}'),
+	 (46,2,4,7,'dialogue',NULL,NULL,'무슨 점심값이 만 원이 넘는 거야.','I never thought I''d have to pay over 10,000 won for lunch.',NULL,NULL,NULL,NULL,'/audio/day04/q1_male_a.mp3','/audio/day04/q1_female_a.mp3',NULL,NULL,'{pay,lunch}'),
+	 (47,2,4,8,'dialogue',NULL,NULL,NULL,NULL,'그러게 요새 물가가 너무너무 비싸.','Yeah. Everything is getting super expensive.',NULL,NULL,NULL,NULL,'/audio/day04/q2_male_b.mp3','/audio/day04/q2_female_b.mp3','{getting,expensive}'),
+	 (48,2,4,9,'dialogue',NULL,NULL,'제주도에서 선물 사 갈까?','Want me to get you a souvenir from Jeju?',NULL,NULL,NULL,NULL,'/audio/day04/q3_male_a.mp3','/audio/day04/q3_female_a.mp3',NULL,NULL,'{souvenir,Jeju}'),
+	 (49,2,4,10,'dialogue',NULL,NULL,NULL,NULL,'오! 그럼 귤 한 박스 사다 줄래? 지금 제철이니 엄청 쌀 거야.','Oh! How about a box of tangerines? They should be super cheap since they''re in season.',NULL,NULL,NULL,NULL,'/audio/day04/q4_male_b.mp3','/audio/day04/q4_female_b.mp3','{tangerines,season}'),
+	 (50,2,4,11,'dialogue',NULL,NULL,'11월 말치고는 너무 따뜻하다. 지금쯤이면 보통은 훨씬 더 추운데.','It''s unusually warm for late November. It''s usually much colder by now.',NULL,NULL,NULL,NULL,'/audio/day04/q5_male_a.mp3','/audio/day04/q5_female_a.mp3',NULL,NULL,'{November,colder}'),
+	 (51,2,4,12,'dialogue',NULL,NULL,NULL,NULL,'맞아. 가을이 점점 짧아지고는 있는데 올해는 엄청 길다','Right. Autumn has been getting shorter, but this year, it''s been super long.',NULL,NULL,NULL,NULL,'/audio/day04/q6_male_b.mp3','/audio/day04/q6_female_b.mp3','{Autumn,shorter}'),
+	 (52,3,4,13,'long','저는 보통은 설명서대로 잘 못하는데, 이번 침대 프레임 조립은 정말 쉽더군요. 조립하는 데 한 시간도 안 걸렸습니다. 동봉된 육각 렌치 이외엔 별도의 도구도 필요 없었어요. 튼튼해 보이기까지 합니다. 이케아 가구가 좀 약하다는 평이 있는데, 이번 침대 프레임 보고는 많이 놀랐습니다.','I''m normally really bad at following instructions, but this bed frame was super easy to put together. It took me less than an hour. I didn''t need any extra tools, besides the included hex key. It looks sturdy too. The furniture from IKEA has a reputation for breaking easily, but this bed frame surprised me.',NULL,NULL,NULL,NULL,'/audio/day04/q1_male.mp3','/audio/day04/q1_female.mp3',NULL,NULL,NULL,NULL,'{frame,reputation}');
 
 -- ================================================
 -- 샘플 사용자 데이터

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import Button from '../ui/Button';
 import { getIcon } from '../../utils/iconMap';
 
@@ -11,14 +12,22 @@ export const QuizControls = ({
   isRecording = false,
   onMainAction,
   onPlayAudio,
-  onShowHint,
   onShowFirstLetters,
   onShowFullAnswer,
   onSkipQuestion,
-  isSubmitting = false,
   showHint = false,
-  showAnswer = false
+  showAnswer = false,
+  gradingResult = null
 }) => {
+  const [clickedButton, setClickedButton] = useState(null);
+
+  // 버튼 클릭 핸들러 (애니메이션 효과)
+  const handleButtonClick = (buttonName, callback) => {
+    setClickedButton(buttonName);
+    setTimeout(() => setClickedButton(null), 300);
+    callback?.();
+  };
+
   return (
     <div className="fixed bottom-0 left-0 right-0 md:left-1/2 md:-translate-x-1/2 md:w-[768px] lg:w-[900px] bg-white shadow-[0_-2px_8px_rgba(0,0,0,0.08)] z-100">
       <div className="p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
@@ -48,20 +57,37 @@ export const QuizControls = ({
             </button>
           </div>
         )}
+
         {/* 컨트롤 버튼들 (채점모드에서만) */}
         {quizMode === 'grading' && (
           <div className="flex gap-2 mb-3">
-            <button onClick={onPlayAudio} className={BUTTON_BASE_STYLE}>
-              {getIcon('IoVolumeHigh', { size: 'xl' })}
-              <span className={LABEL_STYLE}>다시 듣기</span>
+            <button
+              onClick={() => handleButtonClick('playAudio', onPlayAudio)}
+              className={`flex-1 p-3 border rounded-brand-sm transition-all duration-200 flex flex-col items-center gap-1 ${
+                clickedButton === 'playAudio'
+                  ? 'bg-primary border-primary scale-95 shadow-lg'
+                  : 'bg-white border-gray-border hover:border-primary active:scale-[0.97]'
+              }`}
+            >
+              {getIcon('IoVolumeHigh', {
+                size: 'xl',
+                className: clickedButton === 'playAudio' ? 'text-white animate-pulse' : 'text-gray-600'
+              })}
+              <span className={`${LABEL_STYLE} ${clickedButton === 'playAudio' ? 'text-white font-bold' : ''}`}>다시 듣기</span>
             </button>
-            <button onClick={onShowHint} className={BUTTON_BASE_STYLE}>
-              {getIcon('IoBulb', { size: 'xl' })}
-              <span className={LABEL_STYLE}>힌트 보기</span>
-            </button>
-            <button onClick={onSkipQuestion} className={BUTTON_BASE_STYLE}>
-              {getIcon('IoPlayForward', { size: 'xl' })}
-              <span className={LABEL_STYLE}>다음 문제</span>
+            <button
+              onClick={() => handleButtonClick('skipQuestion', onSkipQuestion)}
+              className={`flex-1 p-3 border rounded-brand-sm transition-all duration-200 flex flex-col items-center gap-1 ${
+                clickedButton === 'skipQuestion'
+                  ? 'bg-primary border-primary scale-95 shadow-lg'
+                  : 'bg-white border-gray-border hover:border-primary active:scale-[0.97]'
+              }`}
+            >
+              {getIcon('IoPlayForward', {
+                size: 'xl',
+                className: clickedButton === 'skipQuestion' ? 'text-white animate-pulse' : 'text-gray-600'
+              })}
+              <span className={`${LABEL_STYLE} ${clickedButton === 'skipQuestion' ? 'text-white font-bold' : ''}`}>다음 문제</span>
             </button>
           </div>
         )}
@@ -69,7 +95,6 @@ export const QuizControls = ({
         {quizMode === 'solving' && (
           <Button
             onClick={onMainAction}
-            disabled={isSubmitting}
             size="lg"
             shape="pill"
             className={`w-full py-6 text-lg font-bold flex items-center justify-center gap-2 transition-all duration-300 ${
@@ -78,12 +103,7 @@ export const QuizControls = ({
                 : 'btn-primary'
             }`}
           >
-            {isSubmitting ? (
-              <>
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white" />
-                <span>처리 중...</span>
-              </>
-            ) : inputMode === 'voice' ? (
+            {inputMode === 'voice' ? (
               <>
                 {isRecording ? (
                   <>

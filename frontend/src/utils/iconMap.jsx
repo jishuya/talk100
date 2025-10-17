@@ -26,10 +26,10 @@ const ICON_MAP = {
   IoPersonOutline: 'fluent:person-24-regular',
 
   // === Media Controls ===
-  IoVolumeHigh: 'noto:speaker-high-volume',
+  IoVolumeHigh: 'tabler:reload',  // 다시 듣기 (변경)
   IoMic: 'noto:microphone',
   IoStop: 'noto:stop-button',
-  IoPlayForward: 'noto:next-track-button',
+  IoPlayForward: 'tabler:arrow-right',  // 다음 문제 (변경)
 
   // === Quiz & Learning ===
   AiOutlineQuestionCircle: 'tabler:help-circle',

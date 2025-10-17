@@ -1,7 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-// QuizPage 관련 훅들
-import { useSubmitAnswer } from '../hooks/useApi';
 
 // UI 컴포넌트들
 import { QuizProgressBar } from '../components/quiz/QuizProgressBar';
@@ -11,7 +9,6 @@ import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 
 // 세션 관리 유틸리티
 import {
-  createSession,
   getSession,
   moveToNextQuestion,
   markQuestionCompleted,
@@ -21,6 +18,9 @@ import {
   updateInputMode,
   deleteSession
 } from '../utils/sessionStorage';
+
+// 채점 훅
+import { useQuizGrading } from '../hooks/useQuizGrading';
 
 const QuizPage = () => {
   const [searchParams] = useSearchParams();
@@ -43,17 +43,9 @@ const QuizPage = () => {
         navigate('/');
       }
     } else {
-      // sessionId가 없으면 임시 테스트 세션 생성 (개발용)
-      console.warn('No session ID in URL - creating test session');
-
-      // 임시 테스트 문제 IDs
-      const mockQuestionIds = [1, 2, 3, 4, 5, 6];
-
-      // 임시 세션 생성 (카테고리 1: Model Example)
-      const testSessionId = createSession(1, 1, mockQuestionIds);
-
-      // 생성된 세션으로 리다이렉트
-      navigate(`/quiz?session=${testSessionId}`, { replace: true });
+      // sessionId가 없으면 홈으로
+      console.error('No session ID in URL');
+      navigate('/');
     }
   }, [sessionId, navigate]);
 
@@ -64,10 +56,6 @@ const QuizPage = () => {
   // HomePage에서 API를 통해 데이터를 가져와서 세션에 저장했으므로 추가 조회 불필요
   const questionsData = session?.questions;
   const isLoading = !session || !questionsData;
-  const error = null;
-
-  // 액션 훅들
-  const submitAnswerMutation = useSubmitAnswer();
 
   // 📦 Session 데이터 (LocalStorage에서 관리)
   const progress = session?.progress;
@@ -133,6 +121,9 @@ const QuizPage = () => {
   const [showAnswer, setShowAnswer] = useState(false);
   const [keywordInputs, setKeywordInputs] = useState({});
 
+  // 채점 훅 사용
+  const { gradingResult, checkKeyword, checkAllKeywords, submitAnswer, resetGrading } = useQuizGrading(question, inputMode);
+
   // 세션 inputMode 동기화
   useEffect(() => {
     if (session?.inputMode) {
@@ -160,8 +151,8 @@ const QuizPage = () => {
       return newInputs;
     });
 
-    // 실시간 정답 검증
-    if (value.toLowerCase().trim() === keyword) {
+    // 1️⃣ 실시간 채점: 개별 키워드 검증
+    if (checkKeyword(value, keyword)) {
       // 정답이면 다음 키워드로 포커스 이동
       setTimeout(() => {
         moveToNextKeywordInput(keyword);
@@ -199,45 +190,17 @@ const QuizPage = () => {
     }
   };
 
-  // 키워드 입력 기반 실시간 채점 로직
+  // 1️⃣ 실시간 채점: 모든 키워드 정답시 grading 모드로 전환 (자동 이동 X)
   useEffect(() => {
     if (quizMode === 'solving' && inputMode === 'keyboard' && question?.keywords) {
-      const allKeywordsCorrect = question.keywords.every(keyword => {
-        const userInput = keywordInputs[keyword.toLowerCase()];
-        return userInput?.toLowerCase().trim() === keyword.toLowerCase();
-      });
-
-      if (allKeywordsCorrect && question.keywords.length > 0) {
-        // 모든 키워드가 정답이면 채점 모드로 전환
+      // 모든 키워드가 정답인지 확인
+      if (checkAllKeywords(keywordInputs)) {
+        // grading 모드로 전환 (자동으로 다음 문제로 이동하지 않음)
         setQuizMode('grading');
-        setTimeout(() => {
-          handleNextQuestion();
-        }, 2000);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [keywordInputs, question, quizMode, inputMode]);
-
-  // 음성 모드 실시간 채점 로직 (기존)
-  useEffect(() => {
-    if (quizMode === 'solving' && inputMode === 'voice' && userAnswer.trim() && question?.answer) {
-      const normalizedAnswer = userAnswer.toLowerCase().trim();
-      const normalizedCorrect = question.answer.toLowerCase().trim();
-
-      // 간단한 키워드 매칭 또는 정확한 매칭
-      if (normalizedAnswer === normalizedCorrect ||
-          (question.keywords && question.keywords.some(keyword =>
-            normalizedAnswer.includes(keyword.toLowerCase())
-          ))) {
-        // 정답이면 채점 모드로 전환
-        setQuizMode('grading');
-        setTimeout(() => {
-          handleNextQuestion();
-        }, 2000);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userAnswer, question, quizMode, inputMode]);
 
   // ================================================================
   // 이벤트 핸들러들
@@ -259,36 +222,55 @@ const QuizPage = () => {
     }
   };
 
-  // 답변 제출
-  const handleSubmitAnswer = async () => {
-    if (!userAnswer.trim()) {
-      alert('답변을 입력해주세요!');
-      return;
+  // 2️⃣ 답변 제출 핸들러 (제출 버튼용)
+  const handleSubmitAnswer = useCallback(() => {
+    // 채점 실행
+    const result = submitAnswer(keywordInputs, userAnswer);
+
+    if (result.isAllCorrect) {
+      // 정답: grading 모드로 전환 (자동 이동 X)
+      setQuizMode('grading');
+    } else {
+      // 오답: 피드백 표시
+      alert(
+        `${result.correctCount}/${result.totalCount} 개 정답입니다.\n다시 시도해보세요!`
+      );
     }
+  }, [keywordInputs, userAnswer, submitAnswer]);
 
-    try {
-      await submitAnswerMutation.mutateAsync({
-        sessionId,
-        questionId: question.id,
-        answer: userAnswer.trim(),
-        mode: inputMode
-      });
+  // 음성 녹음 토글
+  const handleToggleRecording = useCallback(() => {
+    if (isRecording) {
+      // 녹음 중지
+      setIsRecording(false);
 
-      // 자동으로 다음 문제로 이동 (설정에 따라)
-      if (session?.settings?.autoNext) {
-        setTimeout(() => {
-          handleNextQuestion();
-        }, 2000);
+      // TODO: 실제 음성 인식 구현 (MediaRecorder API)
+      try {
+        // Mock 음성 인식 결과
+        const mockTranscription = 'I see no point in continuing this interview';
+        setUserAnswer(mockTranscription);
+      } catch (error) {
+        console.error('Speech recognition error:', error);
+        alert('음성 인식에 실패했습니다. 다시 시도해주세요.');
       }
-
-    } catch (error) {
-      console.error('Answer submission error:', error);
-      alert('답변 제출에 실패했습니다. 다시 시도해주세요.');
+    } else {
+      // 녹음 시작
+      setIsRecording(true);
+      setUserAnswer('');
     }
-  };
+  }, [isRecording]);
+
+  // 메인 액션 버튼 핸들러
+  const handleMainAction = useCallback(() => {
+    if (inputMode === 'voice') {
+      handleToggleRecording();
+    } else {
+      handleSubmitAnswer();
+    }
+  }, [inputMode, handleToggleRecording, handleSubmitAnswer]);
 
   // 다음 문제로 이동
-  const handleNextQuestion = async () => {
+  const handleNextQuestion = useCallback(async () => {
     try {
       if (!sessionId) return;
 
@@ -319,65 +301,13 @@ const QuizPage = () => {
       setShowHint(false);
       setShowAnswer(false);
       setKeywordInputs({});
+      resetGrading(); // 채점 결과 초기화
 
     } catch (error) {
       console.error('Move to next question error:', error);
       alert('다음 문제 로드에 실패했습니다.');
     }
-  };
-
-  // 문제 건너뛰기
-  const handleSkipQuestion = async () => {
-    if (confirm('이 문제를 건너뛰시겠습니까?')) {
-      try {
-        // TODO: API 연동
-        // await skipQuestionMutation.mutateAsync({
-        //   sessionId,
-        //   questionId: question.id
-        // });
-
-        // 상태 초기화
-        setUserAnswer('');
-        setKeywordInputs({});
-
-      } catch (error) {
-        console.error('Skip question error:', error);
-        alert('문제 건너뛰기에 실패했습니다.');
-      }
-    }
-  };
-
-  // 음성 녹음 토글
-  const handleToggleRecording = async () => {
-    if (isRecording) {
-      // 녹음 중지
-      setIsRecording(false);
-
-      // TODO: 실제 음성 인식 구현 (MediaRecorder API)
-      try {
-        // Mock 음성 인식 결과
-        const mockTranscription = 'I see no point in continuing this interview';
-        setUserAnswer(mockTranscription);
-
-      } catch (error) {
-        console.error('Speech recognition error:', error);
-        alert('음성 인식에 실패했습니다. 다시 시도해주세요.');
-      }
-    } else {
-      // 녹음 시작
-      setIsRecording(true);
-      setUserAnswer('');
-    }
-  };
-
-  // 메인 액션 버튼 처리
-  const handleMainAction = () => {
-    if (inputMode === 'voice') {
-      handleToggleRecording();
-    } else {
-      handleSubmitAnswer();
-    }
-  };
+  }, [sessionId, question?.id, navigate, resetGrading]);
 
   // 문제 오디오 재생
   const handlePlayAudio = () => {
@@ -387,15 +317,6 @@ const QuizPage = () => {
         console.error('Audio playback error:', error);
         alert('오디오 재생에 실패했습니다.');
       });
-    }
-  };
-
-  // 힌트 보기 (기존)
-  const handleShowHint = () => {
-    if (question?.hints?.length > 0) {
-      alert(`힌트: ${question.hints.join(', ')}`);
-    } else {
-      alert('이 문제에는 힌트가 없습니다.');
     }
   };
 
@@ -470,22 +391,6 @@ const QuizPage = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <p className="text-error mb-4">퀴즈 로드에 실패했습니다.</p>
-          <button
-            onClick={() => navigate('/')}
-            className="btn-primary"
-          >
-            홈으로 돌아가기
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   if (!session || !question) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -528,11 +433,10 @@ const QuizPage = () => {
         showAnswer={showAnswer}
         onMainAction={handleMainAction}
         onPlayAudio={handlePlayAudio}
-        onShowHint={handleShowHint}
         onShowFirstLetters={handleShowFirstLetters}
         onShowFullAnswer={handleShowFullAnswer}
-        onSkipQuestion={handleSkipQuestion}
-        isSubmitting={submitAnswerMutation.isPending}
+        onSkipQuestion={handleNextQuestion}
+        gradingResult={gradingResult}
       />
 
     </div>
