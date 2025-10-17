@@ -287,6 +287,14 @@ class ApiService {
     });
   }
 
+  // 🧩 QuizPage.jsx에서 사용 - 즐겨찾기 토글 (하트 아이콘)
+  toggleFavorite(questionId, isFavorite) {
+    return this.request('/api/quiz/favorites/toggle', null, {
+      method: 'POST',
+      body: { questionId, isFavorite }
+    });
+  }
+
   // ==============================================
   // 👤 MyPage - 마이페이지 관련 API
   // ==============================================

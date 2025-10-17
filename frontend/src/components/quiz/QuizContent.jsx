@@ -24,7 +24,7 @@ export const QuizContent = ({
   onInputModeChange,
   onFavoriteToggle,
   onStarToggle,
-  isFavorited = false,
+  isFavorite = false,
   isStarred = false,
   gradingResult = null
 }) => {
@@ -191,7 +191,7 @@ export const QuizContent = ({
         {/* 즐겨찾기/별표 버튼 */}
         <div className="absolute top-4 right-4 flex gap-2">
           <IconButton
-            icon={getIcon(isFavorited ? 'fluent:heart-24-filled' : 'fluent:heart-24-regular', {
+            icon={getIcon(isFavorite ? 'fluent:heart-24-filled' : 'fluent:heart-24-regular', {
               size: 'lg',
               className: 'text-red-400'
             })}

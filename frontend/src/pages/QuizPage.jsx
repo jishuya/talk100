@@ -23,7 +23,7 @@ import {
 import { useQuizGrading } from '../hooks/useQuizGrading';
 
 // API 훅
-import { useToggleWrongAnswer } from '../hooks/useApi';
+import { useToggleWrongAnswer, useToggleFavorite } from '../hooks/useApi';
 
 const QuizPage = () => {
   const [searchParams] = useSearchParams();
@@ -129,6 +129,9 @@ const QuizPage = () => {
 
   // 틀린 문제 토글 mutation
   const toggleWrongAnswerMutation = useToggleWrongAnswer();
+
+  // 즐겨찾기 토글 mutation
+  const toggleFavoriteMutation = useToggleFavorite();
 
   // 세션 inputMode 동기화
   useEffect(() => {
@@ -357,21 +360,26 @@ const QuizPage = () => {
     if (!question?.id || !sessionId) return;
 
     try {
-      // 즉시 UI 업데이트 (낙관적 업데이트)
-      setIsFavorite(!isFavorite);
+      // 백엔드 API 호출
+      const result = await toggleFavoriteMutation.mutateAsync({
+        questionId: question.id,
+        isFavorite
+      });
 
-      // localStorage 세션 업데이트
-      toggleFavorite(sessionId, question.id);
+      // 성공 시 즉시 UI 업데이트
+      if (result?.isFavorite !== undefined) {
+        // 1. 로컬 상태 업데이트 (즉시 UI 반영)
+        setIsFavorite(result.isFavorite);
 
-      // 세션 상태 갱신
-      setSession(getSession(sessionId));
+        // 2. localStorage 세션 업데이트
+        toggleFavorite(sessionId, question.id);
 
-      // TODO: 백엔드 API에도 전송
+        // 3. 세션 상태 갱신
+        setSession(getSession(sessionId));
+      }
 
     } catch (error) {
       console.error('Toggle favorite error:', error);
-      // 에러 발생 시 원상복구
-      setIsFavorite(isFavorite);
       alert('즐겨찾기 변경에 실패했습니다.');
     }
   };

@@ -183,6 +183,21 @@ export const useToggleWrongAnswer = () => {
   });
 };
 
+// 즐겨찾기 토글 (하트 아이콘)
+export const useToggleFavorite = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ questionId, isFavorite }) => api.toggleFavorite(questionId, isFavorite),
+    onSuccess: () => {
+      // 즐겨찾기 리스트 캐시 무효화
+      queryClient.invalidateQueries(['quiz', 'favorites']);
+      // 개인 퀴즈 카운트 캐시 무효화 (홈 화면)
+      queryClient.invalidateQueries(['user', 'personalQuizzes']);
+    },
+  });
+};
+
 // ==============================================
 // 마이페이지 관련 훅
 // ==============================================

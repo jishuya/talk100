@@ -363,6 +363,38 @@ class QuizQueries {
     }
   }
 
+  /**
+   * 즐겨찾기 토글 (추가 또는 삭제)
+   * @param {string} userId - 사용자 ID
+   * @param {number} questionId - 문제 ID
+   * @param {boolean} isFavorite - 현재 하트 상태 (true: 채워짐, false: 비어짐)
+   * @returns {Object} { isFavorite: boolean }
+   */
+  async toggleFavorite(userId, questionId, isFavorite) {
+    try {
+      if (isFavorite) {
+        // 채워진 하트 → 빈 하트 (DELETE)
+        await db.none(
+          `DELETE FROM favorites WHERE user_id = $1 AND question_id = $2`,
+          [userId, questionId]
+        );
+        return { isFavorite: false };
+      } else {
+        // 빈 하트 → 채워진 하트 (INSERT, added_at은 자동 생성)
+        await db.none(
+          `INSERT INTO favorites (user_id, question_id)
+           VALUES ($1, $2)
+           ON CONFLICT (user_id, question_id) DO NOTHING`,
+          [userId, questionId]
+        );
+        return { isFavorite: true };
+      }
+    } catch (error) {
+      console.error('toggleFavorite query error:', error);
+      throw new Error('Failed to toggle favorite');
+    }
+  }
+
 }
 
 module.exports = new QuizQueries();

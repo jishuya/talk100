@@ -19,4 +19,7 @@ router.get('/favorites', verifyToken, quizController.getFavoritesQuiz);
 // POST /api/quiz/wrong-answers/toggle - 틀린 문제 토글 (인증 필요)
 router.post('/wrong-answers/toggle', verifyToken, quizController.toggleWrongAnswer);
 
+// POST /api/quiz/favorites/toggle - 즐겨찾기 토글 (인증 필요)
+router.post('/favorites/toggle', verifyToken, quizController.toggleFavorite);
+
 module.exports = router;

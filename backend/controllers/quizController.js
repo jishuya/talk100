@@ -175,6 +175,47 @@ class QuizController {
     }
   }
 
+  /**
+   * POST /api/quiz/favorites/toggle
+   * 즐겨찾기 토글 (인증 필수)
+   * Body: { questionId: number, isFavorite: boolean }
+   */
+  async toggleFavorite(req, res) {
+    try {
+      const uid = req.user?.uid;
+      const { questionId, isFavorite } = req.body;
+
+      if (!uid) {
+        return res.status(401).json({
+          success: false,
+          message: 'Authentication required to toggle favorite'
+        });
+      }
+
+      // 유효성 검증
+      if (!questionId || typeof isFavorite !== 'boolean') {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid request: questionId and isFavorite are required'
+        });
+      }
+
+      const result = await quizQueries.toggleFavorite(uid, questionId, isFavorite);
+
+      res.json({
+        success: true,
+        data: result
+      });
+
+    } catch (error) {
+      console.error('toggleFavorite controller error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to toggle favorite'
+      });
+    }
+  }
+
 }
 
 module.exports = new QuizController();
