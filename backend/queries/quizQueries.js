@@ -1,101 +1,204 @@
 const { db } = require('../config/database');
 
 class QuizQueries {
+  // ==========================================
+  // 🔧 헬퍼 함수들 (Private Methods)
+  // ==========================================
+
   /**
-   * 오늘의 퀴즈 - 진행률 + 남은 문제들 조회
+   * 사용자 퀴즈 설정 조회 (daily_goal, default_difficulty 조회용)
+   * @private
+   * @param {Object} t - pg-promise transaction object
    * @param {string} userId - 사용자 ID
-   * @returns {Object} { quiz_type, day, progress, questions }
+   * @returns {Object} { daily_goal, default_difficulty }
+   */
+  async _getUserQuizSettings(t, userId) {
+    return t.one(
+      `SELECT daily_goal, default_difficulty
+       FROM users
+       WHERE uid = $1`,
+      [userId]
+    );
+  }
+
+  /**
+   * 사용자 진행 상황 조회 (어느 Day, 몇 번 문제까지 풀었는지)
+   * @private
+   * @param {Object} t - pg-promise transaction object
+   * @param {string} userId - 사용자 ID
+   * @param {number} categoryId - 카테고리 ID
+   * @returns {Object} { last_studied_day, last_studied_question_id, completed, total }
+   */
+  async _getUserProgress(t, userId, categoryId) {
+    return t.oneOrNone(
+      `SELECT
+        up.last_studied_day,
+        up.last_studied_question_id,
+        q.question_number as completed,
+        day_total.total
+      FROM user_progress up
+      LEFT JOIN questions q ON q.question_id = up.last_studied_question_id
+      LEFT JOIN LATERAL (
+        SELECT MAX(question_number) as total
+        FROM questions
+        WHERE day = up.last_studied_day
+      ) day_total ON true
+      WHERE up.user_id = $1 AND up.category_id = $2`,
+      [userId, categoryId]
+    );
+  }
+
+  /**
+   * 목표 Day 계산 (다음 학습할 Day 계산)
+   * @private
+   * @param {Object} progressInfo - 진행 상황 객체
+   * @returns {Object} { targetDay, startQuestionNumber, completed, total }
+   */
+  _calculateTargetDay(progressInfo) {
+    let targetDay = 1;
+    let startQuestionNumber = 1;
+    let completed = 0;
+    let total = 0;
+
+    if (progressInfo?.last_studied_day) {
+      targetDay = progressInfo.last_studied_day;
+      completed = progressInfo.completed || 0;
+      total = progressInfo.total || 0;
+      startQuestionNumber = completed + 1;
+
+      // Day 완료시 다음 Day로 이동
+      if (startQuestionNumber > total) {
+        targetDay++;
+        startQuestionNumber = 1;
+        completed = 0;
+        total = 0; // 다음 Day 총 문제 수는 호출자가 조회
+      }
+    }
+
+    return { targetDay, startQuestionNumber, completed, total };
+  }
+
+  /**
+   * Day별 총 문제 수 조회
+   * @private
+   * @param {Object} t - pg-promise transaction object
+   * @param {number} day - Day 번호
+   * @returns {number} 총 문제 수
+   */
+  async _getDayTotalQuestions(t, day) {
+    const result = await t.one(
+      `SELECT MAX(question_number) as total
+       FROM questions
+       WHERE day = $1`,
+      [day]
+    );
+    return result.total || 0;
+  }
+
+  /**
+   * 여러 Day의 문제들 조회 (daily_goal 만큼)
+   * @private
+   * @param {Object} t - pg-promise transaction object
+   * @param {string} userId - 사용자 ID
+   * @param {number} startDay - 시작 Day
+   * @param {number} dayCount - 가져올 Day 개수
+   * @param {number} startQuestionNumber - 첫 번째 Day의 시작 문제 번호
+   * @returns {Array} 문제 배열
+   */
+  async _getQuestionsForMultipleDays(t, userId, startDay, dayCount, startQuestionNumber = 1) {
+    const questions = await t.manyOrNone(
+      `SELECT
+        q.question_id,
+        q.category_id,
+        q.day,
+        q.question_number,
+        q.question_type,
+        q.korean,
+        q.english,
+        q.korean_a,
+        q.english_a,
+        q.korean_b,
+        q.english_b,
+        q.audio_male,
+        q.audio_female,
+        q.audio_male_a,
+        q.audio_female_a,
+        q.audio_male_b,
+        q.audio_female_b,
+        q.keywords,
+        EXISTS(SELECT 1 FROM favorites WHERE question_id = q.question_id AND user_id = $2) as is_favorite,
+        EXISTS(SELECT 1 FROM wrong_answers WHERE question_id = q.question_id AND user_id = $2) as is_wrong_answer
+      FROM questions q
+      WHERE q.day >= $1
+        AND q.day < $1 + $3
+        AND (q.day > $1 OR q.question_number >= $4)
+      ORDER BY q.day ASC, q.question_number ASC`,
+      [startDay, userId, dayCount, startQuestionNumber]
+    );
+    return questions;
+  }
+
+  // ==========================================
+  // 📝 메인 퀴즈 조회 함수들
+  // ==========================================
+
+  /**
+   * 오늘의 퀴즈 - daily_goal만큼의 Day 조회 (진행률 + 문제들)
+   * @param {string} userId - 사용자 ID
+   * @returns {Object} { quiz_type, days, progress, questions }
    */
   async getTodayQuizQuestions(userId) {
     try {
       const result = await db.task(async t => {
-        // 1. 진행 상황 + Day별 총 문제 수를 한 번에 조회 (LATERAL JOIN 활용)
-        const progressInfo = await t.oneOrNone(
-          `SELECT
-            up.last_studied_day,
-            up.last_studied_question_id,
-            q.question_number as completed,
-            day_total.total
-          FROM user_progress up
-          LEFT JOIN questions q ON q.question_id = up.last_studied_question_id
-          LEFT JOIN LATERAL (
-            SELECT MAX(question_number) as total
-            FROM questions
-            WHERE day = up.last_studied_day
-          ) day_total ON true
-          WHERE up.user_id = $1 AND up.category_id = 4`,
-          [userId]
-        );
+        // 1. 사용자 설정 조회 (daily_goal)
+        const settings = await this._getUserQuizSettings(t, userId);
+        const dailyGoal = settings.daily_goal || 1;
 
-        // 2. Day 계산 로직
-        let targetDay = 1;
-        let startQuestionNumber = 1;
-        let completed = 0;
-        let total = 0;
+        // 2. 진행 상황 조회 (카테고리 4: 오늘의 퀴즈)
+        const progressInfo = await this._getUserProgress(t, userId, 4);
 
-        if (progressInfo?.last_studied_day) {
-          targetDay = progressInfo.last_studied_day;
-          completed = progressInfo.completed || 0;
-          total = progressInfo.total || 0;
-          startQuestionNumber = completed + 1;
+        // 3. 목표 Day 계산
+        let { targetDay, startQuestionNumber, completed, total } = this._calculateTargetDay(progressInfo);
 
-          // Day 완료시 다음 Day로 이동
-          if (startQuestionNumber > total) {
-            targetDay++;
-            startQuestionNumber = 1;
-            completed = 0;
-            total = 0; // 다음 Day 총 문제 수는 아래에서 조회
-          }
-        }
-
-        // 3. 해당 Day의 총 문제 수 조회 (신규 사용자 OR 다음 Day로 이동한 경우)
+        // 4. 해당 Day의 총 문제 수 조회 (신규 사용자 OR 다음 Day로 이동한 경우)
         if (total === 0) {
-          const dayTotal = await t.one(
-            `SELECT MAX(question_number) as total FROM questions WHERE day = $1`,
-            [targetDay]
-          );
-          total = dayTotal.total || 0;
+          total = await this._getDayTotalQuestions(t, targetDay);
         }
 
-        // 4. 남은 문제들 조회 (EXISTS 서브쿼리로 성능 개선)
-        const questions = await t.manyOrNone(
-          `SELECT
-            q.question_id,
-            q.category_id,
-            q.day,
-            q.question_number,
-            q.question_type,
-            q.korean,
-            q.english,
-            q.korean_a,
-            q.english_a,
-            q.korean_b,
-            q.english_b,
-            q.audio_male,
-            q.audio_female,
-            q.audio_male_a,
-            q.audio_female_a,
-            q.audio_male_b,
-            q.audio_female_b,
-            q.keywords,
-            EXISTS(SELECT 1 FROM favorites WHERE question_id = q.question_id AND user_id = $2) as is_favorite,
-            EXISTS(SELECT 1 FROM wrong_answers WHERE question_id = q.question_id AND user_id = $2) as is_wrong_answer
-          FROM questions q
-          WHERE q.day = $1 AND q.question_number >= $3
-          ORDER BY q.question_number ASC`,
-          [targetDay, userId, startQuestionNumber]
+        // 5. daily_goal만큼의 Day 문제들 조회
+        const questions = await this._getQuestionsForMultipleDays(
+          t,
+          userId,
+          targetDay,
+          dailyGoal,
+          startQuestionNumber
         );
 
-        // 5. Progress 계산 및 결과 반환
+        // 6. 전체 문제 수 계산 (daily_goal만큼의 Day들)
+        let totalQuestionsForGoal = 0;
+        for (let i = 0; i < dailyGoal; i++) {
+          const dayTotal = await this._getDayTotalQuestions(t, targetDay + i);
+          totalQuestionsForGoal += dayTotal;
+        }
+
+        // 첫 번째 Day는 진행 중일 수 있으므로 조정
+        if (startQuestionNumber > 1) {
+          totalQuestionsForGoal -= (startQuestionNumber - 1);
+        }
+
+        // 7. Progress 계산 및 결과 반환
         return {
           quiz_type: 'daily',
           day: targetDay,
+          days: Array.from({ length: dailyGoal }, (_, i) => targetDay + i), // [1, 2, 3] 형태
+          daily_goal: dailyGoal,
           progress: {
             completed,
-            total,
-            percentage: total > 0 ? Math.round((completed / total) * 100) : 0,
+            total: totalQuestionsForGoal,
+            percentage: totalQuestionsForGoal > 0 ? Math.round((completed / totalQuestionsForGoal) * 100) : 0,
             last_studied_day: progressInfo?.last_studied_day || null,
-            last_studied_question_id: progressInfo?.last_studied_question_id || null
+            last_studied_question_id: progressInfo?.last_studied_question_id || null,
+            current_day_total: total // 현재 Day의 문제 수
           },
           questions
         };

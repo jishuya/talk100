@@ -135,7 +135,6 @@ const HomePage = () => {
       }
 
       const result = await response.json();
-      console.log(1111 ,result.data)
       if (result.success && result.data) {
         const { category_id, questions, progress } = result.data;
 
