@@ -317,9 +317,9 @@ INSERT INTO user_progress (user_id, category_id, last_studied_day, last_studied_
 -- ================================================
 -- 샘플 틀린 문제 데이터
 -- ================================================
-INSERT INTO wrong_answers (user_id, question_id, wrong_count) VALUES
-('user003', 1, 1),
-('user003', 2, 1);
+INSERT INTO wrong_answers (user_id, question_id) VALUES
+('user003', 1),
+('user003', 2);
 
 -- ================================================
 -- 샘플 즐겨찾기 데이터

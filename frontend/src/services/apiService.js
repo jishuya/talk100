@@ -273,9 +273,9 @@ class ApiService {
 
   // 🧩 QuizPage.jsx에서 사용 - 진행률 업데이트
   updateProgress(data) {
-    return this.request('/api/progress', null, {
+    return this.request('/api/progress/update', null, {
       method: 'POST',
-      body: JSON.stringify(data)
+      body: data
     });
   }
 

@@ -23,7 +23,7 @@ import {
 import { useQuizGrading } from '../hooks/useQuizGrading';
 
 // API 훅
-import { useToggleWrongAnswer, useToggleFavorite } from '../hooks/useApi';
+import { useToggleWrongAnswer, useToggleFavorite, useUpdateProgress } from '../hooks/useApi';
 
 const QuizPage = () => {
   const [searchParams] = useSearchParams();
@@ -132,6 +132,9 @@ const QuizPage = () => {
 
   // 즐겨찾기 토글 mutation
   const toggleFavoriteMutation = useToggleFavorite();
+
+  // 진행률 업데이트 mutation
+  const updateProgressMutation = useUpdateProgress();
 
   // 세션 inputMode 동기화
   useEffect(() => {
@@ -293,6 +296,30 @@ const QuizPage = () => {
     try {
       if (!sessionId) return;
 
+      // grading 모드에서 "다음 문제" 버튼 클릭 시 백엔드에 진행률 업데이트
+      // (정답을 맞춰서 grading 모드가 된 경우이므로 무조건 업데이트)
+      // 중요: session.category를 사용! (오늘의 퀴즈는 category=4이지만, 문제의 category_id는 1,2,3일 수 있음)
+      // 예외: 틀린문제(5), 즐겨찾기(6)는 진행률 저장 안함 (개인 복습용)
+      const shouldUpdateProgress = session?.category && ![5, 6].includes(session.category);
+
+      if (quizMode === 'grading' && question?.id && shouldUpdateProgress && question?.day) {
+        try {
+          await updateProgressMutation.mutateAsync({
+            categoryId: session.category,  // 세션의 category 사용 (사용자가 선택한 퀴즈 타입)
+            day: question.day,
+            questionId: question.id
+          });
+          console.log('✅ Progress updated successfully:', {
+            categoryId: session.category,
+            day: question.day,
+            questionId: question.id
+          });
+        } catch (error) {
+          console.error('❌ Failed to update progress:', error);
+          // 진행률 업데이트 실패해도 퀴즈는 계속 진행
+        }
+      }
+
       // 현재 문제를 완료 처리
       if (question?.id) {
         markQuestionCompleted(sessionId, question.id);
@@ -326,7 +353,7 @@ const QuizPage = () => {
       console.error('Move to next question error:', error);
       alert('다음 문제 로드에 실패했습니다.');
     }
-  }, [sessionId, question?.id, navigate, resetGrading]);
+  }, [sessionId, question?.id, question?.day, session?.category, quizMode, navigate, resetGrading, updateProgressMutation]);
 
   // 문제 오디오 재생
   const handlePlayAudio = () => {

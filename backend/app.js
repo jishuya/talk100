@@ -18,6 +18,7 @@ const passport = require('./config/passport');
 const authRoutes = require('./routes/auth');
 const usersRoutes = require('./routes/users');
 const quizRoutes = require('./routes/quiz');
+const progressRoutes = require('./routes/progress');
 
 const app = express();
 
@@ -82,8 +83,8 @@ app.get('/health', (req, res) => {
 app.use('/auth', authRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/quiz', quizRoutes);
+app.use('/api/progress', progressRoutes);
 // app.use('/api/questions', questionRoutes);
-// app.use('/api/progress', progressRoutes);
 // app.use('/api/review', reviewRoutes);
 // app.use('/api/wrong-answers', wrongAnswersRoutes);
 // app.use('/api/favorites', favoritesRoutes);
