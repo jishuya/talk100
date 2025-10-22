@@ -171,7 +171,6 @@ CREATE TABLE daily_progress (
     date DATE DEFAULT CURRENT_DATE,
     days_completed INTEGER DEFAULT 0,  -- 오늘 완료한 Day 수
     goal_met BOOLEAN DEFAULT false,    -- 일일 목표 달성 여부
-    additional_days INTEGER DEFAULT 0,  -- 목표 달성 후 추가 학습
     
     PRIMARY KEY (user_id, date)
 );

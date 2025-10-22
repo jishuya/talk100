@@ -102,31 +102,77 @@ class UserQueries {
   }
 
   // 사용자 진행률 정보 조회 (current, total, percentage)
+  // CharacterSection용: 전체 누적 진행률 계산 (daily_goal 반영)
   async getUserProgress(uid) {
     try {
-      const result = await db.oneOrNone(
-        `SELECT
-          u.daily_goal,
-          COALESCE(up.last_studied_day, 1) as current_day,
-          COALESCE(up.last_studied_question_id, 0) as last_question_id,
-          (SELECT COUNT(*) FROM questions WHERE day = COALESCE(up.last_studied_day, 1) AND category_id IN (1,2,3)) * u.daily_goal as total,
-          (SELECT COUNT(*) FROM questions WHERE day = COALESCE(up.last_studied_day, 1) AND category_id IN (1,2,3) AND question_id <= COALESCE(up.last_studied_question_id, 0)) as current
-        FROM users u
-        LEFT JOIN user_progress up ON u.uid = up.user_id AND up.category_id = 4
-        WHERE u.uid = $1`,
-        [uid]
-      );
+      // pg-promise의 task를 사용하여 여러 쿼리를 순차 실행
+      const result = await db.task(async t => {
+        // 1. 기본 정보 조회
+        const baseInfo = await t.oneOrNone(
+          `SELECT
+            u.daily_goal,
+            COALESCE(up.last_studied_day, 1) as current_day,
+            COALESCE(up.last_studied_question_id, 0) as last_question_id,
+            COALESCE(q.question_number, 0) as current_question_number
+          FROM users u
+          LEFT JOIN user_progress up ON u.uid = up.user_id AND up.category_id = 4
+          LEFT JOIN questions q ON q.question_id = up.last_studied_question_id
+          WHERE u.uid = $1`,
+          [uid]
+        );
 
-      if (result) {
-        const percentage = result.total > 0 ? Math.round((result.current / result.total) * 100) : 0;
+        if (!baseInfo) {
+          return { current: 0, total: 0, percentage: 0 };
+        }
+
+        const { daily_goal, current_day, current_question_number } = baseInfo;
+
+        // 2. 시작 Day 계산 (daily_goal 고려)
+        // 예: daily_goal=2이고 current_day=2이면, 시작 Day는 1
+        const startDay = Math.max(1, current_day - daily_goal + 1);
+
+        // 3. 누적 current 계산: 시작 Day부터 현재 Day까지의 모든 문제 수
+        let cumulativeCurrent = 0;
+
+        // 시작 Day부터 현재 Day 이전까지의 모든 문제 수 합산
+        for (let day = startDay; day < current_day; day++) {
+          const dayResult = await t.oneOrNone(
+            `SELECT MAX(question_number) as total
+             FROM questions
+             WHERE day = $1`,
+            [day]
+          );
+          cumulativeCurrent += (dayResult?.total || 0);
+        }
+
+        // 현재 Day의 완료한 문제 수 추가
+        cumulativeCurrent += current_question_number;
+
+        // 4. daily_goal만큼의 Day들의 총 문제 수 계산
+        let totalQuestionsForGoal = 0;
+        for (let i = 0; i < daily_goal; i++) {
+          const dayResult = await t.oneOrNone(
+            `SELECT MAX(question_number) as total
+             FROM questions
+             WHERE day = $1`,
+            [startDay + i]
+          );
+          totalQuestionsForGoal += (dayResult?.total || 0);
+        }
+
+        // 5. percentage 계산
+        const percentage = totalQuestionsForGoal > 0
+          ? Math.round((cumulativeCurrent / totalQuestionsForGoal) * 100)
+          : 0;
+
         return {
-          current: result.current,
-          total: result.total,
-          percentage: percentage
+          current: cumulativeCurrent,
+          total: totalQuestionsForGoal,
+          percentage
         };
-      }
+      });
 
-      return { current: 0, total: 0, percentage: 0 };
+      return result;
     } catch (error) {
       console.error('getUserProgress query error:', error);
       throw new Error('Failed to fetch user progress');

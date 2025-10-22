@@ -23,7 +23,7 @@ import {
 import { useQuizGrading } from '../hooks/useQuizGrading';
 
 // API 훅
-import { useToggleWrongAnswer, useToggleFavorite, useUpdateProgress } from '../hooks/useApi';
+import { useToggleWrongAnswer, useToggleFavorite, useUpdateProgress, useCompleteDayProgress } from '../hooks/useApi';
 
 const QuizPage = () => {
   const [searchParams] = useSearchParams();
@@ -79,7 +79,7 @@ const QuizPage = () => {
       maleAudioUrl = currentQuestion.audio_male;
       femaleAudioUrl = currentQuestion.audio_female;
     } else if (currentQuestion.question_type === 'dialogue') {
-      if (currentQuestion.korean_a !== null) {
+      if (currentQuestion.korean_a !== "" && currentQuestion.korean_a !== null) {
         korean = currentQuestion.korean_a;
         english = currentQuestion.english_a;
         maleAudioUrl = currentQuestion.audio_male_a;
@@ -135,6 +135,9 @@ const QuizPage = () => {
 
   // 진행률 업데이트 mutation
   const updateProgressMutation = useUpdateProgress();
+
+  // Day 완료 mutation
+  const completeDayProgressMutation = useCompleteDayProgress();
 
   // 세션 inputMode 동기화
   useEffect(() => {
@@ -303,20 +306,67 @@ const QuizPage = () => {
       const shouldUpdateProgress = session?.category && ![5, 6].includes(session.category);
 
       if (quizMode === 'grading' && question?.id && shouldUpdateProgress && question?.day) {
+        console.log('🔄 Attempting to update progress...', {
+          quizMode,
+          questionId: question.id,
+          shouldUpdateProgress,
+          day: question.day,
+          categoryId: session.category
+        });
+
         try {
-          await updateProgressMutation.mutateAsync({
+          const progressData = {
             categoryId: session.category,  // 세션의 category 사용 (사용자가 선택한 퀴즈 타입)
             day: question.day,
             questionId: question.id
-          });
-          console.log('✅ Progress updated successfully:', {
-            categoryId: session.category,
-            day: question.day,
-            questionId: question.id
-          });
+          };
+
+          console.log('📤 Sending progress update request:', progressData);
+
+          const result = await updateProgressMutation.mutateAsync(progressData);
+
+          console.log('✅ Progress updated successfully:', result);
         } catch (error) {
           console.error('❌ Failed to update progress:', error);
+          console.error('Error details:', {
+            message: error.message,
+            response: error.response,
+            stack: error.stack
+          });
           // 진행률 업데이트 실패해도 퀴즈는 계속 진행
+        }
+      } else {
+        console.log('⚠️ Progress update skipped:', {
+          quizMode,
+          hasQuestionId: !!question?.id,
+          shouldUpdateProgress,
+          hasDay: !!question?.day,
+          category: session?.category
+        });
+      }
+
+      // 🎯 Day 변경 감지: 다음 문제의 Day와 현재 Day 비교
+      const nextQuestionIndex = currentQuestionIndex + 1;
+      if (nextQuestionIndex < questionsData.length && shouldUpdateProgress) {
+        const nextQuestion = questionsData[nextQuestionIndex];
+        const currentDay = question?.day;
+        const nextDay = nextQuestion?.day;
+
+        // Day가 바뀌는 경우 (예: Day 1 마지막 문제 → Day 2 첫 문제)
+        if (currentDay && nextDay && nextDay > currentDay) {
+          console.log('🎉 Day completed! Updating daily_progress...', {
+            completedDay: currentDay,
+            nextDay: nextDay,
+            categoryId: session.category
+          });
+
+          try {
+            const result = await completeDayProgressMutation.mutateAsync({ day: currentDay });
+            console.log('✅ Daily progress updated successfully:', result);
+          } catch (error) {
+            console.error('❌ Failed to update daily progress:', error);
+            // daily_progress 실패해도 퀴즈는 계속 진행
+          }
         }
       }
 
@@ -353,7 +403,7 @@ const QuizPage = () => {
       console.error('Move to next question error:', error);
       alert('다음 문제 로드에 실패했습니다.');
     }
-  }, [sessionId, question?.id, question?.day, session?.category, quizMode, navigate, resetGrading, updateProgressMutation]);
+  }, [sessionId, question?.id, question?.day, session?.category, quizMode, navigate, resetGrading, updateProgressMutation, completeDayProgressMutation, currentQuestionIndex, questionsData]);
 
   // 문제 오디오 재생
   const handlePlayAudio = () => {

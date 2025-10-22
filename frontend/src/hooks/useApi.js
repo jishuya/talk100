@@ -59,15 +59,6 @@ export const useProgressData = () => {
   });
 };
 
-export const useDailyProgress = () => {
-  return useQuery({
-    queryKey: ['progress', 'daily'],
-    queryFn: () => api.getDailyProgress(),
-    staleTime: ENV.CACHE_TIMES.PROGRESS,
-    retry: 2,
-  });
-};
-
 export const useUpdateProgress = () => {
   const queryClient = useQueryClient();
 
@@ -75,6 +66,21 @@ export const useUpdateProgress = () => {
     mutationFn: (data) => api.updateProgress(data),
     onSuccess: () => {
       queryClient.invalidateQueries(['progress']);
+    },
+  });
+};
+
+// Day 완료 시 daily_progress 업데이트
+export const useCompleteDayProgress = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data) => api.completeDayProgress(data),
+    onSuccess: () => {
+      // 진행률 및 사용자 데이터 캐시 무효화
+      queryClient.invalidateQueries(['progress']);
+      queryClient.invalidateQueries(['user', 'profile']);
+      queryClient.invalidateQueries(['user', 'badges']);
     },
   });
 };

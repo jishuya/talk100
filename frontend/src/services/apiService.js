@@ -275,7 +275,15 @@ class ApiService {
   updateProgress(data) {
     return this.request('/api/progress/update', null, {
       method: 'POST',
-      body: data
+      body: data  // apiCall에서 자동으로 JSON.stringify 처리
+    });
+  }
+
+  // 🧩 QuizPage.jsx에서 사용 - Day 완료 시 daily_progress 업데이트
+  completeDayProgress(data) {
+    return this.request('/api/progress/day-complete', null, {
+      method: 'POST',
+      body: data  // { day: number }
     });
   }
 
@@ -372,11 +380,6 @@ class ApiService {
   // ==============================================
   // 🔍 공통/기타 API (여러 페이지에서 사용)
   // ==============================================
-
-  // 📊 StatusPage.jsx에서도 사용 - 일일 진행률
-  getDailyProgress() {
-    return this.request('/api/progress/daily', 'dailyProgress');
-  }
 }
 
 // 싱글톤 인스턴스 생성 및 내보내기
