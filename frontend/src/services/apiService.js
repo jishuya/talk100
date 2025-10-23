@@ -233,44 +233,6 @@ class ApiService {
   // 🧩 QuizPage - 퀴즈 관련 API
   // ==============================================
 
-  // 🧩 QuizPage.jsx에서 사용 - Day별 전체 문제 조회
-  getQuestions(category, day) {
-    return this.request(`/api/quiz/questions?category=${category}&day=${day}`, 'quizData');
-  }
-
-  // 🧩 QuizPage.jsx에서 사용 - 특정 문제 조회
-  getQuestion(questionId) {
-    return this.request(`/api/quiz/question/${questionId}`, null);
-  }
-
-  // 🧩 QuizPage.jsx에서 사용 - 카테고리별 Day 범위 조회
-  getDayRange(category) {
-    return this.request(`/api/quiz/day-range?category=${category}`, null);
-  }
-
-  // 🧩 QuizPage.jsx에서 사용 - 즐겨찾기 문제 조회
-  getFavoriteQuestions() {
-    return this.request('/api/quiz/favorites', null);
-  }
-
-  // 🧩 QuizPage.jsx에서 사용 - 틀린 문제 조회
-  getWrongAnswerQuestions() {
-    return this.request('/api/quiz/wrong-answers', null);
-  }
-
-  // 🧩 QuizPage.jsx에서 사용 - 퀴즈 세션 데이터 (문제, 진행상황 등) - 레거시
-  getQuizSession(sessionId) {
-    return this.request(`/api/quiz/session/${sessionId}`, 'quizSession');
-  }
-
-  // 🧩 QuizPage.jsx에서 사용 - 답변 제출 및 채점
-  submitAnswer(data) {
-    return this.request('/api/quiz/answer', null, {
-      method: 'POST',
-      body: JSON.stringify(data)
-    });
-  }
-
   // 🧩 QuizPage.jsx에서 사용 - 진행률 업데이트
   updateProgress(data) {
     return this.request('/api/progress/update', null, {
@@ -323,14 +285,6 @@ class ApiService {
   // 👤 MyPage.jsx에서 사용 - 아바타 업데이트
   updateAvatar(data) {
     return this.request('/api/mypage/avatar', null, {
-      method: 'PUT',
-      body: JSON.stringify(data)
-    });
-  }
-
-  // 👤 MyPage.jsx에서 사용 - 프로필 정보 업데이트
-  updateProfile(data) {
-    return this.request('/api/users/profile', null, {
       method: 'PUT',
       body: JSON.stringify(data)
     });

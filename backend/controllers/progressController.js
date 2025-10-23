@@ -114,6 +114,43 @@ class ProgressController {
       });
     }
   }
+
+  /**
+   * POST /api/progress/additional
+   * additional_days +1 업데이트 (추가 학습 선택 시)
+   */
+  async updateAdditionalDays(req, res) {
+    try {
+      const uid = req.user?.uid;
+
+      console.log('🎓 [Additional Learning] Request received:', { uid });
+
+      if (!uid) {
+        console.log('❌ [Additional Learning] No uid found');
+        return res.status(401).json({
+          success: false,
+          message: 'Authentication required'
+        });
+      }
+
+      // additional_days 업데이트
+      const result = await progressQueries.updateAdditionalDays(uid);
+
+      console.log('✅ [Additional Learning] Success:', result);
+
+      res.json({
+        success: true,
+        data: result
+      });
+
+    } catch (error) {
+      console.error('updateAdditionalDays controller error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update additional days'
+      });
+    }
+  }
 }
 
 module.exports = new ProgressController();

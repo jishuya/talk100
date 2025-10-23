@@ -6,7 +6,6 @@ import { v4 as uuidv4 } from 'uuid';
  */
 
 const SESSION_PREFIX = 'quiz_session_';
-const ACTIVE_SESSION_KEY = 'active_quiz_session';
 
 /**
  * 카테고리 ID를 카테고리 번호로 매핑
@@ -49,13 +48,6 @@ export const createSession = (categoryId, day = 1, questionIds = []) => {
     currentQuestionId: questionIds[0] || null,
     completedQuestionIds: [],
 
-    // 진행 상태
-    progress: {
-      completed: 1,
-      total: questionIds.length,
-      percentage: 16
-    },
-
     // 사용자 개인화 정보 (나중에 API에서 가져올 수 있음)
     userPreferences: {
       favoriteIds: [],
@@ -95,14 +87,6 @@ export const getSession = (sessionId) => {
 };
 
 /**
- * 현재 활성화된 세션 ID를 가져옵니다.
- * @returns {string|null} 활성 세션 ID 또는 null
- */
-export const getActiveSessionId = () => {
-  return localStorage.getItem(ACTIVE_SESSION_KEY);
-};
-
-/**
  * 세션 데이터를 업데이트합니다.
  * @param {string} sessionId - 세션 ID
  * @param {Object} updates - 업데이트할 필드들
@@ -121,7 +105,6 @@ export const updateSession = (sessionId, updates) => {
     ...session,
     ...updates,
     // 중첩 객체는 별도로 처리
-    progress: updates.progress ? { ...session.progress, ...updates.progress } : session.progress,
     userPreferences: updates.userPreferences
       ? { ...session.userPreferences, ...updates.userPreferences }
       : session.userPreferences
@@ -146,7 +129,6 @@ export const moveToNextQuestion = (sessionId) => {
   const nextIndex = session.currentQuestionIndex + 1;
 
   if (nextIndex >= session.questionIds.length) {
-    console.log('Quiz completed!');
     return false;
   }
 
@@ -282,31 +264,5 @@ export const deleteSession = (sessionId) => {
   const key = `${SESSION_PREFIX}${sessionId}`;
   localStorage.removeItem(key);
 
-  // 활성 세션이었다면 제거
-  const activeSessionId = getActiveSessionId();
-  if (activeSessionId === sessionId) {
-    localStorage.removeItem(ACTIVE_SESSION_KEY);
-  }
-
   return true;
-};
-
-/**
- * 모든 세션을 삭제합니다. (정리용)
- * @returns {number} 삭제된 세션 개수
- */
-export const clearAllSessions = () => {
-  let count = 0;
-  const keys = Object.keys(localStorage);
-
-  keys.forEach(key => {
-    if (key.startsWith(SESSION_PREFIX)) {
-      localStorage.removeItem(key);
-      count++;
-    }
-  });
-
-  localStorage.removeItem(ACTIVE_SESSION_KEY);
-
-  return count;
 };

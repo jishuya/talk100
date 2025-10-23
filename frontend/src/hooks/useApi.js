@@ -35,29 +35,28 @@ export const usePersonalQuizzesData = () => {
   });
 };
 
-export const useUpdateProfile = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (data) => api.updateProfile(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['user', 'profile']);
-    },
-  });
-};
-
 // ==============================================
 // 진행률 관련 훅
 // ==============================================
 
-export const useProgressData = () => {
+/**
+ * 오늘의 퀴즈 진행률 조회 (CharacterSection & QuizProgressBar 공용)
+ * - 실시간 서버 데이터 사용
+ * - daily_progress.start_day 기준 계산
+ * - React Query 캐싱으로 중복 호출 방지
+ */
+export const useTodayProgress = () => {
   return useQuery({
-    queryKey: ['progress'],
+    queryKey: ['progress', 'today'],
     queryFn: () => api.getProgress(),
     staleTime: ENV.CACHE_TIMES.PROGRESS,
+    refetchOnWindowFocus: true,  // 홈 복귀 시 자동 갱신
     retry: 2,
   });
 };
+
+// 하위 호환성을 위한 alias
+export const useProgressData = useTodayProgress;
 
 export const useUpdateProgress = () => {
   const queryClient = useQueryClient();
@@ -65,7 +64,9 @@ export const useUpdateProgress = () => {
   return useMutation({
     mutationFn: (data) => api.updateProgress(data),
     onSuccess: () => {
-      queryClient.invalidateQueries(['progress']);
+      // 진행률 캐시 무효화 (CharacterSection & QuizProgressBar 자동 갱신)
+      queryClient.invalidateQueries(['progress', 'today']);
+      queryClient.invalidateQueries(['progress']);  // 하위 호환성
     },
   });
 };
@@ -78,7 +79,8 @@ export const useCompleteDayProgress = () => {
     mutationFn: (data) => api.completeDayProgress(data),
     onSuccess: () => {
       // 진행률 및 사용자 데이터 캐시 무효화
-      queryClient.invalidateQueries(['progress']);
+      queryClient.invalidateQueries(['progress', 'today']);
+      queryClient.invalidateQueries(['progress']);  // 하위 호환성
       queryClient.invalidateQueries(['user', 'profile']);
       queryClient.invalidateQueries(['user', 'badges']);
     },
@@ -89,88 +91,12 @@ export const useCompleteDayProgress = () => {
 // 퀴즈 관련 훅
 // ==============================================
 
-// Day별 전체 문제 조회
-export const useQuizQuestions = (category, day) => {
-  return useQuery({
-    queryKey: ['quiz', 'questions', category, day],
-    queryFn: () => api.getQuestions(category, day),
-    staleTime: ENV.CACHE_TIMES.QUIZ_SESSION,
-    enabled: !!category && !!day,
-    retry: 2,
-  });
-};
-
-// 특정 문제 조회
-export const useQuizQuestion = (questionId) => {
-  return useQuery({
-    queryKey: ['quiz', 'question', questionId],
-    queryFn: () => api.getQuestion(questionId),
-    staleTime: ENV.CACHE_TIMES.QUIZ_SESSION,
-    enabled: !!questionId,
-    retry: 2,
-  });
-};
-
-// 카테고리별 Day 범위 조회
-export const useDayRange = (category) => {
-  return useQuery({
-    queryKey: ['quiz', 'day-range', category],
-    queryFn: () => api.getDayRange(category),
-    staleTime: ENV.CACHE_TIMES.CATEGORIES,
-    enabled: !!category,
-    retry: 2,
-  });
-};
-
-// 즐겨찾기 문제 조회
-export const useFavoriteQuestions = () => {
-  return useQuery({
-    queryKey: ['quiz', 'favorites'],
-    queryFn: () => api.getFavoriteQuestions(),
-    staleTime: ENV.CACHE_TIMES.USER_DATA,
-    retry: 2,
-  });
-};
-
-// 틀린 문제 조회
-export const useWrongAnswerQuestions = () => {
-  return useQuery({
-    queryKey: ['quiz', 'wrong-answers'],
-    queryFn: () => api.getWrongAnswerQuestions(),
-    staleTime: ENV.CACHE_TIMES.USER_DATA,
-    retry: 2,
-  });
-};
-
-// 레거시 - 퀴즈 세션 데이터 조회
-export const useQuizData = (sessionId) => {
-  return useQuery({
-    queryKey: ['quiz', 'session', sessionId],
-    queryFn: () => api.getQuizSession(sessionId),
-    staleTime: ENV.CACHE_TIMES.QUIZ_SESSION,
-    enabled: !!sessionId,
-    retry: 2,
-  });
-};
-
 export const useHistoryData = () => {
   return useQuery({
     queryKey: ['user', 'history'],
     queryFn: () => api.getHistory(),
     staleTime: ENV.CACHE_TIMES.HISTORY,
     retry: 2,
-  });
-};
-
-export const useSubmitAnswer = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (data) => api.submitAnswer(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['quiz', 'history']);
-      queryClient.invalidateQueries(['progress']);
-    },
   });
 };
 
