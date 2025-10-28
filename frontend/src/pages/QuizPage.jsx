@@ -1,17 +1,16 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 
 // UI 컴포넌트들
 import { QuizProgressBar } from '../components/quiz/QuizProgressBar';
 import { QuizContent } from '../components/quiz/QuizContent';
 import { QuizControls } from '../components/quiz/QuizControls';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
-import { GoalAchievedModal } from '../components/quiz/GoalAchievedModal';
 
 // 세션 관리 유틸리티
 import {
   getSession,
-  createSession,
   moveToNextQuestion,
   markQuestionCompleted,
   isQuizCompleted,
@@ -25,11 +24,12 @@ import {
 import { useQuizGrading } from '../hooks/useQuizGrading';
 
 // API 훅
-import { useToggleWrongAnswer, useToggleFavorite, useUpdateProgress, useCompleteDayProgress } from '../hooks/useApi';
+import { useToggleWrongAnswer, useToggleFavorite, useUpdateProgress } from '../hooks/useApi';
 
 const QuizPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   // URL 파라미터에서 세션 ID 추출
   const sessionId = searchParams.get('session');
@@ -123,9 +123,6 @@ const QuizPage = () => {
   const [isFavorite, setIsFavorite] = useState(question?.isFavorite || false);
   const [isStarred, setIsStarred] = useState(question?.isWrongAnswer || false);
 
-  // 축하 모달 상태
-  const [showGoalModal, setShowGoalModal] = useState(false);
-  const [goalAchievedData, setGoalAchievedData] = useState(null);
 
   // 채점 훅 사용
   const { gradingResult, checkKeyword, checkAllKeywords, submitAnswer, resetGrading } = useQuizGrading(question, inputMode);
@@ -138,9 +135,6 @@ const QuizPage = () => {
 
   // 진행률 업데이트 mutation
   const updateProgressMutation = useUpdateProgress();
-
-  // Day 완료 mutation
-  const completeDayProgressMutation = useCompleteDayProgress();
 
   // 세션 inputMode 동기화
   useEffect(() => {
@@ -316,59 +310,58 @@ const QuizPage = () => {
             questionId: question.id
           };
 
-          await updateProgressMutation.mutateAsync(progressData);
+          const result = await updateProgressMutation.mutateAsync(progressData);
+
+          // 🎉 목표 달성 확인
+          if (result?.goalAchieved) {
+            // Streak 정보 표시
+            const streakMessage = result.streak
+              ? `\n\n🔥 연속 학습: ${result.streak.current_streak}일\n🏆 최고 기록: ${result.streak.best_streak}일`
+              : '';
+
+            // 추가 학습 여부 확인
+            const continueAdditional = window.confirm(
+              `🎉 축하합니다!\n\n오늘의 학습 목표를 달성했습니다!${streakMessage}\n\n추가 학습을 계속하시겠습니까?`
+            );
+
+            if (continueAdditional) {
+              // 확인 클릭: solved_count 리셋 후 계속 진행
+              try {
+                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/progress/reset-solved-count`, {
+                  method: 'POST',
+                  headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`,
+                    'Content-Type': 'application/json'
+                  },
+                  credentials: 'include'
+                });
+
+                if (!response.ok) {
+                  throw new Error('Failed to reset solved count');
+                }
+
+                // 진행률 캐시를 즉시 0으로 업데이트
+                queryClient.setQueryData(['progress', 'today'], {
+                  current: 0,
+                  total: 20,
+                  percentage: 0
+                });
+
+              } catch (resetError) {
+                console.error('Failed to reset solved count:', resetError);
+                alert('진행률 리셋에 실패했습니다. 다시 시도해주세요.');
+                return;
+              }
+            } else {
+              // 취소 클릭: 홈으로 이동
+              deleteSession(sessionId);
+              navigate('/');
+              return;
+            }
+          }
         } catch (error) {
           console.error('Failed to update progress:', error);
           // 진행률 업데이트 실패해도 퀴즈는 계속 진행
-        }
-      }
-
-      // 🎯 Day 완료 감지: 현재 문제가 Day의 마지막 문제인지 확인
-      const nextQuestionIndex = currentQuestionIndex + 1;
-      const currentDay = question?.day;
-
-      // Day 완료 조건:
-      // 1. 다음 문제가 없는 경우 (마지막 문제)
-      // 2. 다음 문제의 Day가 현재 Day보다 큰 경우 (Day 변경)
-      let isDayCompleted = false;
-      let nextDay = null;
-
-      if (shouldUpdateProgress && currentDay) {
-        if (nextQuestionIndex >= questionsData.length) {
-          // 마지막 문제 완료
-          isDayCompleted = true;
-        } else {
-          // 다음 문제가 있는 경우
-          const nextQuestion = questionsData[nextQuestionIndex];
-          nextDay = nextQuestion?.day;
-
-          if (nextDay && nextDay > currentDay) {
-            // Day 변경 감지
-            isDayCompleted = true;
-          }
-        }
-
-        // Day 완료 처리
-        if (isDayCompleted) {
-          try {
-            const result = await completeDayProgressMutation.mutateAsync({ day: currentDay });
-
-            // 👇 goal_met 확인
-            if (result?.goalMet) {
-              // 축하 모달 표시
-              setGoalAchievedData({
-                daysCompleted: result.daysCompleted
-              });
-              setShowGoalModal(true);
-
-              // 다음 문제 로드 중단 (사용자 선택 대기)
-              return;
-            }
-
-          } catch (error) {
-            console.error('Failed to update daily progress:', error);
-            // daily_progress 실패해도 퀴즈는 계속 진행
-          }
         }
       }
 
@@ -405,7 +398,7 @@ const QuizPage = () => {
       console.error('Move to next question error:', error);
       alert('다음 문제 로드에 실패했습니다.');
     }
-  }, [sessionId, question?.id, question?.day, session?.category, quizMode, navigate, resetGrading, updateProgressMutation, completeDayProgressMutation, currentQuestionIndex, questionsData]);
+  }, [sessionId, question?.id, question?.day, session?.category, quizMode, navigate, resetGrading, updateProgressMutation, currentQuestionIndex, questionsData]);
 
   // 문제 오디오 재생
   const handlePlayAudio = () => {
@@ -492,65 +485,6 @@ const QuizPage = () => {
     }
   };
 
-  // 추가 학습하기 (goal_met 달성 후)
-  const handleContinueLearning = async () => {
-    try {
-      setShowGoalModal(false);
-
-      // 1. 기존 세션 완전 삭제
-      deleteSession(sessionId);
-
-      // 2. 새로운 퀴즈 시작 (오늘의 퀴즈와 동일한 방식)
-      const token = localStorage.getItem('jwt_token');
-      const response = await fetch('/api/quiz/daily', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch additional questions');
-      }
-
-      const result = await response.json();
-
-      if (result.success && result.data) {
-        const { day, questions } = result.data;
-
-        if (!questions || questions.length === 0) {
-          alert('오늘 풀 수 있는 모든 문제를 완료했습니다!');
-          navigate('/');
-          return;
-        }
-
-        // 3. 새 세션 생성 (처음부터 시작)
-        const question_ids = questions.map(q => q.question_id);
-        const newSessionId = createSession(4, day, question_ids);
-        const newSession = JSON.parse(localStorage.getItem(`quiz_session_${newSessionId}`));
-        newSession.questions = questions;
-        localStorage.setItem(`quiz_session_${newSessionId}`, JSON.stringify(newSession));
-
-        // 4. 새 세션으로 이동
-        navigate(`/quiz?session=${newSessionId}`);
-      }
-
-    } catch (error) {
-      console.error('Failed to continue learning:', error);
-      alert('추가 학습을 시작할 수 없습니다. 다시 시도해주세요.');
-    }
-  };
-
-  // 학습 중단 (홈으로)
-  const handleGoHome = () => {
-    setShowGoalModal(false);
-    deleteSession(sessionId);
-    navigate('/');
-  };
-
-
 
   // ================================================================
   // 렌더링
@@ -611,15 +545,6 @@ const QuizPage = () => {
         onSkipQuestion={handleNextQuestion}
         gradingResult={gradingResult}
       />
-
-      {/* Goal Achievement Modal */}
-      <GoalAchievedModal
-        isOpen={showGoalModal}
-        daysCompleted={goalAchievedData?.daysCompleted}
-        onContinue={handleContinueLearning}
-        onGoHome={handleGoHome}
-      />
-
     </div>
   );
 };

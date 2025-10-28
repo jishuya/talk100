@@ -241,11 +241,10 @@ class ApiService {
     });
   }
 
-  // 🧩 QuizPage.jsx에서 사용 - Day 완료 시 daily_progress 업데이트
-  completeDayProgress(data) {
-    return this.request('/api/progress/day-complete', null, {
-      method: 'POST',
-      body: data  // { day: number }
+  // 🧩 QuizPage.jsx에서 사용 - solved_count 리셋 (추가 학습 시작 시)
+  resetSolvedCount() {
+    return this.request('/api/progress/reset-solved-count', null, {
+      method: 'POST'
     });
   }
 

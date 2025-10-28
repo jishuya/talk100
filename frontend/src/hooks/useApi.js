@@ -71,22 +71,6 @@ export const useUpdateProgress = () => {
   });
 };
 
-// Day 완료 시 daily_progress 업데이트
-export const useCompleteDayProgress = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (data) => api.completeDayProgress(data),
-    onSuccess: () => {
-      // 진행률 및 사용자 데이터 캐시 무효화
-      queryClient.invalidateQueries(['progress', 'today']);
-      queryClient.invalidateQueries(['progress']);  // 하위 호환성
-      queryClient.invalidateQueries(['user', 'profile']);
-      queryClient.invalidateQueries(['user', 'badges']);
-    },
-  });
-};
-
 // ==============================================
 // 퀴즈 관련 훅
 // ==============================================

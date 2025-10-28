@@ -1,4 +1,5 @@
 const { db } = require('../config/database');
+const streakQueries = require('./streakQueries');
 
 class ProgressQueries {
   /**
@@ -12,39 +13,63 @@ class ProgressQueries {
    */
   async updateUserProgress(userId, categoryId, day, questionId) {
     try {
-      console.log('🔄 [User Progress] Updating...', {
-        userId,
-        categoryId,
-        day,
-        questionId
-      });
-
       // user_progress 테이블에 INSERT 또는 UPDATE (UPSERT 패턴)
+      // 참고: solved_count는 getTodayQuizQuestions에서 이미 자정 리셋 처리됨
       await db.none(
-        `INSERT INTO user_progress (user_id, category_id, last_studied_day, last_studied_question_id, last_studied_timestamp)
-         VALUES ($1, $2, $3, $4, NOW())
+        `INSERT INTO user_progress (user_id, category_id, last_studied_day, last_studied_question_id, last_studied_timestamp, solved_count)
+         VALUES ($1, $2, $3, $4, NOW(), 1)
          ON CONFLICT (user_id, category_id)
          DO UPDATE SET
            last_studied_day = $3,
            last_studied_question_id = $4,
-           last_studied_timestamp = NOW()`,
+           last_studied_timestamp = NOW(),
+           solved_count = user_progress.solved_count + 1`,
         [userId, categoryId, day, questionId]
       );
 
       // 업데이트 후 확인
       const updated = await db.oneOrNone(
-        `SELECT last_studied_day, last_studied_question_id, last_studied_timestamp
+        `SELECT last_studied_day, last_studied_question_id, last_studied_timestamp, solved_count
          FROM user_progress
          WHERE user_id = $1 AND category_id = $2`,
         [userId, categoryId]
       );
 
-      console.log('✅ [User Progress] Updated successfully:', updated);
+      // 🎯 목표 달성 체크 (category_id = 4: 오늘의 퀴즈만)
+      let goalAchieved = false;
+      let streakInfo = null;
+
+      if (categoryId === 4 && updated?.solved_count) {
+        // daily_goal 조회
+        const userSettings = await db.oneOrNone(
+          `SELECT daily_goal FROM users WHERE uid = $1`,
+          [userId]
+        );
+
+        const dailyGoal = userSettings?.daily_goal || 20;
+
+        // 목표 달성 시 streak 업데이트 (정확히 달성한 순간에만)
+        if (updated.solved_count === dailyGoal) {
+          goalAchieved = true;
+
+          try {
+            const streakResult = await streakQueries.updateStreak(userId);
+            streakInfo = streakResult;
+          } catch (streakError) {
+            console.error('⚠️ [Streak] Update failed (non-critical):', streakError);
+            // streak 업데이트 실패해도 진행률 업데이트는 성공으로 처리
+          }
+        }
+      }
 
       return {
         success: true,
         message: 'User progress updated successfully',
-        data: updated
+        data: {
+          ...updated,
+          goalAchieved,
+          streak: streakInfo
+        }
       };
     } catch (error) {
       console.error('❌ [User Progress] Update failed:', error);
@@ -53,94 +78,29 @@ class ProgressQueries {
   }
 
   /**
-   * daily_progress 업데이트 - Day 완료 시 호출
-   * 오늘 날짜 기준으로 days_completed +1, goal_met 자동 계산
+   * solved_count 리셋 - 추가 학습 시작 시 호출
    * @param {string} userId - 사용자 ID
-   * @returns {Object} { days_completed, goal_met }
+   * @returns {Object} { success: boolean }
    */
-  async updateDailyProgress(userId) {
+  async resetSolvedCount(userId) {
     try {
-      console.log('🔄 [Daily Progress] Updating for userId:', userId);
-
-      // 먼저 현재 상태 확인
-      const currentState = await db.oneOrNone(
-        `SELECT user_id, date, start_day, days_completed, goal_met, additional_days
-         FROM daily_progress
-         WHERE user_id = $1 AND date = CURRENT_DATE`,
-        [userId]
-      );
-      console.log('📌 [Daily Progress] Current state BEFORE update:', currentState);
-
-      // user_progress에서 현재 완료한 Day 조회
-      const userProgress = await db.oneOrNone(
-        `SELECT last_studied_day FROM user_progress
+      await db.none(
+        `UPDATE user_progress
+         SET solved_count = 0
          WHERE user_id = $1 AND category_id = 4`,
         [userId]
       );
 
-      const currentDay = userProgress?.last_studied_day || 0;
-      console.log('🔍 [Daily Progress] Current day from user_progress:', currentDay);
-
-      // goal_met 계산: (현재 Day - start_day + 1) >= daily_goal
-      const result = await db.one(
-        `UPDATE daily_progress
-         SET days_completed = days_completed + 1,
-             goal_met = ($2 - start_day + 1) >= (SELECT daily_goal FROM users WHERE uid = $1)
-         WHERE user_id = $1 AND date = CURRENT_DATE
-         RETURNING user_id, date, start_day, days_completed, goal_met`,
-        [userId, currentDay]
-      );
-
-      console.log('✅ [Daily Progress] Updated AFTER:', {
-        userId: result.user_id,
-        date: result.date,
-        startDay: result.start_day,
-        currentDay,
-        daysCompleted: result.days_completed,
-        goalMet: result.goal_met,
-        calculation: `(${currentDay} - ${result.start_day} + 1) >= daily_goal = ${result.goal_met}`
-      });
-
       return {
         success: true,
-        daysCompleted: result.days_completed,
-        goalMet: result.goal_met
+        message: 'Solved count reset successfully'
       };
     } catch (error) {
-      console.error('❌ [Daily Progress] Update error:', error);
-      throw new Error('Failed to update daily progress');
+      console.error('❌ [Reset Solved Count] Failed:', error);
+      throw new Error('Failed to reset solved count');
     }
   }
 
-  /**
-   * additional_days +1 업데이트 - 추가 학습 선택 시 호출
-   * @param {string} userId - 사용자 ID
-   * @returns {Object} { success: true, additionalDays: number }
-   */
-  async updateAdditionalDays(userId) {
-    try {
-      const result = await db.one(
-        `UPDATE daily_progress
-         SET additional_days = additional_days + 1
-         WHERE user_id = $1 AND date = CURRENT_DATE
-         RETURNING additional_days`,
-        [userId]
-      );
-
-      console.log('✅ [Additional Days] Updated:', {
-        userId,
-        additionalDays: result.additional_days
-      });
-
-      return {
-        success: true,
-        additionalDays: result.additional_days
-      };
-    } catch (error) {
-      console.error('updateAdditionalDays query error:', error);
-      throw new Error('Failed to update additional days');
-    }
-  }
 }
 
 module.exports = new ProgressQueries();

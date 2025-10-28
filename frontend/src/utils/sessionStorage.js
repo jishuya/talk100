@@ -59,9 +59,6 @@ export const createSession = (categoryId, day = 1, questionIds = []) => {
   const key = `${SESSION_PREFIX}${sessionId}`;
   localStorage.setItem(key, JSON.stringify(session));
 
-  // 활성 세션 ID 저장
-  localStorage.setItem(ACTIVE_SESSION_KEY, sessionId);
-
   return sessionId;
 };
 

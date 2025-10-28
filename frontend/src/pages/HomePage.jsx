@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import CharacterSection from '../components/home/CharacterSection';
 import QuizCategorySection from '../components/home/QuizCategorySection';
 import QuizPersonalSection from '../components/home/QuizPersonalSection';
@@ -12,6 +13,7 @@ import { createSession } from '../utils/sessionStorage';
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   // 데이터 훅들 (ApiService가 자동으로 fallback 처리)
   const { data: userData, isLoading: userLoading } = useUserData();
@@ -46,7 +48,28 @@ const HomePage = () => {
           return; // 사용자가 취소하면 중단
         }
 
-        // 추가 학습: getTodayQuizQuestions()가 자동으로 다음 범위 가져옴
+        // 추가 학습 시작: solved_count 리셋
+        const token = localStorage.getItem('jwt_token');
+        const resetResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/progress/reset-solved-count`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include'
+        });
+
+        if (!resetResponse.ok) {
+          alert('진행률 리셋에 실패했습니다. 다시 시도해주세요.');
+          return;
+        }
+
+        // 진행률 캐시를 즉시 0으로 업데이트
+        queryClient.setQueryData(['progress', 'today'], {
+          current: 0,
+          total: 20,
+          percentage: 0
+        });
       }
 
       const token = localStorage.getItem('jwt_token');
@@ -64,9 +87,10 @@ const HomePage = () => {
       }
 
       const result = await response.json();
+      console.log('Today quiz response:', result.data);
 
       if (result.success && result.data) {
-        const { day, questions } = result.data;
+        const { start_question_id, daily_goal, progress, questions } = result.data;
 
         // 문제가 없으면 (모두 풀었음)
         if (!questions || questions.length === 0) {
@@ -76,10 +100,12 @@ const HomePage = () => {
 
         const question_ids = questions.map(q => q.question_id);
 
-        // 세션 생성 및 데이터 저장
-        const sessionId = createSession(4, day, question_ids);
+        // 세션 생성 및 데이터 저장 (day 대신 start_question_id 사용)
+        const sessionId = createSession(4, start_question_id, question_ids);
         const session = JSON.parse(localStorage.getItem(`quiz_session_${sessionId}`));
         session.questions = questions;
+        session.daily_goal = daily_goal;
+        session.progress = progress;
         localStorage.setItem(`quiz_session_${sessionId}`, JSON.stringify(session));
 
         navigate(`/quiz?session=${sessionId}`);

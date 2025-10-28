@@ -21,7 +21,7 @@
 -- ================================================
 DROP TABLE IF EXISTS wrong_answers CASCADE;
 DROP TABLE IF EXISTS favorites CASCADE;
-DROP TABLE IF EXISTS daily_progress CASCADE;
+DROP TABLE IF EXISTS user_streak CASCADE;
 DROP TABLE IF EXISTS review_queue CASCADE;
 DROP TABLE IF EXISTS user_progress CASCADE;
 DROP TABLE IF EXISTS questions CASCADE;
@@ -134,12 +134,15 @@ CREATE TABLE user_progress (
     progress_id SERIAL PRIMARY KEY,
     user_id VARCHAR(255) REFERENCES users(uid) ON DELETE CASCADE,
     category_id INTEGER REFERENCES category(category_id) ON DELETE CASCADE,
-    
+
     -- 마지막 학습 정보
     last_studied_day INTEGER DEFAULT 1,
     last_studied_question_id INTEGER REFERENCES questions(question_id) ON DELETE CASCADE,
     last_studied_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
+
+    -- 일일 진행률 추적
+    solved_count INTEGER DEFAULT 0,          -- 오늘 푼 문제 수 (자정 리셋)
+
     -- 사용자+카테고리별 하나의 레코드만 유지
     UNIQUE(user_id, category_id)
 );
@@ -163,22 +166,7 @@ CREATE TABLE review_queue (
 );
 
 -- ================================================
--- 7. DAILY_PROGRESS 테이블
--- 목적: 일일 학습 진행 추적
--- ================================================
-CREATE TABLE daily_progress (
-    user_id VARCHAR(255) REFERENCES users(uid) ON DELETE CASCADE,
-    date DATE DEFAULT CURRENT_DATE,
-    start_day INTEGER DEFAULT 1,       -- 오늘 시작한 Day 번호
-    days_completed INTEGER DEFAULT 0,  -- 오늘 완료한 Day 수
-    goal_met BOOLEAN DEFAULT false,    -- 일일 목표 달성 여부
-    additional_days INTEGER DEFAULT 0, -- 추가 학습한 Day 수
-
-    PRIMARY KEY (user_id, date)
-);
-
--- ================================================
--- 8. FAVORITES 테이블
+-- 7. FAVORITES 테이블
 -- 목적: 즐겨찾기 문제 관리 (❤️)
 -- ================================================
 CREATE TABLE favorites (
@@ -190,7 +178,7 @@ CREATE TABLE favorites (
 );
 
 -- ================================================
--- 9. WRONG_ANSWERS 테이블
+-- 8. WRONG_ANSWERS 테이블
 -- 목적: 틀린 문제 관리 (⭐)
 -- ================================================
 CREATE TABLE wrong_answers (
@@ -202,13 +190,42 @@ CREATE TABLE wrong_answers (
 );
 
 -- ================================================
+-- 9. USER_STREAK 테이블
+-- 목적: 연속 성공 문제 관리 테이블
+-- ================================================
+CREATE TABLE user_streak (
+    user_id VARCHAR(255) PRIMARY KEY REFERENCES users(uid) ON DELETE CASCADE,
+    current_streak INT DEFAULT 0,
+    last_completed_date DATE,
+    today_completed BOOLEAN DEFAULT FALSE,
+    best_streak INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 2) 업데이트 트리거 함수 생성
+CREATE OR REPLACE FUNCTION set_timestamp()
+	RETURNS TRIGGER AS $$
+	BEGIN
+		NEW.updated_at = NOW();
+		RETURN NEW;
+	END;
+	$$ LANGUAGE plpgsql;
+
+-- 3) 트리거 생성
+CREATE TRIGGER set_timestamp
+	BEFORE UPDATE ON user_streak
+	FOR EACH ROW
+	EXECUTE FUNCTION set_timestamp();
+
+-- ================================================
 -- 인덱스 생성
 -- 자주 사용되는 쿼리 최적화
 -- ================================================
 CREATE INDEX idx_questions_category_day ON questions(category_id, day, question_number);
 CREATE INDEX idx_user_progress_user ON user_progress(user_id, category_id);
 CREATE INDEX idx_review_queue_user_scheduled ON review_queue(user_id, scheduled_for);
-CREATE INDEX idx_daily_progress_user_date ON daily_progress(user_id, date);
+CREATE INDEX idx_user_streak_user ON user_streak(user_id);
 CREATE INDEX idx_favorites_user ON favorites(user_id);
 CREATE INDEX idx_wrong_answers_user ON wrong_answers(user_id);
 
@@ -450,16 +467,6 @@ INSERT INTO users (uid, name, email, voice_gender, default_difficulty, daily_goa
 -- ================================================
 -- 샘플 학습 진행 데이터
 -- ================================================
-INSERT INTO user_progress (user_id, category_id, last_studied_day, last_studied_question_id) VALUES
-('google_116458393760270019201', 1, 1, 1), 
-('google_116458393760270019201', 2, 1, 1),
-('google_116458393760270019201', 3, 1, 1),
-('google_116458393760270019201', 4, 3, 1),
-('google_116458393760270019201', 5, 3, 2),
-('user001', 1, 3, 1),   
-('user001', 2, 1, 1),
-('user001', 3, 1, 1); 
-
 
 -- ================================================
 -- 샘플 틀린 문제 데이터
@@ -476,20 +483,20 @@ INSERT INTO favorites (user_id, question_id) VALUES
 ('user001', 2);
 
 -- ================================================
--- 샘플 일일 진행 데이터
+-- 샘플 학습 연속일 데이터
 -- ================================================
-INSERT INTO daily_progress (user_id, date, days_completed, goal_met) VALUES
-('user001', '2024-01-15', 1, true),
-('user001', '2024-01-16', 2, true),
-('user002', '2024-01-15', 1, false);
+INSERT INTO user_streak (user_id, current_streak, last_completed_date, today_completed, best_streak) VALUES
+('user001', 5, CURRENT_DATE - INTERVAL '1 day', false, 10),
+('user002', 2, CURRENT_DATE, true, 5),
+('user003', 0, NULL, false, 0);
 
 -- ================================================
 -- 샘플 복습 큐 데이터 (Day 번호 기반)
 -- ================================================
-INSERT INTO review_queue (user_id, source_day, interval_days, scheduled_for) VALUES
-('user001', 14, 1, NOW() + INTERVAL '1 day'),
-('user001', 15, 3, NOW() + INTERVAL '3 days'),
-('user002', 14, 1, NOW() + INTERVAL '1 day');
+INSERT INTO review_queue (user_id, day, interval_days, scheduled_for) VALUES
+('user001', 1, 1, NOW() + INTERVAL '1 day'),
+('user001', 2, 3, NOW() + INTERVAL '3 days'),
+('user002', 1, 1, NOW() + INTERVAL '1 day');
 
 -- ================================================
 -- 데이터 확인 쿼리
@@ -504,10 +511,10 @@ SELECT 'Questions:', COUNT(*) FROM questions
 UNION ALL
 SELECT 'User Progress:', COUNT(*) FROM user_progress
 UNION ALL
+SELECT 'User Streak:', COUNT(*) FROM user_streak
+UNION ALL
 SELECT 'Wrong Answers:', COUNT(*) FROM wrong_answers
 UNION ALL
 SELECT 'Favorites:', COUNT(*) FROM favorites
-UNION ALL
-SELECT 'Daily Progress:', COUNT(*) FROM daily_progress
 UNION ALL
 SELECT 'Review Queue:', COUNT(*) FROM review_queue;
