@@ -39,7 +39,7 @@ class ProgressController {
 
       res.json({
         success: true,
-        data: result
+        data: result.data  // result.data에 실제 데이터가 있음 (goalAchieved, streak 포함)
       });
 
     } catch (error) {

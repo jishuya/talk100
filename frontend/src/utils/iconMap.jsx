@@ -72,6 +72,8 @@ const ICON_MAP = {
   'noto:fire': 'noto:fire',
   'noto:bar-chart': 'noto:bar-chart',
   'noto:star': 'noto:star',
+  IoPartyPopper: 'noto:party-popper',
+  IoFire: 'noto:fire',
 
   // === System & Info ===
   'noto:information': 'noto:information',

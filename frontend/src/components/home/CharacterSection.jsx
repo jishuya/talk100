@@ -30,7 +30,7 @@ const CharacterSection = ({
       <div className="mb-4">
         <div className="text-xl font-bold text-text-primary mb-1">{user?.name || '사용자'}</div>
         <div className="flex items-center justify-center text-sm text-text-secondary">
-          학습 목표: {user?.goal || 20}Day
+          학습 목표: {user?.goal || 20}문제
           {/* {getIcon('IoChevronDownOutline', { size: 'md', className: 'ml-1' })} */}
         </div>
       </div>

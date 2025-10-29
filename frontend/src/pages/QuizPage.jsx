@@ -7,6 +7,9 @@ import { QuizProgressBar } from '../components/quiz/QuizProgressBar';
 import { QuizContent } from '../components/quiz/QuizContent';
 import { QuizControls } from '../components/quiz/QuizControls';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
+import Modal, { ModalHeader, ModalBody, ModalFooter } from '../components/ui/Modal';
+import Button from '../components/ui/Button';
+import { getIcon } from '../utils/iconMap';
 
 // 세션 관리 유틸리티
 import {
@@ -118,6 +121,10 @@ const QuizPage = () => {
   const [showHint, setShowHint] = useState(false);
   const [showAnswer, setShowAnswer] = useState(false);
   const [keywordInputs, setKeywordInputs] = useState({});
+
+  // 모달 상태
+  const [showGoalAchievedModal, setShowGoalAchievedModal] = useState(false);
+  const [streakInfo, setStreakInfo] = useState(null);
 
   // 즐겨찾기 & 별 상태 (로컬 상태로 관리하여 즉시 UI 업데이트)
   const [isFavorite, setIsFavorite] = useState(question?.isFavorite || false);
@@ -314,50 +321,10 @@ const QuizPage = () => {
 
           // 🎉 목표 달성 확인
           if (result?.goalAchieved) {
-            // Streak 정보 표시
-            const streakMessage = result.streak
-              ? `\n\n🔥 연속 학습: ${result.streak.current_streak}일\n🏆 최고 기록: ${result.streak.best_streak}일`
-              : '';
-
-            // 추가 학습 여부 확인
-            const continueAdditional = window.confirm(
-              `🎉 축하합니다!\n\n오늘의 학습 목표를 달성했습니다!${streakMessage}\n\n추가 학습을 계속하시겠습니까?`
-            );
-
-            if (continueAdditional) {
-              // 확인 클릭: solved_count 리셋 후 계속 진행
-              try {
-                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/progress/reset-solved-count`, {
-                  method: 'POST',
-                  headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`,
-                    'Content-Type': 'application/json'
-                  },
-                  credentials: 'include'
-                });
-
-                if (!response.ok) {
-                  throw new Error('Failed to reset solved count');
-                }
-
-                // 진행률 캐시를 즉시 0으로 업데이트
-                queryClient.setQueryData(['progress', 'today'], {
-                  current: 0,
-                  total: 20,
-                  percentage: 0
-                });
-
-              } catch (resetError) {
-                console.error('Failed to reset solved count:', resetError);
-                alert('진행률 리셋에 실패했습니다. 다시 시도해주세요.');
-                return;
-              }
-            } else {
-              // 취소 클릭: 홈으로 이동
-              deleteSession(sessionId);
-              navigate('/');
-              return;
-            }
+            // Streak 정보 저장 후 모달 표시
+            setStreakInfo(result.streak || null);
+            setShowGoalAchievedModal(true);
+            return; // 모달 응답을 기다림
           }
         } catch (error) {
           console.error('Failed to update progress:', error);
@@ -374,9 +341,8 @@ const QuizPage = () => {
       const success = moveToNextQuestion(sessionId);
 
       if (!success) {
-        // 퀴즈 완료
+        // 퀴즈 완료 - 바로 홈으로 이동
         if (isQuizCompleted(sessionId)) {
-          alert('퀴즈를 모두 완료했습니다!');
           deleteSession(sessionId);
           navigate('/');
           return;
@@ -398,7 +364,7 @@ const QuizPage = () => {
       console.error('Move to next question error:', error);
       alert('다음 문제 로드에 실패했습니다.');
     }
-  }, [sessionId, question?.id, question?.day, session?.category, quizMode, navigate, resetGrading, updateProgressMutation, currentQuestionIndex, questionsData]);
+  }, [sessionId, question?.id, question?.day, session?.category, quizMode, navigate, resetGrading, updateProgressMutation]);
 
   // 문제 오디오 재생
   const handlePlayAudio = () => {
@@ -485,6 +451,94 @@ const QuizPage = () => {
     }
   };
 
+  // 🎉 목표 달성 모달: 추가 학습 계속하기
+  const handleContinueAdditionalLearning = async () => {
+    try {
+      // 1. solved_count 리셋
+      const resetResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/progress/reset-solved-count`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`,
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      });
+
+      if (!resetResponse.ok) {
+        throw new Error('Failed to reset solved count');
+      }
+
+      // 2. 진행률 캐시를 즉시 0으로 업데이트
+      queryClient.setQueryData(['progress', 'today'], {
+        current: 0,
+        total: 20,
+        percentage: 0
+      });
+
+      // 3. 새로운 문제 불러오기
+      const token = localStorage.getItem('jwt_token');
+      const quizResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/quiz/daily`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      if (!quizResponse.ok) {
+        throw new Error('Failed to fetch new quiz');
+      }
+
+      const result = await quizResponse.json();
+
+      if (result.success && result.data && result.data.questions && result.data.questions.length > 0) {
+        // 4. 기존 세션 삭제
+        deleteSession(sessionId);
+
+        // 5. 새 세션 생성
+        const { questions } = result.data;
+        const questionIds = questions.map(q => q.question_id);
+
+        const newSessionId = `session_${Date.now()}`;
+        const newSession = {
+          sessionId: newSessionId,
+          category: 4,
+          questionIds,
+          questions,
+          progress: { completed: 0, total: questions.length, percentage: 0 },
+          currentQuestionIndex: 0,
+          completedQuestions: [],
+          inputMode: 'keyboard',
+          createdAt: Date.now()
+        };
+
+        localStorage.setItem(`quiz_session_${newSessionId}`, JSON.stringify(newSession));
+
+        // 6. 모달 닫기
+        setShowGoalAchievedModal(false);
+        setStreakInfo(null);
+
+        // 7. 새 세션으로 페이지 이동
+        navigate(`/quiz?session=${newSessionId}`);
+        window.location.reload();
+      } else {
+        alert('추가 학습할 문제가 없습니다.');
+        handleGoToHome();
+      }
+
+    } catch (error) {
+      console.error('Failed to start additional learning:', error);
+      alert('추가 학습 시작에 실패했습니다. 다시 시도해주세요.');
+    }
+  };
+
+  // 🎉 목표 달성 모달: 홈으로 이동
+  const handleGoToHome = () => {
+    deleteSession(sessionId);
+    navigate('/');
+  };
+
 
   // ================================================================
   // 렌더링
@@ -545,6 +599,58 @@ const QuizPage = () => {
         onSkipQuestion={handleNextQuestion}
         gradingResult={gradingResult}
       />
+
+      {/* 🎉 목표 달성 모달 */}
+      <Modal
+        isOpen={showGoalAchievedModal}
+        onClose={handleGoToHome}
+        size="md"
+        closeOnOverlayClick={false}
+        showCloseButton={false}
+        className="border-4 border-primary rounded-3xl overflow-hidden"
+      >
+        <ModalHeader className="bg-gradient-to-r from-primary-light to-primary rounded-t-2xl">
+          <div className="text-center">
+            <div className="mb-2 animate-bounce flex justify-center">
+              {getIcon('IoPartyPopper', { size: '5xl' })}
+            </div>
+            <h2 className="text-2xl font-bold text-white drop-shadow-lg">오늘 목표 완료!</h2>
+          </div>
+        </ModalHeader>
+        <ModalBody className="py-6">
+          <div className="text-center space-y-5">
+            {streakInfo && (
+              <div className="bg-gradient-to-br from-accent-mint to-accent-pale rounded-2xl p-5 space-y-3 border-2 border-primary-light shadow-lg">
+                <div className="flex items-center justify-center gap-3">
+                  {getIcon('IoFire', { size: '3xl' })}
+                  <span className="text-lg text-text-secondary">
+                    연속 학습: <span className="font-bold text-primary text-xl">{streakInfo.current_streak}일</span>
+                  </span>
+                </div>
+                <div className="flex items-center justify-center gap-3">
+                  {getIcon('IoTrophy', { size: '3xl' })}
+                  <span className="text-lg text-text-secondary">
+                    최고 기록: <span className="font-bold text-primary text-xl">{streakInfo.best_streak}일</span>
+                  </span>
+                </div>
+              </div>
+            )}
+
+            <p className="text-lg font-semibold text-text-primary pt-2">
+              추가로 더 푸시겠습니까?
+            </p>
+          </div>
+        </ModalBody>
+        <ModalFooter className="bg-gray-50 rounded-b-2xl">
+          <Button variant="secondary" onClick={handleGoToHome} className="px-6 py-3">
+            홈으로
+          </Button>
+          <Button variant="primary" onClick={handleContinueAdditionalLearning} className="px-6 py-3">
+            계속하기
+          </Button>
+        </ModalFooter>
+      </Modal>
+
     </div>
   );
 };
