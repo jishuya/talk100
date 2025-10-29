@@ -158,6 +158,18 @@ const QuizPage = () => {
     }
   }, [question?.id]);
 
+  // 첫 문제 로드 시 첫 번째 키워드 input에 자동 포커스
+  useEffect(() => {
+    if (question && inputMode === 'keyboard' && quizMode === 'solving') {
+      setTimeout(() => {
+        const firstInput = document.querySelector('input[data-keyword]');
+        if (firstInput) {
+          firstInput.focus();
+        }
+      }, 100);
+    }
+  }, [question?.id, inputMode, quizMode]);
+
 
   // 키워드 입력 변경 핸들러
   const handleKeywordInputChange = (keyword, value) => {
@@ -360,11 +372,35 @@ const QuizPage = () => {
       setKeywordInputs({});
       resetGrading(); // 채점 결과 초기화
 
+      // 첫 번째 키워드 input에 포커스
+      setTimeout(() => {
+        const firstInput = document.querySelector('input[data-keyword]');
+        if (firstInput) {
+          firstInput.focus();
+        }
+      }, 100);
+
     } catch (error) {
       console.error('Move to next question error:', error);
       alert('다음 문제 로드에 실패했습니다.');
     }
   }, [sessionId, question?.id, question?.day, session?.category, quizMode, navigate, resetGrading, updateProgressMutation]);
+
+  // Enter 키로 다음 문제 넘어가기 (grading 모드일 때만)
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      if (e.key === 'Enter' && quizMode === 'grading') {
+        // input이나 textarea에 포커스되어 있지 않을 때만
+        const activeElement = document.activeElement;
+        if (activeElement?.tagName !== 'INPUT' && activeElement?.tagName !== 'TEXTAREA') {
+          handleNextQuestion();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [quizMode, handleNextQuestion]);
 
   // 문제 오디오 재생
   const handlePlayAudio = () => {
