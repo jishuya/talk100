@@ -14,6 +14,7 @@ import StatusPage from './pages/StatusPage';
 import MyPage from './pages/MyPage';
 import SettingsPage from './pages/SettingsPage';
 import LoginPage from './pages/LoginPage';
+import GoalModalSamples from './samples/GoalModalSamples';
 
 // 스타일 import
 import './styles/globals.css';
@@ -83,6 +84,7 @@ function App() {
                         <SettingsPage />
                       </ProtectedRoute>
                     } />
+                    <Route path="/samples/modals" element={<GoalModalSamples />} />
                   </Routes>
                 </AppLayout>
               </div>

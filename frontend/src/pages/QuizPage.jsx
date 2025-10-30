@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -7,7 +7,7 @@ import { QuizProgressBar } from '../components/quiz/QuizProgressBar';
 import { QuizContent } from '../components/quiz/QuizContent';
 import { QuizControls } from '../components/quiz/QuizControls';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
-import Modal, { ModalHeader, ModalBody, ModalFooter } from '../components/ui/Modal';
+import Modal, { ModalBody } from '../components/ui/Modal';
 import Button from '../components/ui/Button';
 import { getIcon } from '../utils/iconMap';
 
@@ -94,6 +94,14 @@ const QuizPage = () => {
       }
     }
 
+    // 🎲 키워드 랜덤 선택: 백엔드에서 받은 키워드 중 랜덤으로 2개만 선택
+    let selectedKeywords = currentQuestion.keywords || [];
+    if (selectedKeywords.length > 2) {
+      // Fisher-Yates 셔플 알고리즘으로 랜덤 선택
+      const shuffled = [...selectedKeywords].sort(() => Math.random() - 0.5);
+      selectedKeywords = shuffled.slice(0, 2);
+    }
+
     return {
       id: currentQuestion.question_id,
       day: currentQuestion.day,
@@ -103,7 +111,7 @@ const QuizPage = () => {
       english,
       maleAudioUrl,
       femaleAudioUrl,
-      keywords: currentQuestion.keywords || [],
+      keywords: selectedKeywords,
       answer: english,
       isFavorite: currentQuestion.is_favorite || false,
       isWrongAnswer: currentQuestion.is_wrong_answer || false
@@ -125,6 +133,9 @@ const QuizPage = () => {
   // 모달 상태
   const [showGoalAchievedModal, setShowGoalAchievedModal] = useState(false);
   const [streakInfo, setStreakInfo] = useState(null);
+
+  // 모달 버튼 ref
+  const continueButtonRef = useRef(null);
 
   // 즐겨찾기 & 별 상태 (로컬 상태로 관리하여 즉시 UI 업데이트)
   const [isFavorite, setIsFavorite] = useState(question?.isFavorite || false);
@@ -215,17 +226,21 @@ const QuizPage = () => {
 
   // 다음 키워드 input으로 포커스 이동
   const moveToNextKeywordInput = (currentKeyword) => {
-    if (!question?.keywords) return;
-    // 키워드 배열에서 현재 위치 찾기
-    const keywords = question.keywords.map(k => k.toLowerCase());
-    const currentIndex = keywords.indexOf(currentKeyword);
-    // DOM 쿼리로 다음 input 찾아서 포커스
-    if (currentIndex !== -1 && currentIndex < keywords.length - 1) {
-      const nextKeyword = keywords[currentIndex + 1];
-      const nextInput = document.querySelector(`input[data-keyword="${nextKeyword}"]`);
-      if (nextInput) {
-        nextInput.focus();
+    // DOM에서 현재 모든 키워드 input을 순서대로 가져오기 (영어 문장 순서)
+    const allInputs = document.querySelectorAll('input[data-keyword]');
+    if (allInputs.length === 0) return;
+
+    // 현재 input의 인덱스 찾기
+    let currentIndex = -1;
+    allInputs.forEach((input, index) => {
+      if (input.dataset.keyword === currentKeyword) {
+        currentIndex = index;
       }
+    });
+
+    // 다음 input으로 포커스 이동
+    if (currentIndex !== -1 && currentIndex < allInputs.length - 1) {
+      allInputs[currentIndex + 1].focus();
     }
   };
 
@@ -389,7 +404,8 @@ const QuizPage = () => {
   // Enter 키로 다음 문제 넘어가기 (grading 모드일 때만)
   useEffect(() => {
     const handleKeyPress = (e) => {
-      if (e.key === 'Enter' && quizMode === 'grading') {
+      // 모달이 열려 있을 때는 이 핸들러를 무시
+      if (e.key === 'Enter' && quizMode === 'grading' && !showGoalAchievedModal) {
         // input이나 textarea에 포커스되어 있지 않을 때만
         const activeElement = document.activeElement;
         if (activeElement?.tagName !== 'INPUT' && activeElement?.tagName !== 'TEXTAREA') {
@@ -400,7 +416,38 @@ const QuizPage = () => {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [quizMode, handleNextQuestion]);
+  }, [quizMode, handleNextQuestion, showGoalAchievedModal]);
+
+  // 목표 달성 모달이 열릴 때 "계속하기" 버튼에 자동 포커스
+  useEffect(() => {
+    if (showGoalAchievedModal && continueButtonRef.current) {
+      setTimeout(() => {
+        continueButtonRef.current?.focus();
+      }, 100);
+    }
+  }, [showGoalAchievedModal]);
+
+  // 목표 달성 모달에서 Enter 키로 추가 학습하기
+  useEffect(() => {
+    const handleModalKeyPress = (e) => {
+      if (e.key === 'Enter' && showGoalAchievedModal) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // "계속하기" 버튼 클릭
+        if (continueButtonRef.current) {
+          continueButtonRef.current.classList.add('animate-pulse');
+          setTimeout(() => {
+            continueButtonRef.current?.classList.remove('animate-pulse');
+            continueButtonRef.current?.click();
+          }, 200);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleModalKeyPress);
+    return () => window.removeEventListener('keydown', handleModalKeyPress);
+  }, [showGoalAchievedModal]);
 
   // 문제 오디오 재생
   const handlePlayAudio = () => {
@@ -544,7 +591,7 @@ const QuizPage = () => {
           questions,
           progress: { completed: 0, total: questions.length, percentage: 0 },
           currentQuestionIndex: 0,
-          completedQuestions: [],
+          completedQuestionIds: [],
           inputMode: 'keyboard',
           createdAt: Date.now()
         };
@@ -557,7 +604,6 @@ const QuizPage = () => {
 
         // 7. 새 세션으로 페이지 이동
         navigate(`/quiz?session=${newSessionId}`);
-        window.location.reload();
       } else {
         alert('추가 학습할 문제가 없습니다.');
         handleGoToHome();
@@ -636,55 +682,81 @@ const QuizPage = () => {
         gradingResult={gradingResult}
       />
 
-      {/* 🎉 목표 달성 모달 */}
+      {/* 🎉 목표 달성 모달 - 샘플 10 스타일 */}
       <Modal
         isOpen={showGoalAchievedModal}
         onClose={handleGoToHome}
-        size="md"
+        size="sm"
         closeOnOverlayClick={false}
         showCloseButton={false}
-        className="border-4 border-primary rounded-3xl overflow-hidden"
+        className="rounded-2xl overflow-hidden"
       >
-        <ModalHeader className="bg-gradient-to-r from-primary-light to-primary rounded-t-2xl">
-          <div className="text-center">
-            <div className="mb-2 animate-bounce flex justify-center">
+        <div className="bg-gradient-to-br from-primary-light via-primary to-primary-dark py-8 px-6 relative">
+          <div className="text-center relative z-10">
+            <div className="inline-block mb-3 animate-bounce">
               {getIcon('IoPartyPopper', { size: '5xl' })}
             </div>
-            <h2 className="text-2xl font-bold text-white drop-shadow-lg">오늘 목표 완료!</h2>
+            <h2 className="text-2xl font-bold text-white drop-shadow-lg">
+              오늘의 목표 달성!
+            </h2>
           </div>
-        </ModalHeader>
-        <ModalBody className="py-6">
-          <div className="text-center space-y-5">
+          {/* 장식 효과 */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+        </div>
+
+        <ModalBody className="py-6 px-6">
+          <div className="space-y-5">
+            {/* 민트 그라데이션 카드 */}
             {streakInfo && (
-              <div className="bg-gradient-to-br from-accent-mint to-accent-pale rounded-2xl p-5 space-y-3 border-2 border-primary-light shadow-lg">
-                <div className="flex items-center justify-center gap-3">
-                  {getIcon('IoFire', { size: '3xl' })}
-                  <span className="text-lg text-text-secondary">
-                    연속 학습: <span className="font-bold text-primary text-xl">{streakInfo.current_streak}일</span>
-                  </span>
+              <div className="flex gap-3">
+                <div className="flex-1 bg-gradient-to-br from-primary/10 to-primary/20 rounded-xl p-4 border border-primary/30 hover:shadow-lg transition-shadow">
+                  <div className="flex justify-center mb-2">
+                    {getIcon('IoFire', { size: '3xl' })}
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-primary">{streakInfo.current_streak}일</div>
+                    <div className="text-xs text-gray-600 mt-1">연속 학습</div>
+                  </div>
                 </div>
-                <div className="flex items-center justify-center gap-3">
-                  {getIcon('IoTrophy', { size: '3xl' })}
-                  <span className="text-lg text-text-secondary">
-                    최고 기록: <span className="font-bold text-primary text-xl">{streakInfo.best_streak}일</span>
-                  </span>
+
+                <div className="flex-1 bg-gradient-to-br from-primary/10 to-primary/20 rounded-xl p-4 border border-primary/30 hover:shadow-lg transition-shadow">
+                  <div className="flex justify-center mb-2">
+                    {getIcon('IoTrophy', { size: '3xl' })}
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-primary">{streakInfo.best_streak}일</div>
+                    <div className="text-xs text-gray-600 mt-1">최고 기록</div>
+                  </div>
                 </div>
               </div>
             )}
 
-            <p className="text-lg font-semibold text-text-primary pt-2">
-              추가로 더 푸시겠습니까?
+            {/* 질문 */}
+            <p className="text-center text-base text-gray-600 pt-2">
+              추가 학습을 하시겠습니까?
             </p>
+
+            {/* 버튼 */}
+            <div className="flex gap-3">
+              <Button
+                variant="secondary"
+                onClick={handleGoToHome}
+                className="flex-1 py-2.5 focus:ring-4 focus:ring-gray-300 transition-all"
+              >
+                홈으로
+              </Button>
+              <Button
+                ref={continueButtonRef}
+                variant="primary"
+                onClick={handleContinueAdditionalLearning}
+                className="flex-1 py-2.5 focus:ring-4 focus:ring-primary/50 transition-all"
+              >
+                계속하기
+              </Button>
+            </div>
           </div>
         </ModalBody>
-        <ModalFooter className="bg-gray-50 rounded-b-2xl">
-          <Button variant="secondary" onClick={handleGoToHome} className="px-6 py-3">
-            홈으로
-          </Button>
-          <Button variant="primary" onClick={handleContinueAdditionalLearning} className="px-6 py-3">
-            계속하기
-          </Button>
-        </ModalFooter>
       </Modal>
 
     </div>

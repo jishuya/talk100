@@ -1,9 +1,12 @@
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import CharacterSection from '../components/home/CharacterSection';
 import QuizCategorySection from '../components/home/QuizCategorySection';
 import QuizPersonalSection from '../components/home/QuizPersonalSection';
 import StudyHistorySection from '../components/home/StudyHistorySection';
+import Modal, { ModalBody } from '../components/ui/Modal';
+import Button from '../components/ui/Button';
 
 // 데이터 훅들
 import { useUserData, useBadgesData, useTodayProgress, usePersonalQuizzesData, useHistoryData } from '../hooks/useApi';
@@ -15,6 +18,10 @@ const HomePage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
+  // 추가 학습 확인 모달 상태
+  const [showAdditionalLearningModal, setShowAdditionalLearningModal] = useState(false);
+  const continueButtonRef = useRef(null);
+
   // 데이터 훅들 (ApiService가 자동으로 fallback 처리)
   const { data: userData, isLoading: userLoading } = useUserData();
   const { data: progressData, isLoading: progressLoading } = useTodayProgress();
@@ -24,6 +31,33 @@ const HomePage = () => {
 
   // 통합 로딩 상태
   const isLoading = userLoading || progressLoading || personalQuizzesLoading;
+
+  // 모달이 열릴 때 "계속하기" 버튼에 자동 포커스
+  useEffect(() => {
+    if (showAdditionalLearningModal && continueButtonRef.current) {
+      setTimeout(() => {
+        continueButtonRef.current?.focus();
+      }, 100);
+    }
+  }, [showAdditionalLearningModal]);
+
+  // 모달에서 Enter 키 처리
+  useEffect(() => {
+    const handleModalKeyPress = (e) => {
+      if (e.key === 'Enter' && showAdditionalLearningModal) {
+        const activeElement = document.activeElement;
+        if (activeElement?.tagName === 'BUTTON') {
+          activeElement.classList.add('animate-pulse');
+          setTimeout(() => {
+            activeElement.classList.remove('animate-pulse');
+          }, 200);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleModalKeyPress);
+    return () => window.removeEventListener('keydown', handleModalKeyPress);
+  }, [showAdditionalLearningModal]);
 
   if (isLoading) {
     return (
@@ -36,18 +70,32 @@ const HomePage = () => {
     );
   }
 
+  // 오늘의 퀴즈 클릭 핸들러
   const handleTodayQuizClick = async () => {
+    // 100% 달성 시 추가 학습 확인 모달 표시
+    if (progressData?.percentage >= 100) {
+      setShowAdditionalLearningModal(true);
+      return;
+    }
+    // 100% 미만이면 바로 시작
+    await startTodayQuiz(false);
+  };
+
+  // 추가 학습 확인 모달에서 "취소" 클릭
+  const handleCancelAdditionalLearning = () => {
+    setShowAdditionalLearningModal(false);
+  };
+
+  // 추가 학습 확인 모달에서 "계속하기" 클릭
+  const handleConfirmAdditionalLearning = async () => {
+    setShowAdditionalLearningModal(false);
+    await startTodayQuiz(true); // 추가 학습 모드로 시작
+  };
+
+  // 오늘의 퀴즈 시작 (추가 학습 모드 포함)
+  const startTodayQuiz = async (isAdditionalLearning = false) => {
     try {
-      // 100% 달성 시 추가 학습 확인
-      if (progressData?.percentage >= 100) {
-        const confirmAdditional = window.confirm(
-          '오늘의 목표를 이미 달성했습니다!\n추가 학습을 진행하시겠습니까?'
-        );
-
-        if (!confirmAdditional) {
-          return; // 사용자가 취소하면 중단
-        }
-
+      if (isAdditionalLearning) {
         // 추가 학습 시작: solved_count 리셋
         const token = localStorage.getItem('jwt_token');
         const resetResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/progress/reset-solved-count`, {
@@ -241,6 +289,45 @@ const HomePage = () => {
         historyItems={historyData}
         onHistoryItemClick={handleHistoryItemClick}
       />
+
+      {/* 추가 학습 확인 모달 */}
+      <Modal
+        isOpen={showAdditionalLearningModal}
+        onClose={handleCancelAdditionalLearning}
+        size="sm"
+        closeOnOverlayClick={false}
+        showCloseButton={false}
+        className="rounded-2xl overflow-hidden"
+      >
+        <ModalBody className="py-8 px-6">
+          <div className="space-y-6">
+            {/* 메시지 */}
+            <p className="text-center text-lg text-gray-700">
+              오늘의 목표를 이미 달성하였습니다.<br />
+              추가 학습을 하시겠습니까?
+            </p>
+
+            {/* 버튼 */}
+            <div className="flex gap-3">
+              <Button
+                variant="secondary"
+                onClick={handleCancelAdditionalLearning}
+                className="flex-1 py-2.5 focus:ring-4 focus:ring-gray-300 transition-all"
+              >
+                취소
+              </Button>
+              <Button
+                ref={continueButtonRef}
+                variant="primary"
+                onClick={handleConfirmAdditionalLearning}
+                className="flex-1 py-2.5 focus:ring-4 focus:ring-primary/50 transition-all"
+              >
+                계속하기
+              </Button>
+            </div>
+          </div>
+        </ModalBody>
+      </Modal>
     </div>
   );
 };
