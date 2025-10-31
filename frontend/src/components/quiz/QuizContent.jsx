@@ -56,20 +56,7 @@ export const QuizContent = ({
             </div>
           )}
           <div className="text-lg leading-relaxed text-text-primary font-medium">
-            {question.korean?.split(' ').map((word, index) => {
-              // 키워드 하이라이트 체크
-              const isKeyword = question.keywords?.some(keyword =>
-                word.includes(keyword) || keyword.includes(word.replace(/[.,!?]/g, ''))
-              );
-              return (
-                <span
-                  key={index}
-                  className={isKeyword ? 'text-primary font-bold underline decoration-dotted underline-offset-2' : ''}
-                >
-                  {word}{index < question.korean.split(' ').length - 1 ? ' ' : ''}
-                </span>
-              );
-            })}
+            {question.korean}
           </div>
         </div>
         {/* 정답 영역 */}
@@ -90,9 +77,15 @@ export const QuizContent = ({
                       value={keywordInputs[cleanWord.toLowerCase()] || ''}
                       onChange={(e) => onKeywordInputChange?.(cleanWord.toLowerCase(), e.target.value)}
                       onKeyDown={(e) => onKeywordKeyDown?.(cleanWord.toLowerCase(), keywordInputs[cleanWord.toLowerCase()] || '', e)}
-                      className="bg-yellow-200 px-2 py-1 rounded font-semibold text-center border-2 border-yellow-300 focus:border-primary focus:outline-none min-w-[60px] max-w-[120px]"
-                      style={{ width: `${Math.max(cleanWord.length * 8, 60)}px` }}
-                      placeholder="___"
+                      className="bg-yellow-200 px-2 py-1 rounded font-semibold text-center border-2 border-yellow-300 focus:border-primary focus:outline-none min-w-[70px] max-w-[130px] placeholder:text-transparent"
+                      style={{
+                        width: `${Math.max(cleanWord.length * 8 + 8, 70)}px`,
+                        backgroundImage: 'linear-gradient(to right, #9ca3af 0%, #9ca3af 100%)',
+                        backgroundSize: 'calc(100% - 12px) 2px',
+                        backgroundPosition: 'center bottom 6px',
+                        backgroundRepeat: 'no-repeat'
+                      }}
+                      placeholder=""
                       data-keyword={cleanWord.toLowerCase()}
                     />
                     {punctuation && <span className="ml-0.5">{punctuation}</span>}

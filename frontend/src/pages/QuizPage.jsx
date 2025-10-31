@@ -598,9 +598,15 @@ const QuizPage = () => {
 
         localStorage.setItem(`quiz_session_${newSessionId}`, JSON.stringify(newSession));
 
-        // 6. 모달 닫기
+        // 6. 모든 상태 초기화
         setShowGoalAchievedModal(false);
         setStreakInfo(null);
+        setUserAnswer('');
+        setQuizMode('solving');
+        setShowHint(false);
+        setShowAnswer(false);
+        setKeywordInputs({});
+        resetGrading();
 
         // 7. 새 세션으로 페이지 이동
         navigate(`/quiz?session=${newSessionId}`);
