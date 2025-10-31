@@ -36,8 +36,63 @@ const BottomNavigation = () => {
     },
   ];
 
+  // 오늘의 퀴즈 시작
+  const startTodayQuiz = async () => {
+    try {
+      const token = localStorage.getItem('jwt_token');
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/quiz/daily`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch quiz');
+      }
+
+      const result = await response.json();
+
+      if (result.success && result.data && result.data.questions) {
+        const { questions } = result.data;
+
+        if (questions.length > 0) {
+          // 세션 생성 (HomePage와 동일한 방식)
+          const questionIds = questions.map(q => q.question_id);
+          const sessionId = `session_${Date.now()}`;
+          const newSession = {
+            sessionId,
+            category: 4,
+            questionIds,
+            questions,
+            progress: { completed: 0, total: questions.length, percentage: 0 },
+            currentQuestionIndex: 0,
+            completedQuestionIds: [],
+            inputMode: 'keyboard',
+            createdAt: Date.now()
+          };
+
+          localStorage.setItem(`quiz_session_${sessionId}`, JSON.stringify(newSession));
+          navigate(`/quiz?session=${sessionId}`);
+        } else {
+          alert('더 이상 풀 문제가 없습니다.');
+        }
+      }
+    } catch (error) {
+      console.error('Failed to start quiz:', error);
+      alert('퀴즈를 불러오는데 실패했습니다.');
+    }
+  };
+
   const handleNavClick = (path) => {
-    navigate(path);
+    // '학습' 버튼을 클릭한 경우 오늘의 퀴즈 시작
+    if (path === '/quiz') {
+      startTodayQuiz();
+    } else {
+      navigate(path);
+    }
   };
 
   return (
