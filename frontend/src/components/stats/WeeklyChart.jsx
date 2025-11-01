@@ -10,7 +10,7 @@ const WeeklyChart = ({ data }) => {
       <div className="flex justify-between items-center mb-10">
         <h2 className="text-base font-semibold text-text-primary flex items-center gap-2">
 {getIcon('noto:bar-chart', { size: 'xl' })}
-          <span>주간 출석 패턴</span>
+          <span>요일별 학습 패턴</span>
         </h2>
       </div>
       <div className="flex justify-between items-end h-[120px] mb-3">

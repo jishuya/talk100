@@ -5,20 +5,20 @@ const LearningPattern = ({ data }) => {
 
   const patternItems = [
     {
-      value: data.dailyAvgCompletion,
-      label: '일평균 Day 완료'
+      value: data.dailyAvgQuestions,
+      label: '일평균 학습 문제'
     },
     {
-      value: `${data.goalAchievementRate}%`,
-      label: '목표 달성률'
+      value: data.totalDaysCompleted,
+      label: '목표 완료 횟수'
     },
     {
-      value: data.wrongAnswers,
-      label: '틀린 문제'
+      value: data.reviewQuestions,
+      label: '복습 문제 ⭐'
     },
     {
       value: data.favorites,
-      label: '즐겨찾기'
+      label: '즐겨찾기 ❤️'
     }
   ];
 

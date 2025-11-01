@@ -26,8 +26,9 @@ import {
 // 채점 훅
 import { useQuizGrading } from '../hooks/useQuizGrading';
 
-// API 훅
+// API 훅 및 서비스
 import { useToggleWrongAnswer, useToggleFavorite, useUpdateProgress } from '../hooks/useApi';
+import { api } from '../services/apiService';
 
 const QuizPage = () => {
   const [searchParams] = useSearchParams();
@@ -329,6 +330,17 @@ const QuizPage = () => {
   const handleNextQuestion = useCallback(async () => {
     try {
       if (!sessionId) return;
+
+      // 🎯 문제 완료 시 question_attempts 테이블에 기록 (모든 카테고리)
+      if (question?.id) {
+        try {
+          await api.recordQuestionAttempt(question.id);
+          console.log('✅ Question attempt recorded:', question.id);
+        } catch (error) {
+          console.error('Failed to record question attempt:', error);
+          // 기록 실패해도 퀴즈는 계속 진행
+        }
+      }
 
       // grading 모드에서 "다음 문제" 버튼 클릭 시 백엔드에 진행률 업데이트
       // (정답을 맞춰서 grading 모드가 된 경우이므로 무조건 업데이트)

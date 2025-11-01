@@ -3,22 +3,22 @@ export const statisticsData = {
   // 전체 통계 요약
   summaryStats: {
     week: {
-      totalDays: 7,
-      accuracy: 87,
-      solvedProblems: 42,
-      dailyAverage: 6.0
+      totalDays: 7,              // ✅ 학습한 날 수
+      studiedQuestions: 42,      // ✅ 학습한 문제 수
+      dailyAverage: 6.0,         // ✅ 일평균 학습 문제 수
+      reviewCount: 5             // ✅ 복습 표시한 문제 수 (⭐)
     },
     month: {
       totalDays: 30,
-      accuracy: 85,
-      solvedProblems: 180,
-      dailyAverage: 6.0
+      studiedQuestions: 180,
+      dailyAverage: 6.0,
+      reviewCount: 18
     },
     all: {
       totalDays: 45,
-      accuracy: 86,
-      solvedProblems: 342,
-      dailyAverage: 7.6
+      studiedQuestions: 342,
+      dailyAverage: 7.6,
+      reviewCount: 28
     }
   },
 
@@ -87,22 +87,22 @@ export const statisticsData = {
   // 학습 패턴 분석
   learningPattern: {
     week: {
-      dailyAvgCompletion: 2.5,
-      goalAchievementRate: 78,
-      wrongAnswers: 5,
-      favorites: 12
+      dailyAvgQuestions: 6.0,       // ✅ 일평균 학습 문제 수
+      totalDaysCompleted: 3,        // ✅ 일일목표(daily goal) 완료 횟수
+      reviewQuestions: 5,           // ✅ 복습 필요 문제 (⭐)
+      favorites: 12                 // ✅ 즐겨찾기 (❤️)
     },
     month: {
-      dailyAvgCompletion: 2.8,
-      goalAchievementRate: 82,
-      wrongAnswers: 18,
+      dailyAvgQuestions: 6.0,
+      totalDaysCompleted: 15,
+      reviewQuestions: 18,
       favorites: 25
     },
     all: {
-      dailyAvgCompletion: 2.5,
-      goalAchievementRate: 78,
-      wrongAnswers: 15,
-      favorites: 28
+      dailyAvgQuestions: 7.6,
+      totalDaysCompleted: 25,
+      reviewQuestions: 28,
+      favorites: 35
     }
   },
 

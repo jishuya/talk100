@@ -1,5 +1,4 @@
 const { db } = require('../config/database');
-const streakQueries = require('./streakQueries');
 
 class ProgressQueries {
   /**
@@ -35,41 +34,49 @@ class ProgressQueries {
         [userId, categoryId]
       );
 
-      // 🎯 목표 달성 체크 (category_id = 4: 오늘의 퀴즈만)
-      let goalAchieved = false;
-      let streakInfo = null;
-
-      if (categoryId === 4 && updated?.solved_count) {
-        // daily_goal 조회
-        const userSettings = await db.oneOrNone(
-          `SELECT daily_goal FROM users WHERE uid = $1`,
-          [userId]
+      // 📅 Day 완료 체크 - daily_summary.days_completed 업데이트
+      // 방금 푼 문제가 해당 Day의 마지막 문제인지 확인
+      try {
+        // 1. 해당 Day의 총 문제 수 조회
+        const dayInfo = await db.oneOrNone(
+          `SELECT MAX(question_number) as total_questions
+           FROM questions
+           WHERE day = $1 AND (category_id = $2 OR $2 = 4)`,
+          [day, categoryId]
         );
 
-        const dailyGoal = userSettings?.daily_goal || 20;
+        // 2. 방금 푼 문제의 question_number 조회
+        const currentQuestion = await db.oneOrNone(
+          `SELECT question_number FROM questions WHERE question_id = $1`,
+          [questionId]
+        );
 
-        // 목표 달성 시 streak 업데이트 (정확히 달성한 순간에만)
-        if (updated.solved_count === dailyGoal) {
-          goalAchieved = true;
+        // 3. Day 완료 조건: 마지막 문제를 방금 풀었을 때
+        if (dayInfo?.total_questions && currentQuestion?.question_number === dayInfo.total_questions) {
+          const today = new Date().toISOString().split('T')[0];
 
-          try {
-            const streakResult = await streakQueries.updateStreak(userId);
-            streakInfo = streakResult;
-          } catch (streakError) {
-            console.error('⚠️ [Streak] Update failed (non-critical):', streakError);
-            // streak 업데이트 실패해도 진행률 업데이트는 성공으로 처리
-          }
+          // daily_summary.days_completed += 1
+          await db.none(
+            `INSERT INTO daily_summary (user_id, date, days_completed)
+             VALUES ($1, $2, 1)
+             ON CONFLICT (user_id, date)
+             DO UPDATE SET
+               days_completed = daily_summary.days_completed + 1,
+               updated_at = CURRENT_TIMESTAMP`,
+            [userId, today]
+          );
+
+          console.log(`✅ [Day Completed] User: ${userId}, Day: ${day}, Category: ${categoryId}`);
         }
+      } catch (dayCompletionError) {
+        console.error('⚠️ [Day Completion] Update failed (non-critical):', dayCompletionError);
+        // Day 완료 추적 실패해도 진행률 업데이트는 성공으로 처리
       }
 
       return {
         success: true,
         message: 'User progress updated successfully',
-        data: {
-          ...updated,
-          goalAchieved,
-          streak: streakInfo
-        }
+        data: updated
       };
     } catch (error) {
       console.error('❌ [User Progress] Update failed:', error);

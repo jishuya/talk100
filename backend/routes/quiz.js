@@ -22,4 +22,7 @@ router.post('/wrong-answers/toggle', verifyToken, quizController.toggleWrongAnsw
 // POST /api/quiz/favorites/toggle - 즐겨찾기 토글 (인증 필요)
 router.post('/favorites/toggle', verifyToken, quizController.toggleFavorite);
 
+// POST /api/quiz/attempt - 문제 시도 기록 (인증 필요)
+router.post('/attempt', verifyToken, quizController.recordAttempt);
+
 module.exports = router;

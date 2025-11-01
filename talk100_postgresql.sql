@@ -21,13 +21,14 @@
 -- ================================================
 DROP TABLE IF EXISTS wrong_answers CASCADE;
 DROP TABLE IF EXISTS favorites CASCADE;
-DROP TABLE IF EXISTS user_streak CASCADE;
 DROP TABLE IF EXISTS review_queue CASCADE;
 DROP TABLE IF EXISTS user_progress CASCADE;
 DROP TABLE IF EXISTS questions CASCADE;
 DROP TABLE IF EXISTS category CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS session CASCADE;
+DROP TABLE IF EXISTS daily_summary CASCADE;
+DROP TABLE IF EXISTS question_attempts CASCADE;
 
 -- ================================================
 -- 1. SESSION 테이블
@@ -185,25 +186,18 @@ CREATE TABLE wrong_answers (
     user_id VARCHAR(255) REFERENCES users(uid) ON DELETE CASCADE,
     question_id INTEGER REFERENCES questions(question_id) ON DELETE CASCADE,
     added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
+	wrong_count INTEGER DEFAULT 1,
+    last_viewed_at TIMESTAMP,
+
     PRIMARY KEY (user_id, question_id)
 );
 
 -- ================================================
--- 9. USER_STREAK 테이블
--- 목적: 연속 성공 문제 관리 테이블
+-- 9. DAILY_SUMMARY 테이블
+-- 목적: 하루 단위 학습 활동을 집계하여 빠른 통계 조회를 위한 요약 테이블
 -- ================================================
-CREATE TABLE user_streak (
-    user_id VARCHAR(255) PRIMARY KEY REFERENCES users(uid) ON DELETE CASCADE,
-    current_streak INT DEFAULT 0,
-    last_completed_date DATE,
-    today_completed BOOLEAN DEFAULT FALSE,
-    best_streak INT DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
 
--- 2) 업데이트 트리거 함수 생성
+-- 업데이트 트리거 함수 생성
 CREATE OR REPLACE FUNCTION set_timestamp()
 	RETURNS TRIGGER AS $$
 	BEGIN
@@ -212,11 +206,49 @@ CREATE OR REPLACE FUNCTION set_timestamp()
 	END;
 	$$ LANGUAGE plpgsql;
 
--- 3) 트리거 생성
-CREATE TRIGGER set_timestamp
-	BEFORE UPDATE ON user_streak
-	FOR EACH ROW
-	EXECUTE FUNCTION set_timestamp();
+CREATE TABLE daily_summary (
+    summary_id SERIAL PRIMARY KEY,
+    user_id VARCHAR(255) REFERENCES users(uid) ON DELETE CASCADE,
+    date DATE NOT NULL DEFAULT CURRENT_DATE,
+    questions_attempted INTEGER DEFAULT 0,
+    days_completed INTEGER DEFAULT 0,
+    goal_met BOOLEAN DEFAULT false,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, date)
+);
+
+-- 자동 업데이트 트리거
+CREATE TRIGGER set_daily_summary_timestamp
+    BEFORE UPDATE ON daily_summary
+    FOR EACH ROW
+    EXECUTE FUNCTION set_timestamp();
+
+-- ================================================
+-- 10. QUESTION_ATTEMPTS 테이블
+-- 목적: 사용자가 시도한 문제 추적 (정답 여부 무관)
+-- ================================================
+CREATE TABLE question_attempts (
+    user_id VARCHAR(255) NOT NULL,
+    question_id INTEGER NOT NULL,
+    date DATE NOT NULL DEFAULT CURRENT_DATE,
+    attempted_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    
+    -- 외래키
+    CONSTRAINT fk_qa_user FOREIGN KEY (user_id) 
+        REFERENCES users(uid) ON DELETE CASCADE,
+    CONSTRAINT fk_qa_question FOREIGN KEY (question_id) 
+        REFERENCES questions(question_id) ON DELETE CASCADE,
+    
+    -- 기본키: 같은 날 같은 문제는 한 번만 기록
+    PRIMARY KEY (user_id, question_id, date)
+);
+
+-- 인덱스: 날짜별 조회 최적화
+CREATE INDEX idx_qa_user_date ON question_attempts(user_id, date DESC);
+
+COMMENT ON TABLE question_attempts IS '사용자별 문제 시도 기록 (정답 여부 무관)';
+COMMENT ON COLUMN question_attempts.attempted_at IS '시도 시각 (학습 패턴 분석용 - 몇 시에 주로 학습하는지)';
 
 -- ================================================
 -- 인덱스 생성
@@ -225,13 +257,26 @@ CREATE TRIGGER set_timestamp
 CREATE INDEX idx_questions_category_day ON questions(category_id, day, question_number);
 CREATE INDEX idx_user_progress_user ON user_progress(user_id, category_id);
 CREATE INDEX idx_review_queue_user_scheduled ON review_queue(user_id, scheduled_for);
-CREATE INDEX idx_user_streak_user ON user_streak(user_id);
 CREATE INDEX idx_favorites_user ON favorites(user_id);
 CREATE INDEX idx_wrong_answers_user ON wrong_answers(user_id);
+CREATE INDEX idx_daily_summary_user_date ON daily_summary(user_id, date DESC);
+CREATE INDEX idx_question_attempts_user_date ON question_attempts(user_id, date);
 
 -- ================================================
 -- 샘플 데이터 입력
 -- ================================================
+
+--daily_summary 데이터
+-- 오늘: 6문제 시도, 1 Day 완료, 목표 달성
+INSERT INTO daily_summary (user_id, date, questions_attempted, days_completed, goal_met) 
+VALUES ('user001', CURRENT_DATE, 6, 1, true);
+-- 어제: 8문제 시도, 1 Day 완료, 목표 달성
+INSERT INTO daily_summary (user_id, date, questions_attempted, days_completed, goal_met) 
+VALUES ('user001', CURRENT_DATE - INTERVAL '1 day', 8, 1, true);
+-- 2일 전: 5문제 시도, 0 Day 완료, 목표 미달성
+INSERT INTO daily_summary (user_id, date, questions_attempted, days_completed, goal_met) 
+VALUES ('user001', CURRENT_DATE - INTERVAL '2 days', 5, 0, false);
+
 
 -- category 데이터
 INSERT INTO category (category_id, name, display_name, order_num) VALUES
@@ -471,9 +516,25 @@ INSERT INTO users (uid, name, email, voice_gender, default_difficulty, daily_goa
 -- ================================================
 -- 샘플 틀린 문제 데이터
 -- ================================================
-INSERT INTO wrong_answers (user_id, question_id) VALUES
-('user003', 1),
-('user003', 2);
+-- user001이 question_id 1번을 3번 틀림 (정답보기 3번)
+INSERT INTO wrong_answers (user_id, question_id, added_at, wrong_count, last_viewed_at) 
+VALUES ('naver_IkQGr-fk1gVw2es4wbHnpCW42yMDTgYoKnEXe7A2sWc', 12, CURRENT_TIMESTAMP - INTERVAL '5 days', 3, CURRENT_TIMESTAMP - INTERVAL '1 day');
+
+-- user001이 question_id 5번을 1번 틀림 (정답보기 1번)
+INSERT INTO wrong_answers (user_id, question_id, added_at, wrong_count, last_viewed_at) 
+VALUES ('naver_IkQGr-fk1gVw2es4wbHnpCW42yMDTgYoKnEXe7A2sWc', 14, CURRENT_TIMESTAMP - INTERVAL '3 days', 1, CURRENT_TIMESTAMP - INTERVAL '3 days');
+
+-- user001이 question_id 12번을 2번 틀림 (정답보기 2번)
+INSERT INTO wrong_answers (user_id, question_id, added_at, wrong_count, last_viewed_at) 
+VALUES ('naver_IkQGr-fk1gVw2es4wbHnpCW42yMDTgYoKnEXe7A2sWc', 16, CURRENT_TIMESTAMP - INTERVAL '4 days', 2, CURRENT_TIMESTAMP - INTERVAL '2 days');
+
+-- user001이 question_id 27번을 1번 틀림 (최근)
+INSERT INTO wrong_answers (user_id, question_id, added_at, wrong_count, last_viewed_at) 
+VALUES ('naver_IkQGr-fk1gVw2es4wbHnpCW42yMDTgYoKnEXe7A2sWc', 18, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP);
+
+-- user001이 question_id 40번을 4번 틀림 (자주 틀리는 문제)
+INSERT INTO wrong_answers (user_id, question_id, added_at, wrong_count, last_viewed_at) 
+VALUES ('naver_IkQGr-fk1gVw2es4wbHnpCW42yMDTgYoKnEXe7A2sWc', 20, CURRENT_TIMESTAMP - INTERVAL '7 days', 4, CURRENT_TIMESTAMP - INTERVAL '1 day');
 
 -- ================================================
 -- 샘플 즐겨찾기 데이터
@@ -481,14 +542,6 @@ INSERT INTO wrong_answers (user_id, question_id) VALUES
 INSERT INTO favorites (user_id, question_id) VALUES
 ('user001', 1),
 ('user001', 2);
-
--- ================================================
--- 샘플 학습 연속일 데이터
--- ================================================
-INSERT INTO user_streak (user_id, current_streak, last_completed_date, today_completed, best_streak) VALUES
-('user001', 5, CURRENT_DATE - INTERVAL '1 day', false, 10),
-('user002', 2, CURRENT_DATE, true, 5),
-('user003', 0, NULL, false, 0);
 
 -- ================================================
 -- 샘플 복습 큐 데이터 (Day 번호 기반)
@@ -511,10 +564,12 @@ SELECT 'Questions:', COUNT(*) FROM questions
 UNION ALL
 SELECT 'User Progress:', COUNT(*) FROM user_progress
 UNION ALL
-SELECT 'User Streak:', COUNT(*) FROM user_streak
-UNION ALL
 SELECT 'Wrong Answers:', COUNT(*) FROM wrong_answers
 UNION ALL
 SELECT 'Favorites:', COUNT(*) FROM favorites
 UNION ALL
-SELECT 'Review Queue:', COUNT(*) FROM review_queue;
+SELECT 'Review Queue:', COUNT(*) FROM review_queue
+UNION ALL
+SELECT 'Daily Summary:', COUNT(*) FROM daily_summary
+UNION ALL
+SELECT 'Question Attempts:', COUNT(*) FROM question_attempts;

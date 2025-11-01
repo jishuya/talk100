@@ -216,6 +216,47 @@ class QuizController {
     }
   }
 
+  /**
+   * POST /api/quiz/attempt
+   * 문제 시도 기록 (인증 필수)
+   * Body: { questionId: number }
+   */
+  async recordAttempt(req, res) {
+    try {
+      const uid = req.user?.uid;
+      const { questionId } = req.body;
+
+      if (!uid) {
+        return res.status(401).json({
+          success: false,
+          message: 'Authentication required to record attempt'
+        });
+      }
+
+      // 유효성 검증
+      if (!questionId) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid request: questionId is required'
+        });
+      }
+
+      const result = await quizQueries.recordQuestionAttempt(uid, questionId);
+
+      res.json({
+        success: true,
+        data: result
+      });
+
+    } catch (error) {
+      console.error('recordAttempt controller error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to record question attempt'
+      });
+    }
+  }
+
 }
 
 module.exports = new QuizController();

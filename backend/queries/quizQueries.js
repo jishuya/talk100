@@ -482,6 +482,135 @@ class QuizQueries {
     }
   }
 
+  /**
+   * 문제 시도 기록 (question_attempts 테이블에 INSERT)
+   * + daily_summary 업데이트 (questions_attempted, goal_met)
+   * + 오늘 첫 학습 시 streak 업데이트
+   * @param {string} userId - 사용자 ID
+   * @param {number} questionId - 문제 ID
+   * @returns {Object} { success, isFirstStudyToday, streakUpdated, newStreak, goalMet, questionsToday, dailyGoal }
+   */
+  async recordQuestionAttempt(userId, questionId) {
+    try {
+      return await db.tx(async t => {
+        const today = new Date().toISOString().split('T')[0];
+
+        // 1. 오늘 첫 학습인지 확인 (question_attempts 조회)
+        const todayRecord = await t.oneOrNone(
+          `SELECT 1 FROM question_attempts
+           WHERE user_id = $1 AND date = $2
+           LIMIT 1`,
+          [userId, today]
+        );
+
+        const isFirstStudyToday = !todayRecord;
+
+        // 2. question_attempts INSERT
+        await t.none(
+          `INSERT INTO question_attempts (user_id, question_id, date, attempted_at)
+           VALUES ($1, $2, $3, CURRENT_TIMESTAMP)
+           ON CONFLICT (user_id, question_id, date) DO NOTHING`,
+          [userId, questionId, today]
+        );
+
+        // 2-1. daily_summary 업데이트 (questions_attempted +1)
+        await t.none(
+          `INSERT INTO daily_summary (user_id, date, questions_attempted)
+           VALUES ($1, $2, 1)
+           ON CONFLICT (user_id, date)
+           DO UPDATE SET
+             questions_attempted = daily_summary.questions_attempted + 1,
+             updated_at = CURRENT_TIMESTAMP`,
+          [userId, today]
+        );
+
+        // 2-2. goal_met 계산 및 업데이트
+        const user = await t.one(
+          `SELECT daily_goal FROM users WHERE uid = $1`,
+          [userId]
+        );
+
+        const summary = await t.one(
+          `SELECT questions_attempted FROM daily_summary
+           WHERE user_id = $1 AND date = $2`,
+          [userId, today]
+        );
+
+        const goalMet = summary.questions_attempted >= user.daily_goal;
+
+        if (goalMet) {
+          await t.none(
+            `UPDATE daily_summary
+             SET goal_met = true
+             WHERE user_id = $1 AND date = $2`,
+            [userId, today]
+          );
+
+          console.log(`🎯 [Goal Met] User: ${userId}, Questions: ${summary.questions_attempted}/${user.daily_goal}`);
+        }
+
+        // 3. 오늘 첫 학습이면 streak 업데이트
+        let streakUpdated = false;
+        let newStreak = null;
+
+        if (isFirstStudyToday) {
+          const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+
+          // 어제 학습했는지 확인
+          const studiedYesterday = await t.oneOrNone(
+            `SELECT 1 FROM question_attempts
+             WHERE user_id = $1 AND date = $2
+             LIMIT 1`,
+            [userId, yesterday]
+          );
+
+          // 현재 streak 조회
+          const user = await t.one(
+            `SELECT current_streak, longest_streak FROM users WHERE uid = $1`,
+            [userId]
+          );
+
+          // 새로운 streak 계산
+          newStreak = studiedYesterday
+            ? user.current_streak + 1  // 연속 학습
+            : 1;                        // 새로 시작
+
+          const newLongest = Math.max(newStreak, user.longest_streak);
+
+          // users 테이블 업데이트
+          await t.none(
+            `UPDATE users
+             SET current_streak = $1,
+                 longest_streak = $2,
+                 total_days_studied = total_days_studied + 1
+             WHERE uid = $3`,
+            [newStreak, newLongest, userId]
+          );
+
+          streakUpdated = true;
+
+          console.log(`✅ [Streak Updated] User: ${userId}, New Streak: ${newStreak}, Longest: ${newLongest}`);
+        }
+
+        return {
+          success: true,
+          isFirstStudyToday,
+          streakUpdated,
+          newStreak,
+          goalMet,
+          questionsToday: summary.questions_attempted,
+          dailyGoal: user.daily_goal,
+          message: isFirstStudyToday
+            ? 'Question attempt recorded and streak updated'
+            : 'Question attempt recorded successfully'
+        };
+      });
+    } catch (error) {
+      console.error('recordQuestionAttempt query error:', error);
+      throw new Error('Failed to record question attempt');
+    }
+  }
+
 }
 
 module.exports = new QuizQueries();

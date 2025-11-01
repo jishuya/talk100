@@ -10,16 +10,16 @@ const SummaryCard = ({ data }) => {
       </div>
       <div className="grid grid-cols-3 gap-4">
         <div className="text-center">
-          <span className="block text-xl font-bold">{data.accuracy}%</span>
-          <span className="text-xs opacity-90 mt-1">정답률</span>
-        </div>
-        <div className="text-center">
-          <span className="block text-xl font-bold">{data.solvedProblems}</span>
-          <span className="text-xs opacity-90 mt-1">해결한 문제</span>
+          <span className="block text-xl font-bold">{data.studiedQuestions}</span>
+          <span className="text-xs opacity-90 mt-1">학습한 문제</span>
         </div>
         <div className="text-center">
           <span className="block text-xl font-bold">{data.dailyAverage}</span>
           <span className="text-xs opacity-90 mt-1">일평균 학습</span>
+        </div>
+        <div className="text-center">
+          <span className="block text-xl font-bold">{data.reviewCount}</span>
+          <span className="text-xs opacity-90 mt-1">복습 표시 ⭐</span>
         </div>
       </div>
     </div>

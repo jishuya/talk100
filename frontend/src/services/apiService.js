@@ -264,6 +264,14 @@ class ApiService {
     });
   }
 
+  // 🧩 QuizPage.jsx에서 사용 - 문제 시도 기록 (다음 문제로 넘어갈 때)
+  recordQuestionAttempt(questionId) {
+    return this.request('/api/quiz/attempt', null, {
+      method: 'POST',
+      body: { questionId }
+    });
+  }
+
   // ==============================================
   // 👤 MyPage - 마이페이지 관련 API
   // ==============================================
