@@ -72,7 +72,8 @@ CREATE TABLE users (
     level INTEGER DEFAULT 1,
     
     -- PostgreSQL 배열 타입
-    weekly_attendance INTEGER[] DEFAULT ARRAY[0,0,0,0,0,0,0]  -- 주간 출석 [월,화,수,목,금,토,일]
+    weekly_attendance INTEGER[] DEFAULT ARRAY[0,0,0,0,0,0,0],  -- 주간 출석 [월,화,수,목,금,토,일]
+	earned_badges JSONB DEFAULT '[]'::jsonb,
 );
 
 -- ================================================

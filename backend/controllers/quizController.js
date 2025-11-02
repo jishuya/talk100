@@ -241,7 +241,8 @@ class QuizController {
         });
       }
 
-      const result = await quizQueries.recordQuestionAttempt(uid, questionId);
+      // 뱃지 체크 포함된 버전 사용
+      const result = await quizQueries.recordQuestionAttemptWithBadges(uid, questionId);
 
       res.json({
         success: true,

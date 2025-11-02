@@ -19,4 +19,19 @@ router.get('/personal-quizzes', verifyToken, userController.getPersonalQuizzes);
 // GET /api/users/history - 최근 학습 기록 조회
 router.get('/history', verifyToken, userController.getHistory);
 
+// GET /api/users/badges-achievements - 성취 뱃지 조회
+router.get('/badges-achievements', verifyToken, userController.getBadgesAchievements);
+
+// POST /api/users/check-badges - 뱃지 체크 (강제 실행)
+router.post('/check-badges', verifyToken, userController.checkBadges);
+
+// GET /api/users/summary-stats - 통계 요약 정보 조회
+router.get('/summary-stats', verifyToken, userController.getSummaryStats);
+
+// GET /api/users/streak-data - 연속 학습 일수 조회
+router.get('/streak-data', verifyToken, userController.getStreakData);
+
+// GET /api/users/weekly-chart - 요일별 학습 패턴 조회
+router.get('/weekly-chart', verifyToken, userController.getWeeklyChart);
+
 module.exports = router;

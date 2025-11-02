@@ -1,4 +1,5 @@
 import { getIcon } from '../../utils/iconMap';
+import { getBadgeIconName } from '../../utils/badgeIcons';
 
 const BadgesSection = ({ data }) => {
   if (!data || !Array.isArray(data)) return null;
@@ -15,29 +16,35 @@ const BadgesSection = ({ data }) => {
     <div className="bg-white rounded-2xl p-5 shadow-lg">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-base font-semibold text-text-primary flex items-center gap-2">
-{getIcon('IoTrophy', { size: 'xl' })}
+          {getIcon('IoTrophy', { size: 'xl' })}
           <span>성취 뱃지</span>
         </h2>
       </div>
       <div className="grid grid-cols-3 gap-3 md:grid-cols-4">
-        {data.map((badge) => (
-          <div
-            key={badge.id}
-            onClick={() => handleBadgeClick(badge)}
-            className={`
-              p-4 rounded-xl text-center cursor-pointer transition-all duration-300 active:scale-95
-              ${badge.earned
-                ? 'bg-gradient-badge'
-                : 'bg-accent-pale opacity-60'
-              }
-            `}
-          >
-            <div className="text-3xl mb-2">{badge.icon}</div>
-            <div className="text-xs text-text-primary font-medium">
-              {badge.name}
+        {data.map((badge) => {
+          const iconName = getBadgeIconName(badge.id);
+
+          return (
+            <div
+              key={badge.id}
+              onClick={() => handleBadgeClick(badge)}
+              className={`
+                p-4 rounded-xl text-center cursor-pointer transition-all duration-300 active:scale-95
+                ${badge.earned
+                  ? 'bg-gradient-badge'
+                  : 'bg-accent-pale opacity-60'
+                }
+              `}
+            >
+              <div className="flex justify-center mb-2">
+                {getIcon(iconName, { size: '3xl' })}
+              </div>
+              <div className="text-xs text-text-primary font-medium">
+                {badge.name}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

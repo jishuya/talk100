@@ -1,4 +1,5 @@
 const userQueries = require('../queries/userQueries');
+const badgeService = require('../services/badgeService');
 
 class UserController {
   // GET /api/users/profile
@@ -222,6 +223,164 @@ class UserController {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch user history'
+      });
+    }
+  }
+
+  // GET /api/users/badges-achievements
+  async getBadgesAchievements(req, res) {
+    try {
+      const uid = req.user?.uid;
+
+      if (!uid) {
+        return res.status(401).json({
+          success: false,
+          message: 'User not authenticated'
+        });
+      }
+
+      const badges = await badgeService.getUserBadges(uid);
+
+      res.json({
+        success: true,
+        data: badges
+      });
+
+    } catch (error) {
+      console.error('getBadgesAchievements controller error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch badges'
+      });
+    }
+  }
+
+  // POST /api/users/check-badges
+  async checkBadges(req, res) {
+    try {
+      const uid = req.user?.uid;
+
+      if (!uid) {
+        return res.status(401).json({
+          success: false,
+          message: 'User not authenticated'
+        });
+      }
+
+      const result = await badgeService.checkAndUpdateBadges(uid);
+
+      res.json({
+        success: true,
+        data: result
+      });
+
+    } catch (error) {
+      console.error('checkBadges controller error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to check badges'
+      });
+    }
+  }
+
+  // GET /api/users/summary-stats?period=week
+  async getSummaryStats(req, res) {
+    try {
+      const uid = req.user?.uid;
+      const period = req.query.period || 'week'; // week, month, all
+
+      if (!uid) {
+        return res.status(401).json({
+          success: false,
+          message: 'User not authenticated'
+        });
+      }
+
+      // period 유효성 검증
+      if (!['week', 'month', 'all'].includes(period)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid period. Must be one of: week, month, all'
+        });
+      }
+
+      const summaryStats = await userQueries.getSummaryStats(uid, period);
+
+      res.json({
+        success: true,
+        data: summaryStats
+      });
+
+    } catch (error) {
+      console.error('getSummaryStats controller error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch summary stats'
+      });
+    }
+  }
+
+  // GET /api/users/streak-data
+  async getStreakData(req, res) {
+    try {
+      const uid = req.user?.uid;
+
+      if (!uid) {
+        return res.status(401).json({
+          success: false,
+          message: 'User not authenticated'
+        });
+      }
+
+      const streakData = await userQueries.getStreakData(uid);
+
+      res.json({
+        success: true,
+        data: streakData
+      });
+
+    } catch (error) {
+      console.error('getStreakData controller error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch streak data'
+      });
+    }
+  }
+
+  // GET /api/users/weekly-chart?period=week
+  async getWeeklyChart(req, res) {
+    try {
+      const uid = req.user?.uid;
+      const period = req.query.period || 'week'; // week, month, all
+
+      if (!uid) {
+        return res.status(401).json({
+          success: false,
+          message: 'User not authenticated'
+        });
+      }
+
+      // period 유효성 검증
+      if (!['week', 'month', 'all'].includes(period)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid period. Must be one of: week, month, all'
+        });
+      }
+
+      const weeklyChart = await userQueries.getWeeklyChart(uid, period);
+
+      res.json({
+        success: true,
+        data: weeklyChart
+      });
+
+    } catch (error) {
+      console.error('getWeeklyChart controller error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch weekly chart'
       });
     }
   }

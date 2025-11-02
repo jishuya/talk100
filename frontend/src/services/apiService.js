@@ -32,6 +32,9 @@ const MOCK_DATA = {
   weeklyData: statisticsData.weeklyPattern,
   categoryStats: statisticsData.categoryProgress,
   learningPattern: statisticsData.learningPattern,
+  badgesAchievements: statisticsData.badges,
+  summaryStats: statisticsData.summaryStats?.week,
+  streakData: statisticsData.streak,
 
   // 추가 별칭들
   dailyProgress: MOCK_HOME_DATA.progress
@@ -336,6 +339,26 @@ class ApiService {
   // 📊 StatusPage.jsx에서 사용 - 학습 패턴 분석
   getLearningPattern() {
     return this.request('/api/stats/pattern', 'learningPattern');
+  }
+
+  // 🏆 StatusPage.jsx에서 사용 - 성취 뱃지 조회
+  getBadgesAchievements() {
+    return this.request('/api/users/badges-achievements', 'badgesAchievements');
+  }
+
+  // 📊 StatusPage.jsx에서 사용 - SummaryCard 통계 요약 (기간별)
+  getSummaryStats(period = 'week') {
+    return this.request(`/api/users/summary-stats?period=${period}`, 'summaryStats');
+  }
+
+  // 📊 StatusPage.jsx에서 사용 - StreakSection 연속 학습 일수
+  getStreakData() {
+    return this.request('/api/users/streak-data', 'streakData');
+  }
+
+  // 📊 StatusPage.jsx에서 사용 - WeeklyChart 요일별 학습 패턴
+  getWeeklyChart(period = 'week') {
+    return this.request(`/api/users/weekly-chart?period=${period}`, 'weeklyData');
   }
 
   // ==============================================

@@ -1,16 +1,25 @@
 import { getIcon } from '../../utils/iconMap';
 
-const WeeklyChart = ({ data }) => {
+const WeeklyChart = ({ data, period = 'week' }) => {
   if (!data || !Array.isArray(data)) return null;
 
   const maxCount = Math.max(...data.map(item => item.count));
+
+  // 기간별 제목 설정
+  const getTitle = () => {
+    if (period === 'week') {
+      return '요일별 학습한 문제';
+    } else {
+      return '요일별 평균 학습한 문제';
+    }
+  };
 
   return (
     <div className="bg-white rounded-2xl p-5 mb-4 shadow-lg">
       <div className="flex justify-between items-center mb-10">
         <h2 className="text-base font-semibold text-text-primary flex items-center gap-2">
 {getIcon('noto:bar-chart', { size: 'xl' })}
-          <span>요일별 학습 패턴</span>
+          <span>{getTitle()}</span>
         </h2>
       </div>
       <div className="flex justify-between items-end h-[120px] mb-3">

@@ -207,6 +207,203 @@ class UserQueries {
       throw new Error('Failed to fetch user history');
     }
   }
+
+  // 통계 - StreakSection 데이터 조회
+  async getStreakData(uid) {
+    try {
+      console.log('🔥 [Get Streak Data] Fetching for uid:', uid);
+
+      const result = await db.one(
+        `SELECT
+          current_streak as current,
+          longest_streak as best
+         FROM users
+         WHERE uid = $1`,
+        [uid]
+      );
+
+      console.log('✅ [Get Streak Data] Result:', result);
+
+      return {
+        current: parseInt(result.current) || 0,
+        best: parseInt(result.best) || 0
+      };
+
+    } catch (error) {
+      console.error('❌ [Get Streak Data] Query error:', error);
+      throw new Error('Failed to fetch streak data');
+    }
+  }
+
+  // 통계 - WeeklyChart 데이터 조회 (요일별 학습 문제 수)
+  async getWeeklyChart(uid, period = 'week') {
+    try {
+      console.log('📊 [Get Weekly Chart] Fetching for uid:', uid, 'period:', period);
+
+      // 기간 계산
+      let startDate;
+
+      switch(period) {
+        case 'week':
+          startDate = new Date();
+          startDate.setDate(startDate.getDate() - 7);
+          break;
+        case 'month':
+          startDate = new Date();
+          startDate.setDate(startDate.getDate() - 30);
+          break;
+        case 'all':
+          startDate = new Date('1970-01-01');
+          break;
+        default:
+          startDate = new Date();
+          startDate.setDate(startDate.getDate() - 7);
+      }
+
+      // 요일별 학습 문제 수 조회 (0=일요일, 1=월요일, ..., 6=토요일)
+      let results;
+
+      if (period === 'week') {
+        // 주간: 각 요일에 푼 총 문제 수
+        results = await db.any(
+          `SELECT
+            EXTRACT(DOW FROM date) as day_of_week,
+            SUM(questions_attempted) as question_count
+           FROM daily_summary
+           WHERE user_id = $1
+             AND date >= $2
+             AND date <= CURRENT_DATE
+             AND questions_attempted > 0
+           GROUP BY EXTRACT(DOW FROM date)
+           ORDER BY day_of_week`,
+          [uid, startDate.toISOString().split('T')[0]]
+        );
+      } else {
+        // 월간/전체: 각 요일의 평균 문제 수
+        results = await db.any(
+          `SELECT
+            EXTRACT(DOW FROM date) as day_of_week,
+            ROUND(AVG(questions_attempted)) as question_count
+           FROM daily_summary
+           WHERE user_id = $1
+             AND date >= $2
+             AND date <= CURRENT_DATE
+             AND questions_attempted > 0
+           GROUP BY EXTRACT(DOW FROM date)
+           ORDER BY day_of_week`,
+          [uid, startDate.toISOString().split('T')[0]]
+        );
+      }
+
+      // 요일 이름 매핑 (한글)
+      const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+
+      // 7일 배열 초기화 (일~토)
+      const weeklyData = dayNames.map((day, index) => ({
+        day: day,
+        count: 0
+      }));
+
+      // DB 결과를 배열에 매핑
+      results.forEach(row => {
+        const dayIndex = parseInt(row.day_of_week);
+        weeklyData[dayIndex].count = parseInt(row.question_count) || 0;
+      });
+
+      console.log('✅ [Get Weekly Chart] Result:', weeklyData);
+
+      return weeklyData;
+
+    } catch (error) {
+      console.error('❌ [Get Weekly Chart] Query error:', error);
+      throw new Error('Failed to fetch weekly chart data');
+    }
+  }
+
+  // 통계 - SummaryCard 데이터 조회 (기간별)
+  async getSummaryStats(uid, period = 'week') {
+    try {
+      console.log('📊 [Get Summary Stats] Fetching for uid:', uid, 'period:', period);
+
+      // 기간 계산
+      let startDate;
+
+      switch(period) {
+        case 'week':
+          startDate = new Date();
+          startDate.setDate(startDate.getDate() - 7);
+          break;
+        case 'month':
+          startDate = new Date();
+          startDate.setDate(startDate.getDate() - 30);
+          break;
+        case 'all':
+          startDate = new Date('1970-01-01');
+          break;
+        default:
+          startDate = new Date();
+          startDate.setDate(startDate.getDate() - 7);
+      }
+
+      const result = await db.one(
+        `SELECT
+          -- 1. 총 학습일수 (기간 내)
+          COUNT(DISTINCT ds.date) as total_days,
+
+          -- 2. 학습한 문제 수 (기간 내, DISTINCT로 중복 제거)
+          (
+            SELECT COUNT(DISTINCT qa.question_id)
+            FROM question_attempts qa
+            WHERE qa.user_id = $1
+              AND qa.date >= $2
+              AND qa.date <= CURRENT_DATE
+          ) as studied_questions,
+
+          -- 3. 일평균 학습 문제 수 (학습한 날 기준)
+          CASE
+            WHEN COUNT(DISTINCT ds.date) > 0 THEN
+              ROUND(
+                (
+                  SELECT COUNT(DISTINCT qa.question_id)
+                  FROM question_attempts qa
+                  WHERE qa.user_id = $1
+                    AND qa.date >= $2
+                    AND qa.date <= CURRENT_DATE
+                )::numeric / COUNT(DISTINCT ds.date)::numeric,
+                1
+              )
+            ELSE 0
+          END as daily_average,
+
+          -- 4. 복습 표시 문제 수 (wrong_answers 테이블)
+          (
+            SELECT COUNT(*)
+            FROM wrong_answers wa
+            WHERE wa.user_id = $1
+          ) as review_count
+
+        FROM daily_summary ds
+        WHERE ds.user_id = $1
+          AND ds.date >= $2
+          AND ds.date <= CURRENT_DATE
+          AND ds.questions_attempted > 0`,
+        [uid, startDate.toISOString().split('T')[0]]
+      );
+
+      console.log('✅ [Get Summary Stats] Result:', result);
+
+      return {
+        totalDays: parseInt(result.total_days) || 0,
+        studiedQuestions: parseInt(result.studied_questions) || 0,
+        dailyAverage: parseFloat(result.daily_average) || 0,
+        reviewCount: parseInt(result.review_count) || 0
+      };
+
+    } catch (error) {
+      console.error('❌ [Get Summary Stats] Query error:', error);
+      throw new Error('Failed to fetch summary stats');
+    }
+  }
 }
 
 module.exports = new UserQueries();

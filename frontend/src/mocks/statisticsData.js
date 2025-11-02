@@ -64,23 +64,23 @@ export const statisticsData = {
     {
       id: 1,
       name: 'Model Example',
-      progress: 85,
-      currentDay: 25,
-      totalDays: 30
+      completedQuestions: 170,  // 실제 푼 문제 수
+      totalQuestions: 200,      // 전체 문제 수
+      progress: 85              // 170/200 * 100 = 85%
     },
     {
       id: 2,
       name: 'Small Talk',
-      progress: 60,
-      currentDay: 18,
-      totalDays: 30
+      completedQuestions: 120,
+      totalQuestions: 200,
+      progress: 60              // 120/200 * 100 = 60%
     },
     {
       id: 3,
       name: 'Cases in Point',
-      progress: 45,
-      currentDay: 13,
-      totalDays: 30
+      completedQuestions: 90,
+      totalQuestions: 200,
+      progress: 45              // 90/200 * 100 = 45%
     }
   ],
 
@@ -106,49 +106,98 @@ export const statisticsData = {
     }
   },
 
-  // 성취 뱃지
+  // 성취 뱃지 (12개) - icon은 badgeIcons.js에서 매핑
   badges: [
+    // 카테고리 완료 (3개)
+    {
+      id: 'complete-model',
+      name: 'Model Example 마스터',
+      earned: false,
+      description: 'Model Example 카테고리 완료',
+      category: 'category'
+    },
+    {
+      id: 'complete-smalltalk',
+      name: 'Small Talk 마스터',
+      earned: false,
+      description: 'Small Talk 카테고리 완료',
+      category: 'category'
+    },
+    {
+      id: 'complete-cases',
+      name: 'Cases in Point 마스터',
+      earned: false,
+      description: 'Cases in Point 카테고리 완료',
+      category: 'category'
+    },
+
+    // 연속 학습 (3개)
     {
       id: 'streak-7',
-      name: '7일 연속',
-      icon: '🔥',
+      name: '일주일 연속',
       earned: true,
-      description: '7일 연속 학습 완료'
+      description: '7일 연속 학습 완료',
+      category: 'streak'
     },
     {
-      id: 'problems-100',
-      name: '100문제 달성',
-      icon: '📚',
+      id: 'streak-30',
+      name: '한달 연속',
+      earned: false,
+      description: '30일 연속 학습 완료',
+      category: 'streak'
+    },
+    {
+      id: 'streak-100',
+      name: '백일 연속',
+      earned: false,
+      description: '100일 연속 학습 완료',
+      category: 'streak'
+    },
+
+    // 문제 수 (3개)
+    {
+      id: 'questions-100',
+      name: '백문백답',
       earned: true,
-      description: '총 100문제 해결'
+      description: '총 100문제 완료',
+      category: 'questions'
     },
     {
-      id: 'accuracy-80',
-      name: '정답률 80%',
-      icon: '⭐',
-      earned: true,
-      description: '정답률 80% 달성'
-    },
-    {
-      id: 'monthly-goal',
-      name: '월간 목표',
-      icon: '🎯',
+      id: 'questions-500',
+      name: '오백 정복',
       earned: false,
-      description: '월간 학습 목표 달성'
+      description: '총 500문제 완료',
+      category: 'questions'
     },
     {
-      id: 'master',
-      name: '마스터',
-      icon: '💎',
+      id: 'questions-1000',
+      name: '천문대가',
       earned: false,
-      description: '모든 카테고리 완주'
+      description: '총 1000문제 완료',
+      category: 'questions'
+    },
+
+    // 특수 업적 (3개)
+    {
+      id: 'master-all',
+      name: '완전 정복',
+      earned: false,
+      description: '모든 카테고리 완료',
+      category: 'special'
     },
     {
-      id: 'perfect',
-      name: '퍼펙트',
-      icon: '🥇',
+      id: 'dedicated',
+      name: '성실왕',
       earned: false,
-      description: '정답률 100% 달성'
+      description: '총 100일 학습 완료',
+      category: 'special'
+    },
+    {
+      id: 'collector',
+      name: '컬렉터',
+      earned: false,
+      description: '즐겨찾기 50개 등록',
+      category: 'special'
     }
   ]
 };

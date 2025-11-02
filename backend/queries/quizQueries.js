@@ -1,4 +1,5 @@
 const { db } = require('../config/database');
+const badgeService = require('../services/badgeService');
 
 class QuizQueries {
   // ==========================================
@@ -592,6 +593,14 @@ class QuizQueries {
           console.log(`✅ [Streak Updated] User: ${userId}, New Streak: ${newStreak}, Longest: ${newLongest}`);
         }
 
+        // 4. users 테이블의 total_questions_attempted 업데이트
+        await t.none(
+          `UPDATE users
+           SET total_questions_attempted = total_questions_attempted + 1
+           WHERE uid = $1`,
+          [userId]
+        );
+
         return {
           success: true,
           isFirstStudyToday,
@@ -608,6 +617,32 @@ class QuizQueries {
     } catch (error) {
       console.error('recordQuestionAttempt query error:', error);
       throw new Error('Failed to record question attempt');
+    }
+  }
+
+  /**
+   * 문제 시도 기록 + 뱃지 체크 (통합 버전)
+   * @param {string} userId - 사용자 UID
+   * @param {number} questionId - 문제 ID
+   * @returns {Object} { success, isFirstStudyToday, streakUpdated, newStreak, goalMet, questionsToday, dailyGoal, newBadges }
+   */
+  async recordQuestionAttemptWithBadges(userId, questionId) {
+    try {
+      // 1. 기본 문제 시도 기록
+      const attemptResult = await this.recordQuestionAttempt(userId, questionId);
+
+      // 2. 뱃지 체크
+      const badgeResult = await badgeService.checkAndUpdateBadges(userId);
+
+      // 3. 결과 통합
+      return {
+        ...attemptResult,
+        newBadges: badgeResult.newBadges || []
+      };
+
+    } catch (error) {
+      console.error('recordQuestionAttemptWithBadges error:', error);
+      throw error;
     }
   }
 

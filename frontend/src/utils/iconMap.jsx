@@ -104,9 +104,33 @@ const ICON_MAP = {
   Fox: 'fox',
   Lion: 'lion',
   Unicorn: 'unicorn',
-  Dragon: 'dragon', 
+  Dragon: 'dragon',
   Eagle: 'eagle',
   Crown: 'crown',
+
+  // === Achievement Badges ===
+  // 카테고리 완료
+  BadgePencil: 'noto:memo',                    // 📝 Model Example 마스터
+  BadgeChat: 'noto:speech-balloon',            // 💬 Small Talk 마스터
+  BadgeBook: 'noto:open-book',                 // 📖 Cases in Point 마스터
+
+  // 연속 학습
+  BadgeFire: 'noto:fire',                      // 🔥 일주일 연속
+  BadgeFireDouble: 'twemoji:fire',             // 🔥🔥 한달 연속
+  BadgeFireTriple: 'fxemoji:fire',             // 🔥🔥🔥 백일 연속
+
+  // 문제 수
+  BadgeHundred: 'noto:hundred-points',         // 💯 백문백답
+  BadgeBooks: 'noto:books',                    // 📚 오백 정복
+  BadgeGraduation: 'noto:graduation-cap',      // 🎓 천문대가
+
+  // 특수 업적
+  BadgeDiamond: 'noto:gem-stone',              // 💎 완전 정복
+  BadgeCrown: 'noto:crown',                    // 👑 성실왕
+  BadgeHeart: 'noto:red-heart',                // ❤️ 컬렉터
+
+  // 추가 뱃지 아이콘
+  IoSparkles: 'noto:sparkles',                 // 뱃지 모달용
 };
 
 export const getIcon = (iconName, { size = 'xl', color, className = '', ...props } = {}) => {

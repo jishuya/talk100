@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useStatisticsData, useWeeklyChart, useCategoryProgress, useLearningPattern } from '../hooks/useApi';
+import { useStatisticsData, useWeeklyChart, useCategoryProgress, useLearningPattern, useBadgesAchievements, useSummaryStats, useStreakData } from '../hooks/useApi';
 import SummaryCard from '../components/stats/SummaryCard';
 import StreakSection from '../components/stats/StreakSection';
 import WeeklyChart from '../components/stats/WeeklyChart';
@@ -15,21 +15,24 @@ const StatusPage = () => {
 
   // 통계 데이터 훅들
   const { data: statisticsData, isLoading: statsLoading, error: statsError } = useStatisticsData(selectedPeriod);
-  const { data: weeklyData, isLoading: weeklyLoading } = useWeeklyChart();
+  const { data: weeklyData, isLoading: weeklyLoading } = useWeeklyChart(selectedPeriod);
   const { data: categoryData, isLoading: categoryLoading } = useCategoryProgress();
   const { data: patternData, isLoading: patternLoading } = useLearningPattern();
+  const { data: badgesData, isLoading: badgesLoading } = useBadgesAchievements();
+  const { data: summaryData, isLoading: summaryLoading } = useSummaryStats(selectedPeriod);
+  const { data: streakData, isLoading: streakLoading } = useStreakData();
 
 
   // Mock 데이터에서 값 추출
-  const summary = statisticsData?.summaryStats?.[selectedPeriod];
-  const streak = statisticsData?.streakData;
-  const weeklyPattern = weeklyData?.[selectedPeriod];
+  const summary = summaryData || statisticsData?.summaryStats?.[selectedPeriod];
+  const streak = streakData || statisticsData?.streak;
+  const weeklyPattern = weeklyData || statisticsData?.weeklyPattern?.[selectedPeriod];
   const categoryProgress = categoryData;
   const learningPattern = patternData?.[selectedPeriod];
-  const badges = statisticsData?.badges;
+  const badges = badgesData || statisticsData?.badges;
 
   // 통합 로딩 상태
-  const isLoading = statsLoading || weeklyLoading || categoryLoading || patternLoading;
+  const isLoading = statsLoading || weeklyLoading || categoryLoading || patternLoading || badgesLoading || summaryLoading || streakLoading;
   const error = statsError;
 
   if (isLoading) {
@@ -80,8 +83,8 @@ const StatusPage = () => {
         {/* 연속 학습 */}
         <StreakSection data={streak} />
 
-        {/* 주간 출석 패턴 */}
-        <WeeklyChart data={weeklyPattern} />
+        {/* 요일별 학습 문제 */}
+        <WeeklyChart data={weeklyPattern} period={selectedPeriod} />
 
         {/* 카테고리별 진행률 */}
         <CategoryProgress data={categoryProgress} />

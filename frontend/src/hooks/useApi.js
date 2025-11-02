@@ -188,10 +188,10 @@ export const useStatisticsData = (period = '7days') => {
   });
 };
 
-export const useWeeklyChart = () => {
+export const useWeeklyChart = (period = 'week') => {
   return useQuery({
-    queryKey: ['statistics', 'weekly'],
-    queryFn: () => api.getWeeklyChart(),
+    queryKey: ['statistics', 'weekly', period],
+    queryFn: () => api.getWeeklyChart(period),
     staleTime: ENV.CACHE_TIMES.HISTORY,
     retry: 2,
   });
@@ -211,6 +211,33 @@ export const useLearningPattern = () => {
     queryKey: ['statistics', 'pattern'],
     queryFn: () => api.getLearningPattern(),
     staleTime: ENV.CACHE_TIMES.HISTORY,
+    retry: 2,
+  });
+};
+
+export const useBadgesAchievements = () => {
+  return useQuery({
+    queryKey: ['badges', 'achievements'],
+    queryFn: () => api.getBadgesAchievements(),
+    staleTime: ENV.CACHE_TIMES.USER_DATA,  // 5분
+    retry: 2,
+  });
+};
+
+export const useSummaryStats = (period = 'week') => {
+  return useQuery({
+    queryKey: ['statistics', 'summary', period],
+    queryFn: () => api.getSummaryStats(period),
+    staleTime: ENV.CACHE_TIMES.PROGRESS,  // 1분
+    retry: 2,
+  });
+};
+
+export const useStreakData = () => {
+  return useQuery({
+    queryKey: ['statistics', 'streak'],
+    queryFn: () => api.getStreakData(),
+    staleTime: ENV.CACHE_TIMES.PROGRESS,  // 1분
     retry: 2,
   });
 };
