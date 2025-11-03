@@ -179,31 +179,44 @@ class UserQueries {
   // 최근 학습 기록 조회 (Model Example, Small Talk, Cases in Point만)
   async getUserHistory(uid) {
     try {
+      console.log('📋 [getUserHistory] Fetching for uid:', uid);
+
+      // 모든 카테고리(1,2,3)를 반환하되, user_progress가 없어도 기본 정보는 제공
       const result = await db.manyOrNone(
         `SELECT
-          up.category_id as id,
+          c.category_id as id,
+          c.display_name as category_name,
           up.last_studied_day,
           up.last_studied_question_id,
           up.last_studied_timestamp as timestamp,
           -- Day 내 총 문제 수
           (SELECT COUNT(*)
            FROM questions
-           WHERE category_id = up.category_id AND day = up.last_studied_day) as total_questions,
+           WHERE category_id = c.category_id AND day = COALESCE(up.last_studied_day, 1)) as total_questions,
           -- 마지막으로 푼 문제의 question_number (Day 내 순서)
           (SELECT question_number
            FROM questions
-           WHERE question_id = up.last_studied_question_id) as completed_question_number
-        FROM user_progress up
-        WHERE up.user_id = $1
-          AND up.category_id IN (1, 2, 3)
-          AND up.last_studied_timestamp IS NOT NULL
-        ORDER BY up.last_studied_timestamp DESC`,
+           WHERE question_id = up.last_studied_question_id) as completed_question_number,
+          -- 카테고리 전체 완료 문제 수
+          (SELECT COUNT(DISTINCT qa.question_id)
+           FROM question_attempts qa
+           JOIN questions q ON qa.question_id = q.question_id
+           WHERE qa.user_id = $1 AND q.category_id = c.category_id) as category_completed,
+          -- 카테고리 전체 문제 수
+          (SELECT COUNT(*)
+           FROM questions q
+           WHERE q.category_id = c.category_id) as category_total
+        FROM category c
+        LEFT JOIN user_progress up ON c.category_id = up.category_id AND up.user_id = $1
+        WHERE c.category_id IN (1, 2, 3)
+        ORDER BY c.order_num`,
         [uid]
       );
 
+      console.log('✅ [getUserHistory] Result:', result);
       return result || [];
     } catch (error) {
-      console.error('getUserHistory query error:', error);
+      console.error('❌ [getUserHistory] Query error:', error);
       throw new Error('Failed to fetch user history');
     }
   }

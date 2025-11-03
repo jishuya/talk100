@@ -1,50 +1,52 @@
-import React from 'react';
 import { getIcon } from '../../utils/iconMap.jsx';
 
-const StudyHistorySection = ({ historyItems, onHistoryItemClick }) => {
+const StudyHistorySection = ({ historyItems }) => {
+  console.log('📦 [StudyHistorySection] Received historyItems:', historyItems);
+
   const baseHistory = [
     {
       id: 1,
       icon: 'tabler:bulb',
-      title: 'Model Example Day',
+      title: 'Model Example',
       category: 1
     },
     {
       id: 2,
       icon: 'tabler:message-circle',
-      title: 'Small Talk Day',
+      title: 'Small Talk',
       category: 2
     },
     {
       id: 3,
       icon: 'tabler:file-text',
-      title: 'Cases in Point Day',
+      title: 'Cases in Point',
       category: 3
     }
   ];
 
-  // historyItems에서 time, score 값을 id로 매칭하여 합치기
+  // historyItems에서 백엔드 데이터를 id로 매칭하여 합치기
   const history = baseHistory.map(baseItem => {
     const dynamicItem = historyItems?.find(item => item.id === baseItem.id);
-    return {
+    console.log(`🔍 [Matching] Category ${baseItem.id}:`, dynamicItem);
+
+    // 카테고리 진행률 계산
+    const categoryCompleted = dynamicItem?.category_completed || 0;
+    const categoryTotal = dynamicItem?.category_total || 1;
+    const progress = Math.round((categoryCompleted / categoryTotal) * 100);
+
+    const result = {
       ...baseItem,
       time: dynamicItem?.time || '-',
-      percent: dynamicItem?.percent || 0, 
-      lastDay: dynamicItem?.last_day || 1
+      lastDay: dynamicItem?.last_day || null,
+      lastQuestionNumber: dynamicItem?.last_question_number || null,
+      categoryCompleted,
+      categoryTotal,
+      progress
     };
+
+    console.log(`✅ [Mapped] Category ${baseItem.id}:`, result);
+    return result;
   });
-
-  const handleItemClick = (item) => {
-    if (onHistoryItemClick) {
-      onHistoryItemClick(item);
-    }
-  };
-
-  const getScoreColorClass = (percent) => {
-    if (percent >= 90) return 'text-success';
-    if (percent >= 70) return 'text-warning';
-    return 'text-error';
-  };
 
   return (
     <div className="px-4 pb-5">
@@ -53,23 +55,37 @@ const StudyHistorySection = ({ historyItems, onHistoryItemClick }) => {
         {history.map((item) => (
           <div
             key={item.id}
-            className="flex items-center py-3 border-b border-gray-border last:border-b-0 touchable"
-            onClick={() => handleItemClick(item)}
+            className="py-3 border-b border-gray-border last:border-b-0"
           >
-            <div className="w-10 h-10 bg-accent-pale rounded-full flex items-center justify-center mr-3">
-              {typeof item.icon === 'string' ? getIcon(item.icon, {
-                size: 'xl',
-                className: item.category === 1 ? 'text-green-400' :
-                          item.category === 2 ? 'text-purple-400' :
-                          item.category === 3 ? 'text-blue-400' : ''
-              }) : item.icon}
+            <div className="flex items-center mb-2">
+              <div className="w-10 h-10 bg-accent-pale rounded-full flex items-center justify-center mr-3">
+                {typeof item.icon === 'string' ? getIcon(item.icon, {
+                  size: 'xl',
+                  className: item.category === 1 ? 'text-green-400' :
+                            item.category === 2 ? 'text-purple-400' :
+                            item.category === 3 ? 'text-blue-400' : ''
+                }) : item.icon}
+              </div>
+              <div className="flex-1">
+                <div className="text-sm font-semibold text-text-primary mb-0.5">
+                  {item.title}
+                  {item.lastDay && item.lastQuestionNumber &&
+                    ` Day ${item.lastDay}, Question ${item.lastQuestionNumber}`
+                  }
+                </div>
+                <div className="text-xs text-text-secondary">{item.time}</div>
+              </div>
+              <div className="text-xs text-text-secondary ml-2">
+                {item.progress}% ({item.categoryCompleted}/{item.categoryTotal})
+              </div>
             </div>
-            <div className="flex-1">
-              <div className="text-sm font-semibold text-text-primary mb-0.5">{item.title}{item.lastDay}</div>
-              <div className="text-xs text-text-secondary">{item.time}</div>
-            </div>
-            <div className={`text-sm font-bold ${getScoreColorClass(item.score)}`}>
-              {item.percent}%
+
+            {/* 진행률 바 */}
+            <div className="h-2 bg-accent-mint rounded overflow-hidden ml-[52px]">
+              <div
+                className="h-full bg-primary rounded transition-all duration-500 ease-out"
+                style={{ width: `${item.progress}%` }}
+              />
             </div>
           </div>
         ))}

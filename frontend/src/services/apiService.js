@@ -223,8 +223,10 @@ class ApiService {
   }
 
   // 🏠 HomePage.jsx > StudyHistorySection에서 사용 - 최근 학습 기록
-  getHistory() {
-    return this.request('/api/users/history', 'history');
+  async getHistory() {
+    const result = await this.request('/api/users/history', 'history');
+    console.log('📋 [getHistory] API Response:', result);
+    return result;
   }
 
   // 🏠 HomePage.jsx에서 사용 - 개인 퀴즈 데이터 (즐겨찾기, 틀린문제 개수 포함)

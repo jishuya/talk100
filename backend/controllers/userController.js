@@ -166,9 +166,15 @@ class UserController {
       }
 
       const historyData = await userQueries.getUserHistory(uid);
+      console.log('📊 [getHistory Controller] Raw data:', JSON.stringify(historyData, null, 2));
 
       // 시간 계산 및 퍼센트 계산
       const processedHistory = historyData.map(item => {
+        console.log(`🔍 [Processing Category ${item.id}]:`, {
+          last_studied_day: item.last_studied_day,
+          completed_question_number: item.completed_question_number,
+          timestamp: item.timestamp
+        });
 
         // percent 계산: question_number / total_questions * 100
         // question_number는 이미 Day 내에서 몇 번째 문제인지를 나타냄
@@ -176,32 +182,35 @@ class UserController {
         const completedQuestionNumber = parseInt(item.completed_question_number) || 0;
         const percent = Math.round((completedQuestionNumber / totalQuestions) * 100);
 
-        // 시간 차이 계산 (1분 미만은 "방금 전")
-        const now = new Date();
-        const timestamp = new Date(item.timestamp);
-        const diffMs = now - timestamp;
-        const diffMins = Math.floor(diffMs / 60000);
-        const diffHours = Math.floor(diffMs / 3600000);
-        const diffDays = Math.floor(diffMs / 86400000);
-        const diffWeeks = Math.floor(diffMs / (86400000 * 7));
-        const diffMonths = Math.floor(diffMs / (86400000 * 30));
-        const diffYears = Math.floor(diffMs / (86400000 * 365));
+        // 시간 차이 계산 (timestamp가 null이면 "학습 기록 없음")
+        let time = '학습 기록 없음';
 
-        let time;
-        if (diffMins < 1) {
-          time = '방금 전';
-        } else if (diffMins < 60) {
-          time = `${diffMins}분 전`;
-        } else if (diffHours < 24) {
-          time = `${diffHours}시간 전`;
-        } else if (diffDays < 14) {
-          time = diffDays === 1 ? '어제' : `${diffDays}일 전`;
-        } else if (diffWeeks < 4) {
-          time = `${diffWeeks}주 전`;
-        } else if (diffMonths < 12) {
-          time = `${diffMonths}달 전`;
-        } else {
-          time = `${diffYears}년 전`;
+        if (item.timestamp) {
+          const now = new Date();
+          const timestamp = new Date(item.timestamp);
+          const diffMs = now - timestamp;
+          const diffMins = Math.floor(diffMs / 60000);
+          const diffHours = Math.floor(diffMs / 3600000);
+          const diffDays = Math.floor(diffMs / 86400000);
+          const diffWeeks = Math.floor(diffMs / (86400000 * 7));
+          const diffMonths = Math.floor(diffMs / (86400000 * 30));
+          const diffYears = Math.floor(diffMs / (86400000 * 365));
+
+          if (diffMins < 1) {
+            time = '방금 전';
+          } else if (diffMins < 60) {
+            time = `${diffMins}분 전`;
+          } else if (diffHours < 24) {
+            time = `${diffHours}시간 전`;
+          } else if (diffDays < 14) {
+            time = diffDays === 1 ? '어제' : `${diffDays}일 전`;
+          } else if (diffWeeks < 4) {
+            time = `${diffWeeks}주 전`;
+          } else if (diffMonths < 12) {
+            time = `${diffMonths}달 전`;
+          } else {
+            time = `${diffYears}년 전`;
+          }
         }
 
         return {
@@ -209,7 +218,10 @@ class UserController {
           time: time,
           percent: percent,
           last_day: item.last_studied_day,
-          last_qestion_id: item.last_studied_question_id
+          last_qestion_id: item.last_studied_question_id,
+          last_question_number: parseInt(item.completed_question_number) || 0,
+          category_completed: parseInt(item.category_completed) || 0,
+          category_total: parseInt(item.category_total) || 0
         };
       });
 

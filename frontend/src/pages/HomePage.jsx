@@ -253,16 +253,6 @@ const HomePage = () => {
     }
   };
 
-  const handleHistoryItemClick = (item) => {
-    // TODO: 백엔드에서 해당 카테고리/Day의 문제 ID 목록 가져오기
-    const mockQuestionIds = [1, 2, 3, 4, 5, 6];
-
-    // item.category를 카테고리 ID로 변환 (필요시)
-    const categoryId = item.category_id || item.category;
-    const sessionId = createSession(categoryId, item.day, mockQuestionIds);
-    navigate(`/quiz?session=${sessionId}`);
-  };
-
   return (
     <div>
       {/* Character Section */}
@@ -287,7 +277,6 @@ const HomePage = () => {
       {/* Study History Section */}
       <StudyHistorySection
         historyItems={historyData}
-        onHistoryItemClick={handleHistoryItemClick}
       />
 
       {/* 추가 학습 확인 모달 */}
