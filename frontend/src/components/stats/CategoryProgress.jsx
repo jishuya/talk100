@@ -13,19 +13,22 @@ const CategoryProgress = ({ data }) => {
       </div>
       <div className="space-y-4">
         {data.map((category) => {
-          // progress가 없으면 completedQuestions/totalQuestions로 계산
-          const progress = category.progress ??
-            Math.round((category.completedQuestions / category.totalQuestions) * 100);
+          // 백엔드 응답 형식: { categoryId, name, completed, total }
+          // 또는 레거시 형식: { id, name, completedQuestions, totalQuestions, progress }
+          const id = category.categoryId || category.id;
+          const completed = category.completed ?? category.completedQuestions ?? 0;
+          const total = category.total ?? category.totalQuestions ?? 1;
+          const progress = category.progress ?? Math.round((completed / total) * 100);
 
           return (
-            <div key={category.id}>
+            <div key={id}>
               <div className="flex justify-between items-center mb-2">
                 <span className="text-sm font-medium text-text-primary">
                   {category.name}
                 </span>
                 <div className="flex gap-3 text-xs text-text-secondary">
                   <span>{progress}%</span>
-                  <span>{category.completedQuestions}/{category.totalQuestions} 문제</span>
+                  <span>{completed}/{total} 문제</span>
                 </div>
               </div>
               <div className="h-2 bg-accent-mint rounded overflow-hidden">

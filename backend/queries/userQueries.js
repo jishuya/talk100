@@ -404,6 +404,116 @@ class UserQueries {
       throw new Error('Failed to fetch summary stats');
     }
   }
+
+  // 통계 - CategoryProgress 데이터 조회 (카테고리별 진행률)
+  async getCategoryProgress(uid) {
+    try {
+      console.log('📊 [Get Category Progress] Fetching for uid:', uid);
+
+      const results = await db.any(
+        `SELECT
+          c.category_id,
+          c.display_name as name,
+          -- 실제 푼 문제 수 (DISTINCT로 중복 제거)
+          COUNT(DISTINCT qa.question_id) as completed_questions,
+          -- 해당 카테고리의 전체 문제 수
+          (
+            SELECT COUNT(*)
+            FROM questions q2
+            WHERE q2.category_id = c.category_id
+          ) as total_questions
+        FROM category c
+        -- 전체 문제 수를 구하기 위해 questions와 LEFT JOIN
+        LEFT JOIN questions q ON c.category_id = q.category_id
+        -- 사용자가 실제 푼 문제만 가져오기 위해 LEFT JOIN
+        LEFT JOIN question_attempts qa
+          ON q.question_id = qa.question_id
+          AND qa.user_id = $1
+        WHERE c.category_id IN (1, 2, 3)  -- Model, Small Talk, Cases만
+        GROUP BY c.category_id, c.display_name, c.order_num
+        ORDER BY c.order_num`,
+        [uid]
+      );
+
+      // 데이터 변환
+      const categoryProgress = results.map(row => ({
+        categoryId: parseInt(row.category_id),
+        name: row.name,
+        completed: parseInt(row.completed_questions) || 0,
+        total: parseInt(row.total_questions) || 0
+      }));
+
+      console.log('✅ [Get Category Progress] Result:', categoryProgress);
+
+      return categoryProgress;
+
+    } catch (error) {
+      console.error('❌ [Get Category Progress] Query error:', error);
+      throw new Error('Failed to fetch category progress');
+    }
+  }
+
+  // 통계 - LearningPattern 데이터 조회 (학습 패턴 분석)
+  async getLearningPattern(uid, period = 'week') {
+    try {
+      console.log('📊 [Get Learning Pattern] Fetching for uid:', uid, 'period:', period);
+
+      // 기간 계산
+      let startDate;
+
+      switch(period) {
+        case 'week':
+          startDate = new Date();
+          startDate.setDate(startDate.getDate() - 7);
+          break;
+        case 'month':
+          startDate = new Date();
+          startDate.setDate(startDate.getDate() - 30);
+          break;
+        case 'all':
+          startDate = new Date('1970-01-01');
+          break;
+        default:
+          startDate = new Date();
+          startDate.setDate(startDate.getDate() - 7);
+      }
+
+      const result = await db.one(
+        `SELECT
+          -- 1. 일평균 학습 문제 수 (기간별)
+          COALESCE(ROUND(AVG(ds.questions_attempted), 1), 0) as daily_avg_questions,
+
+          -- 2. 일일목표 완료 횟수 (기간별)
+          COALESCE(SUM(CASE WHEN ds.goal_met = true THEN 1 ELSE 0 END), 0) as total_days_completed,
+
+          -- 3. 복습 필요 문제 수 (전체 - 기간 무관)
+          (SELECT COUNT(*) FROM wrong_answers WHERE user_id = $1) as review_questions,
+
+          -- 4. 즐겨찾기 문제 수 (전체 - 기간 무관)
+          (SELECT COUNT(*) FROM favorites WHERE user_id = $1) as favorites
+
+        FROM daily_summary ds
+        WHERE ds.user_id = $1
+          AND ds.date >= $2
+          AND ds.date <= CURRENT_DATE
+          AND ds.questions_attempted > 0`,
+        [uid, startDate.toISOString().split('T')[0]]
+      );
+
+      console.log('✅ [Get Learning Pattern] Result:', result);
+
+      return {
+        dailyAvgQuestions: parseFloat(result.daily_avg_questions) || 0,
+        totalDaysCompleted: parseInt(result.total_days_completed) || 0,
+        reviewQuestions: parseInt(result.review_questions) || 0,
+        favorites: parseInt(result.favorites) || 0
+      };
+
+    } catch (error) {
+      console.error('❌ [Get Learning Pattern] Query error:', error);
+      throw new Error('Failed to fetch learning pattern');
+    }
+  }
 }
 
 module.exports = new UserQueries();

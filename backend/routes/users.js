@@ -34,4 +34,10 @@ router.get('/streak-data', verifyToken, userController.getStreakData);
 // GET /api/users/weekly-chart - 요일별 학습 패턴 조회
 router.get('/weekly-chart', verifyToken, userController.getWeeklyChart);
 
+// GET /api/users/category-progress - 카테고리별 진행률 조회
+router.get('/category-progress', verifyToken, userController.getCategoryProgress);
+
+// GET /api/users/learning-pattern - 학습 패턴 분석 조회
+router.get('/learning-pattern', verifyToken, userController.getLearningPattern);
+
 module.exports = router;

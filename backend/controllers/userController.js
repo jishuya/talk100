@@ -384,6 +384,71 @@ class UserController {
       });
     }
   }
+
+  // GET /api/users/category-progress
+  async getCategoryProgress(req, res) {
+    try {
+      const uid = req.user?.uid;
+
+      if (!uid) {
+        return res.status(401).json({
+          success: false,
+          message: 'User not authenticated'
+        });
+      }
+
+      const categoryProgress = await userQueries.getCategoryProgress(uid);
+
+      res.json({
+        success: true,
+        data: categoryProgress
+      });
+
+    } catch (error) {
+      console.error('getCategoryProgress controller error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch category progress'
+      });
+    }
+  }
+
+  // GET /api/users/learning-pattern?period=week
+  async getLearningPattern(req, res) {
+    try {
+      const uid = req.user?.uid;
+      const period = req.query.period || 'week'; // week, month, all
+
+      if (!uid) {
+        return res.status(401).json({
+          success: false,
+          message: 'User not authenticated'
+        });
+      }
+
+      // period 유효성 검증
+      if (!['week', 'month', 'all'].includes(period)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid period. Must be one of: week, month, all'
+        });
+      }
+
+      const learningPattern = await userQueries.getLearningPattern(uid, period);
+
+      res.json({
+        success: true,
+        data: learningPattern
+      });
+
+    } catch (error) {
+      console.error('getLearningPattern controller error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch learning pattern'
+      });
+    }
+  }
 }
 
 module.exports = new UserController();

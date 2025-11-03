@@ -367,12 +367,12 @@ class ApiService {
 
   // 📊 StatusPage.jsx에서 사용 - 카테고리별 진행률
   getCategoryProgress() {
-    return this.request('/api/stats/categories', 'categoryStats');
+    return this.request('/api/users/category-progress', 'categoryStats');
   }
 
   // 📊 StatusPage.jsx에서 사용 - 학습 패턴 분석
-  getLearningPattern() {
-    return this.request('/api/stats/pattern', 'learningPattern');
+  getLearningPattern(period = 'week') {
+    return this.request(`/api/users/learning-pattern?period=${period}`, 'learningPattern');
   }
 
   // 🏆 StatusPage.jsx에서 사용 - 성취 뱃지 조회

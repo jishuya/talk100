@@ -206,10 +206,10 @@ export const useCategoryProgress = () => {
   });
 };
 
-export const useLearningPattern = () => {
+export const useLearningPattern = (period = 'week') => {
   return useQuery({
-    queryKey: ['statistics', 'pattern'],
-    queryFn: () => api.getLearningPattern(),
+    queryKey: ['statistics', 'pattern', period],
+    queryFn: () => api.getLearningPattern(period),
     staleTime: ENV.CACHE_TIMES.HISTORY,
     retry: 2,
   });
