@@ -1,5 +1,6 @@
 const { db } = require('../config/database');
 const badgeService = require('../services/badgeService');
+const avatarService = require('../services/avatarService');
 
 class QuizQueries {
   // ==========================================
@@ -593,13 +594,38 @@ class QuizQueries {
           console.log(`✅ [Streak Updated] User: ${userId}, New Streak: ${newStreak}, Longest: ${newLongest}`);
         }
 
-        // 4. users 테이블의 total_questions_attempted 업데이트
-        await t.none(
-          `UPDATE users
-           SET total_questions_attempted = total_questions_attempted + 1
+        // 4. 레벨업 체크 및 users 테이블 업데이트
+        // 4-1. 현재 문제 수 조회
+        const currentUser = await t.one(
+          `SELECT total_questions_attempted, level, profile_image
+           FROM users
            WHERE uid = $1`,
           [userId]
         );
+
+        const previousQuestions = currentUser.total_questions_attempted;
+        const currentQuestions = previousQuestions + 1;
+
+        // 4-2. 레벨업 체크
+        const levelUpInfo = avatarService.checkLevelUp(previousQuestions, currentQuestions);
+
+        // 4-3. users 테이블 업데이트 (total_questions_attempted + level)
+        const newLevel = avatarService.calculateLevel(currentQuestions);
+
+        await t.none(
+          `UPDATE users
+           SET total_questions_attempted = $1,
+               level = $2
+           WHERE uid = $3`,
+          [currentQuestions, newLevel, userId]
+        );
+
+        console.log(`📊 [Questions Updated] User: ${userId}, Total: ${currentQuestions}, Level: ${newLevel}`);
+
+        // 4-4. 레벨업 시 로그
+        if (levelUpInfo) {
+          console.log(`🎉 [Level Up!] User: ${userId}, ${levelUpInfo.previousLevel} → ${levelUpInfo.newLevel}, Avatar: ${levelUpInfo.avatar}`);
+        }
 
         return {
           success: true,
@@ -609,6 +635,7 @@ class QuizQueries {
           goalMet,
           questionsToday: summary.questions_attempted,
           dailyGoal: user.daily_goal,
+          levelUp: levelUpInfo,  // 레벨업 정보 추가
           message: isFirstStudyToday
             ? 'Question attempt recorded and streak updated'
             : 'Question attempt recorded successfully'

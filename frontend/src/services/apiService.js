@@ -19,6 +19,7 @@ const MOCK_DATA = {
 
   // MypageData 키들
   mypageData: mypageData,
+  avatarSystem: mypageData.avatarSystem,
 
   // QuizData 키들
   quizSession: MOCK_QUIZ_DATA, // 레거시 지원
@@ -328,11 +329,16 @@ class ApiService {
     });
   }
 
+  // 👤 MyPage.jsx에서 사용 - 아바타 시스템 조회
+  getAvatarSystem() {
+    return this.request('/api/avatar/system', 'avatarSystem');
+  }
+
   // 👤 MyPage.jsx에서 사용 - 아바타 업데이트
-  updateAvatar(data) {
-    return this.request('/api/mypage/avatar', null, {
+  updateAvatar(avatar) {
+    return this.request('/api/avatar/select', null, {
       method: 'PUT',
-      body: JSON.stringify(data)
+      body: { avatar }
     });
   }
 

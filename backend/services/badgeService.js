@@ -64,18 +64,18 @@ class BadgeService {
       condition: 'total_questions >= 100'
     },
     {
-      id: 'questions-500',
-      name: '500문제 정복',
-      description: '총 500문제 완료',
+      id: 'questions-300',
+      name: '300문제 정복',
+      description: '총 300문제 완료',
       category: 'questions',
-      condition: 'total_questions >= 500'
+      condition: 'total_questions >= 300'
     },
     {
-      id: 'questions-1000',
-      name: '100문제 정복',
+      id: 'questions-500',
+      name: '500문제 정복',
       description: '총 1000문제 완료',
       category: 'questions',
-      condition: 'total_questions >= 1000'
+      condition: 'total_questions >= 500'
     },
 
     // 4. 특수 업적 (3개)

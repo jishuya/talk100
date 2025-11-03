@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 
@@ -6,6 +6,7 @@ import { Button } from '../components/ui/Button';
 import {
   useMypageData,
   useUpdateGoals,
+  useAvatarSystem,
   useUpdateAvatar,
   useLogout
 } from '../hooks/useApi';
@@ -27,6 +28,7 @@ const MyPage = () => {
 
   // 데이터 훅들
   const { data: apiMypageData, isLoading, error, refetch } = useMypageData();
+  const { data: apiAvatarSystem } = useAvatarSystem();
 
   // 액션 훅들
   const updateGoalsMutation = useUpdateGoals();
@@ -35,18 +37,27 @@ const MyPage = () => {
 
   // Mock 데이터를 fallback으로 사용
   const finalMypageData = apiMypageData || mypageData;
+  const avatarSystem = apiAvatarSystem || mypageData.avatarSystem;
 
   // 데이터에서 값 추출
   const profile = finalMypageData?.userProfile;
   const summary = finalMypageData?.summaryStats;
   const goals = finalMypageData?.learningGoals;
-  const management = finalMypageData?.learningManagement;
-  const avatarSystem = finalMypageData?.avatarSystem;
 
 
   // 모달 상태
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [showGoalEditModal, setShowGoalEditModal] = useState(false);
+
+  // 앱 설정 로컬 상태
+  const [localAppSettings, setLocalAppSettings] = useState(profile?.appSettings || []);
+
+  // profile 데이터가 로드되면 localAppSettings 초기화
+  useEffect(() => {
+    if (profile?.appSettings) {
+      setLocalAppSettings(profile.appSettings);
+    }
+  }, [profile?.appSettings]);
 
   // 로딩 상태
   if (isLoading) {
@@ -104,6 +115,21 @@ const MyPage = () => {
       console.error('Setting toggle error:', error);
       alert('설정 변경에 실패했습니다.');
     }
+  };
+
+  // 앱 설정 슬라이더 변경
+  const handleAppSettingSlider = (settingId, value) => {
+    // 로컬 상태 즉시 업데이트
+    setLocalAppSettings(prev =>
+      prev.map(setting =>
+        setting.id === settingId
+          ? { ...setting, value, displayValue: `${value}x` }
+          : setting
+      )
+    );
+
+    // TODO: 백엔드 API 호출 (디바운스 적용 필요)
+    console.log(`Setting ${settingId} changed to ${value}`);
   };
 
   // 아바타 저장
@@ -193,18 +219,19 @@ const MyPage = () => {
         />
 
         {/* 학습 관리 */}
-        <MenuSection
+        {/* <MenuSection
           title="학습 관리"
           items={management}
           onItemClick={handleLearningManagementClick}
-        />
+        /> */}
 
         {/* 앱 설정 */}
         <MenuSection
           title="앱 설정"
-          items={profile?.appSettings || []}
+          items={localAppSettings}
           onItemClick={handleAppSettingClick}
           onToggleChange={handleAppSettingToggle}
+          onSliderChange={handleAppSettingSlider}
         />
 
         {/* 로그아웃 버튼 */}

@@ -356,20 +356,20 @@ const SettingsPage = () => {
         />
 
         {/* 학습 설정 */}
-        <SettingsSection
+        {/* <SettingsSection
           title="학습 설정"
           items={learningItems}
           onItemChange={(key, value) => handleSettingChange('learning', key, value)}
           onItemClick={handleItemClick}
-        />
+        /> */}
 
         {/* 알림 설정 */}
-        <SettingsSection
+        {/* <SettingsSection
           title="알림 설정"
           items={notificationItems}
           onItemChange={(key, value) => handleSettingChange('notifications', key, value)}
           onItemClick={handleItemClick}
-        />
+        /> */}
 
         {/* 화면 설정 */}
         <SettingsSection

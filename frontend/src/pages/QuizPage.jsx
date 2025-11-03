@@ -9,6 +9,7 @@ import { QuizControls } from '../components/quiz/QuizControls';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import Modal, { ModalBody } from '../components/ui/Modal';
 import BadgeModal from '../components/ui/BadgeModal';
+import LevelUpModal from '../components/quiz/LevelUpModal';
 import Button from '../components/ui/Button';
 import { getIcon } from '../utils/iconMap';
 
@@ -136,6 +137,7 @@ const QuizPage = () => {
   const [showGoalAchievedModal, setShowGoalAchievedModal] = useState(false);
   const [streakInfo, setStreakInfo] = useState(null);
   const [newBadges, setNewBadges] = useState([]);
+  const [levelUpInfo, setLevelUpInfo] = useState(null);
 
   // 모달 버튼 ref
   const continueButtonRef = useRef(null);
@@ -415,6 +417,12 @@ const QuizPage = () => {
           const result = await api.recordQuestionAttempt(question.id);
           console.log('✅ Question attempt recorded:', question.id);
 
+          // 🎊 레벨업이 있으면 모달 표시 (최우선)
+          if (result?.levelUp) {
+            setLevelUpInfo(result.levelUp);
+            return; // 레벨업 모달이 닫힐 때까지 대기
+          }
+
           // 🏆 새로운 뱃지가 있으면 모달 표시
           if (result?.newBadges && result.newBadges.length > 0) {
             setNewBadges(result.newBadges);
@@ -435,6 +443,13 @@ const QuizPage = () => {
     }
   }, [sessionId, question?.id, moveToNext]);
 
+  // 레벨업 모달 닫기 핸들러
+  const handleLevelUpModalClose = useCallback(() => {
+    setLevelUpInfo(null);
+    // 레벨업 모달 닫힌 후 다음 문제로 이동
+    moveToNext();
+  }, [moveToNext]);
+
   // 뱃지 모달 닫기 핸들러
   const handleBadgeModalClose = useCallback(() => {
     setNewBadges([]);
@@ -446,7 +461,7 @@ const QuizPage = () => {
   useEffect(() => {
     const handleKeyPress = (e) => {
       // 모달이 열려 있을 때는 이 핸들러를 무시
-      if (e.key === 'Enter' && quizMode === 'grading' && !showGoalAchievedModal && newBadges.length === 0) {
+      if (e.key === 'Enter' && quizMode === 'grading' && !showGoalAchievedModal && newBadges.length === 0 && !levelUpInfo) {
         // input이나 textarea에 포커스되어 있지 않을 때만
         const activeElement = document.activeElement;
         if (activeElement?.tagName !== 'INPUT' && activeElement?.tagName !== 'TEXTAREA') {
@@ -457,7 +472,7 @@ const QuizPage = () => {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [quizMode, handleNextQuestion, showGoalAchievedModal, newBadges]);
+  }, [quizMode, handleNextQuestion, showGoalAchievedModal, newBadges, levelUpInfo]);
 
   // 목표 달성 모달이 열릴 때 "계속하기" 버튼에 자동 포커스
   useEffect(() => {
@@ -805,6 +820,15 @@ const QuizPage = () => {
           </div>
         </ModalBody>
       </Modal>
+
+      {/* 🎊 레벨업 모달 */}
+      {levelUpInfo && (
+        <LevelUpModal
+          isOpen={!!levelUpInfo}
+          onClose={handleLevelUpModalClose}
+          levelUpInfo={levelUpInfo}
+        />
+      )}
 
       {/* 🏆 뱃지 획득 모달 */}
       {newBadges.length > 0 && (

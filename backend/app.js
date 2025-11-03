@@ -19,6 +19,7 @@ const authRoutes = require('./routes/auth');
 const usersRoutes = require('./routes/users');
 const quizRoutes = require('./routes/quiz');
 const progressRoutes = require('./routes/progress');
+const avatarRoutes = require('./routes/avatar');
 
 const app = express();
 
@@ -84,6 +85,7 @@ app.use('/auth', authRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/progress', progressRoutes);
+app.use('/api/avatar', avatarRoutes);
 // app.use('/api/questions', questionRoutes);
 // app.use('/api/review', reviewRoutes);
 // app.use('/api/wrong-answers', wrongAnswersRoutes);

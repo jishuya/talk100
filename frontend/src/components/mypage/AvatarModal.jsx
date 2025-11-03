@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 
@@ -10,9 +10,16 @@ const AvatarModal = ({
 }) => {
   const [selectedAvatar, setSelectedAvatar] = useState(avatarSystem?.current || '🦊');
 
+  // avatarSystem이 업데이트되면 selectedAvatar도 업데이트
+  useEffect(() => {
+    if (avatarSystem?.current) {
+      setSelectedAvatar(avatarSystem.current);
+    }
+  }, [avatarSystem]);
+
   if (!avatarSystem) return null;
 
-  const { userLevel, avatars } = avatarSystem;
+  const { userLevel, totalQuestions, avatars } = avatarSystem;
 
   const handleSave = () => {
     onSave(selectedAvatar);
@@ -36,7 +43,7 @@ const AvatarModal = ({
         <div className="mb-5">
           <div className="grid grid-cols-3 gap-2.5 p-1">
             {avatars.map((avatar, index) => {
-              const isUnlocked = userLevel >= avatar.level;
+              const isUnlocked = !avatar.locked;
               const isSelected = avatar.emoji === selectedAvatar;
 
               return (
@@ -53,8 +60,11 @@ const AvatarModal = ({
                   <div className="text-[10px] text-text-secondary text-center">{avatar.name}</div>
                   <div className="text-[9px] text-primary font-semibold">Lv.{avatar.level}</div>
                   {!isUnlocked && (
-                    <div className="absolute inset-0 bg-black/30 rounded-xl flex items-center justify-center text-lg">
-                      🔒
+                    <div className="absolute inset-0 bg-black/30 rounded-xl flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="text-lg mb-0.5">🔒</div>
+                        <div className="text-[8px] text-white font-medium">{avatar.requiredQuestions}문제</div>
+                      </div>
                     </div>
                   )}
                 </div>

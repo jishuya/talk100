@@ -28,6 +28,20 @@ export const mypageData = {
         value: false
       },
       {
+        id: 'voiceSpeed',
+        title: '음성 재생 속도',
+        description: null,
+        icon: 'IoSpeedometer',
+        bgColor: 'bg-accent-mint',
+        type: 'slider',
+        value: 1.0,
+        min: 0.5,
+        max: 2,
+        step: 0.25,
+        displayValue: '1.0x',
+        sliderLabels: ['0.5x', '1.0x', '1.5x', '2.0x']
+      },
+      {
         id: 'feedback',
         title: '피드백 보내기',
         description: null,
@@ -82,16 +96,16 @@ export const mypageData = {
       count: 28,
       path: '/quiz/favorites'
     },
-    {
-      id: 'review-schedule',
-      title: '복습 스케줄',
-      description: '예정된 복습 일정',
-      icon: 'IoTimeOutline',
-      bgColor: 'bg-blue-100',
-      count: 3,
-      countLabel: '오늘 3개',
-      path: '/review'
-    },
+    // {
+    //   id: 'review-schedule',
+    //   title: '복습 스케줄',
+    //   description: '예정된 복습 일정',
+    //   icon: 'IoTimeOutline',
+    //   bgColor: 'bg-blue-100',
+    //   count: 3,
+    //   countLabel: '오늘 3개',
+    //   path: '/review'
+    // },
     {
       id: 'achievements',
       title: '성취 & 뱃지',
@@ -104,21 +118,24 @@ export const mypageData = {
   ],
 
 
-  // 아바타 시스템 데이터
+  // 아바타 시스템 데이터 (백엔드 형식에 맞춤)
   avatarSystem: {
     current: '🦊',
-    userLevel: 12,
+    userLevel: 5,
+    totalQuestions: 400,  // 현재 푼 문제 수
     avatars: [
-      { emoji: '🐣', name: '병아리', level: 1, desc: '초보 학습자' },
-      { emoji: '🐰', name: '토끼', level: 3, desc: '열심히 뛰는 중' },
-      { emoji: '🐶', name: '강아지', level: 5, desc: '충실한 학습자' },
-      { emoji: '🐱', name: '고양이', level: 7, desc: '똑똑한 학습자' },
-      { emoji: '🦊', name: '여우', level: 10, desc: '영리한 학습자' },
-      { emoji: '🦁', name: '사자', level: 15, desc: '자신감 넘치는' },
-      { emoji: '🦄', name: '유니콘', level: 20, desc: '특별한 학습자' },
-      { emoji: '🐲', name: '용', level: 25, desc: '전설의 학습자' },
-      { emoji: '🦅', name: '독수리', level: 30, desc: '높이 나는 중' },
-      { emoji: '👑', name: '왕관', level: 40, desc: '마스터' }
+      { emoji: '🐣', name: '병아리', level: 1, requiredQuestions: 0, locked: false },
+      { emoji: '🐰', name: '토끼', level: 2, requiredQuestions: 50, locked: false },
+      { emoji: '🐶', name: '강아지', level: 3, requiredQuestions: 150, locked: false },
+      { emoji: '🐱', name: '고양이', level: 4, requiredQuestions: 250, locked: false },
+      { emoji: '🦊', name: '여우', level: 5, requiredQuestions: 350, locked: false },
+      { emoji: '🐼', name: '판다', level: 6, requiredQuestions: 450, locked: true },
+      { emoji: '🦁', name: '사자', level: 7, requiredQuestions: 550, locked: true },
+      { emoji: '🐯', name: '호랑이', level: 8, requiredQuestions: 650, locked: true },
+      { emoji: '🦄', name: '유니콘', level: 9, requiredQuestions: 750, locked: true },
+      { emoji: '🐲', name: '용', level: 10, requiredQuestions: 850, locked: true },
+      { emoji: '��', name: '독수리', level: 11, requiredQuestions: 950, locked: true },
+      { emoji: '👑', name: '왕관', level: 12, requiredQuestions: 1050, locked: true }
     ]
   }
 };

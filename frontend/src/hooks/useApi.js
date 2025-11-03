@@ -139,12 +139,22 @@ export const useUpdateGoals = () => {
   });
 };
 
+export const useAvatarSystem = () => {
+  return useQuery({
+    queryKey: ['avatar', 'system'],
+    queryFn: () => api.getAvatarSystem(),
+    staleTime: ENV.CACHE_TIMES.USER_DATA,
+    retry: 2,
+  });
+};
+
 export const useUpdateAvatar = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data) => api.updateAvatar(data),
+    mutationFn: (avatar) => api.updateAvatar(avatar),
     onSuccess: () => {
+      queryClient.invalidateQueries(['avatar', 'system']);
       queryClient.invalidateQueries(['mypage']);
       queryClient.invalidateQueries(['user', 'profile']);
     },

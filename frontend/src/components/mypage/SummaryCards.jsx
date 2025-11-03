@@ -6,19 +6,20 @@ const SummaryCards = ({ summary }) => {
   const cards = [
     {
       value: summary.totalDays,
-      label: '학습일',
+      label: '총 학습일',
       suffix: ''
     },
     {
       value: summary.streakDays,
-      label: '연속일',
+      label: '현재 연속일수',
       suffix: ''
     },
     {
       value: summary.maxStreakDays,
-      label: '최장연속일',
+      label: '최장 연속일',
       suffix: ''
-    }
+    },
+    
   ];
 
   return (

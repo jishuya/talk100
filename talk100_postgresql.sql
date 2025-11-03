@@ -62,6 +62,8 @@ CREATE TABLE users (
     voice_gender VARCHAR(10) DEFAULT 'male' CHECK (voice_gender IN ('male', 'female')),
     default_difficulty INTEGER DEFAULT 2 CHECK (default_difficulty BETWEEN 1 AND 3),
     daily_goal INTEGER DEFAULT 1 CHECK (daily_goal >= 1),  -- Quiz Set (Day 개수)
+	attandance_goal int4 DEFAULT 1 NULL,	-- 주간 목표 출석일
+	quiz_count_goal int4 DEFAULT 1 NULL,	-- 주간 목표 문제수
     
     -- 통계
     total_questions_attempted INTEGER DEFAULT 0,
