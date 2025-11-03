@@ -26,13 +26,36 @@ class ProgressQueries {
         [userId, categoryId, day, questionId]
       );
 
-      // 업데이트 후 확인
+      // 업데이트 후 확인 및 목표 달성 체크
       const updated = await db.oneOrNone(
         `SELECT last_studied_day, last_studied_question_id, last_studied_timestamp, solved_count
          FROM user_progress
          WHERE user_id = $1 AND category_id = $2`,
         [userId, categoryId]
       );
+
+      // 🎯 목표 달성 체크 (오늘의 퀴즈만)
+      let goalAchieved = false;
+      let streakInfo = null;
+
+      if (categoryId === 4) {
+        // 사용자 목표 조회
+        const userGoal = await db.oneOrNone(
+          `SELECT daily_goal, current_streak, longest_streak
+           FROM users
+           WHERE uid = $1`,
+          [userId]
+        );
+
+        // 목표 달성 여부 확인
+        if (userGoal && updated.solved_count >= userGoal.daily_goal) {
+          goalAchieved = true;
+          streakInfo = {
+            current_streak: userGoal.current_streak || 0,
+            best_streak: userGoal.longest_streak || 0
+          };
+        }
+      }
 
       // 📅 Day 완료 체크 - daily_summary.days_completed 업데이트
       // 방금 푼 문제가 해당 Day의 마지막 문제인지 확인
@@ -76,7 +99,9 @@ class ProgressQueries {
       return {
         success: true,
         message: 'User progress updated successfully',
-        data: updated
+        data: updated,
+        goalAchieved,
+        streak: streakInfo
       };
     } catch (error) {
       console.error('❌ [User Progress] Update failed:', error);

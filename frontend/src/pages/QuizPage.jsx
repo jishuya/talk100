@@ -8,6 +8,7 @@ import { QuizContent } from '../components/quiz/QuizContent';
 import { QuizControls } from '../components/quiz/QuizControls';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import Modal, { ModalBody } from '../components/ui/Modal';
+import BadgeModal from '../components/ui/BadgeModal';
 import Button from '../components/ui/Button';
 import { getIcon } from '../utils/iconMap';
 
@@ -134,6 +135,7 @@ const QuizPage = () => {
   // 모달 상태
   const [showGoalAchievedModal, setShowGoalAchievedModal] = useState(false);
   const [streakInfo, setStreakInfo] = useState(null);
+  const [newBadges, setNewBadges] = useState([]);
 
   // 모달 버튼 ref
   const continueButtonRef = useRef(null);
@@ -326,21 +328,10 @@ const QuizPage = () => {
     }
   }, [inputMode, handleToggleRecording, handleSubmitAnswer]);
 
-  // 다음 문제로 이동
-  const handleNextQuestion = useCallback(async () => {
+  // 실제로 다음 문제로 이동하는 핵심 로직 (뱃지 모달 이후에도 호출됨)
+  const moveToNext = useCallback(async () => {
     try {
       if (!sessionId) return;
-
-      // 🎯 문제 완료 시 question_attempts 테이블에 기록 (모든 카테고리)
-      if (question?.id) {
-        try {
-          await api.recordQuestionAttempt(question.id);
-          console.log('✅ Question attempt recorded:', question.id);
-        } catch (error) {
-          console.error('Failed to record question attempt:', error);
-          // 기록 실패해도 퀴즈는 계속 진행
-        }
-      }
 
       // grading 모드에서 "다음 문제" 버튼 클릭 시 백엔드에 진행률 업데이트
       // (정답을 맞춰서 grading 모드가 된 경우이므로 무조건 업데이트)
@@ -413,11 +404,49 @@ const QuizPage = () => {
     }
   }, [sessionId, question?.id, question?.day, session?.category, quizMode, navigate, resetGrading, updateProgressMutation]);
 
+  // 다음 문제로 이동 (뱃지 체크 포함)
+  const handleNextQuestion = useCallback(async () => {
+    try {
+      if (!sessionId) return;
+
+      // 🎯 문제 완료 시 question_attempts 테이블에 기록 (모든 카테고리)
+      if (question?.id) {
+        try {
+          const result = await api.recordQuestionAttempt(question.id);
+          console.log('✅ Question attempt recorded:', question.id);
+
+          // 🏆 새로운 뱃지가 있으면 모달 표시
+          if (result?.newBadges && result.newBadges.length > 0) {
+            setNewBadges(result.newBadges);
+            return; // 뱃지 모달이 닫힐 때까지 대기
+          }
+        } catch (error) {
+          console.error('Failed to record question attempt:', error);
+          // 기록 실패해도 퀴즈는 계속 진행
+        }
+      }
+
+      // 뱃지가 없으면 바로 다음 문제로 이동
+      await moveToNext();
+
+    } catch (error) {
+      console.error('handleNextQuestion error:', error);
+      alert('다음 문제 로드에 실패했습니다.');
+    }
+  }, [sessionId, question?.id, moveToNext]);
+
+  // 뱃지 모달 닫기 핸들러
+  const handleBadgeModalClose = useCallback(() => {
+    setNewBadges([]);
+    // 뱃지 모달 닫힌 후 다음 문제로 이동
+    moveToNext();
+  }, [moveToNext]);
+
   // Enter 키로 다음 문제 넘어가기 (grading 모드일 때만)
   useEffect(() => {
     const handleKeyPress = (e) => {
       // 모달이 열려 있을 때는 이 핸들러를 무시
-      if (e.key === 'Enter' && quizMode === 'grading' && !showGoalAchievedModal) {
+      if (e.key === 'Enter' && quizMode === 'grading' && !showGoalAchievedModal && newBadges.length === 0) {
         // input이나 textarea에 포커스되어 있지 않을 때만
         const activeElement = document.activeElement;
         if (activeElement?.tagName !== 'INPUT' && activeElement?.tagName !== 'TEXTAREA') {
@@ -428,7 +457,7 @@ const QuizPage = () => {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [quizMode, handleNextQuestion, showGoalAchievedModal]);
+  }, [quizMode, handleNextQuestion, showGoalAchievedModal, newBadges]);
 
   // 목표 달성 모달이 열릴 때 "계속하기" 버튼에 자동 포커스
   useEffect(() => {
@@ -776,6 +805,14 @@ const QuizPage = () => {
           </div>
         </ModalBody>
       </Modal>
+
+      {/* 🏆 뱃지 획득 모달 */}
+      {newBadges.length > 0 && (
+        <BadgeModal
+          badges={newBadges}
+          onClose={handleBadgeModalClose}
+        />
+      )}
 
     </div>
   );

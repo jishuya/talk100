@@ -39,7 +39,9 @@ class ProgressController {
 
       res.json({
         success: true,
-        data: result.data  // result.data에 실제 데이터가 있음 (goalAchieved, streak 포함)
+        data: result.data,  // 진행률 데이터
+        goalAchieved: result.goalAchieved,  // 목표 달성 여부
+        streak: result.streak  // 연속 학습 정보
       });
 
     } catch (error) {

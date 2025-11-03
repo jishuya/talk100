@@ -237,11 +237,45 @@ class ApiService {
   // ==============================================
 
   // 🧩 QuizPage.jsx에서 사용 - 진행률 업데이트
-  updateProgress(data) {
-    return this.request('/api/progress/update', null, {
-      method: 'POST',
-      body: data  // apiCall에서 자동으로 JSON.stringify 처리
-    });
+  async updateProgress(data) {
+    // ⚠️ 특별 처리: goalAchieved와 streak도 함께 반환해야 하므로
+    // apiCall 대신 raw fetch를 사용하여 전체 응답 객체를 받아옴
+    const endpoint = '/api/progress/update';
+    const url = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}${endpoint}`;
+    const token = localStorage.getItem('jwt_token');
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        credentials: 'include',
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const jsonResponse = await response.json();
+
+      // 백엔드 응답: { success: true, data: {...}, goalAchieved: boolean, streak: {...} }
+      // data, goalAchieved, streak를 모두 포함한 객체 반환
+      if (jsonResponse.success) {
+        return {
+          ...jsonResponse.data,  // 진행률 데이터 (last_studied_day, solved_count 등)
+          goalAchieved: jsonResponse.goalAchieved,  // 목표 달성 여부
+          streak: jsonResponse.streak  // 연속 학습 정보
+        };
+      }
+
+      throw new Error(jsonResponse.message || '진행률 업데이트 실패');
+    } catch (error) {
+      console.error('Failed to update progress:', error.message);
+      throw this.handleError(error);
+    }
   }
 
   // 🧩 QuizPage.jsx에서 사용 - solved_count 리셋 (추가 학습 시작 시)
