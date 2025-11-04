@@ -2,22 +2,31 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // Settings 관련 훅들
-import { useSettingsData, useUpdateSettings } from '../hooks/useApi';
+import { useMypageData, useUpdateSettings, useUpdateProfile } from '../hooks/useApi';
 
 // Settings 컴포넌트들
 import SettingsHeader from '../components/settings/SettingsHeader';
 import SettingsSection from '../components/settings/SettingsSection';
 import TimeModal from '../components/settings/TimeModal';
 import DangerZone from '../components/settings/DangerZone';
+import ProfileEditModal from '../components/settings/ProfileEditModal';
+
+// Mock 데이터
+import { settingsData } from '../mocks/settingsData';
 
 const SettingsPage = () => {
   const navigate = useNavigate();
 
-  // 데이터 훅들
-  const { data: allSettings, isLoading, error, refetch } = useSettingsData();
+  // MyPage 데이터 가져오기 (프로필 정보 포함)
+  const { data: mypageData } = useMypageData();
+
+  // Mock 데이터를 fallback으로 사용
+  const allSettings = settingsData;
+  const profile = mypageData?.userProfile;
 
   // 액션 훅들
   const saveAllMutation = useUpdateSettings();
+  const updateProfileMutation = useUpdateProfile();
 
   // 로컬 상태 (설정값들)
   const [localSettings, setLocalSettings] = useState({
@@ -28,6 +37,7 @@ const SettingsPage = () => {
 
   // 모달 상태
   const [showTimeModal, setShowTimeModal] = useState(false);
+  const [showProfileEditModal, setShowProfileEditModal] = useState(false);
 
   // 설정 초기화
   useEffect(() => {
@@ -39,32 +49,6 @@ const SettingsPage = () => {
       });
     }
   }, [allSettings]);
-
-  // 로딩 상태
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-accent-pale">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-text-secondary">설정을 불러오는 중...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // 에러 상태
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-accent-pale">
-        <div className="text-center">
-          <p className="text-red-500 mb-4">설정을 불러오는데 실패했습니다.</p>
-          <button onClick={refetch} className="btn-primary">
-            다시 시도
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   // ================================================================
   // 헬퍼 함수들
@@ -153,6 +137,17 @@ const SettingsPage = () => {
     alert('계정 삭제 기능은 추후 구현될 예정입니다.');
   };
 
+  // 프로필 저장
+  const handleProfileSave = async (profileData) => {
+    try {
+      await updateProfileMutation.mutateAsync(profileData);
+      alert('프로필이 저장되었습니다.');
+    } catch (error) {
+      console.error('Profile save error:', error);
+      alert('프로필 저장에 실패했습니다.');
+    }
+  };
+
   // 설정 항목 클릭 처리
   const handleItemClick = (item) => {
     switch (item.id) {
@@ -160,13 +155,7 @@ const SettingsPage = () => {
         setShowTimeModal(true);
         break;
       case 'profileEdit':
-        navigate('/profile/edit');
-        break;
-      case 'passwordChange':
-        navigate('/password/change');
-        break;
-      case 'connectedAccount':
-        navigate('/account/connections');
+        setShowProfileEditModal(true);
         break;
       case 'backup':
         handleBackupData();
@@ -186,23 +175,24 @@ const SettingsPage = () => {
   // 설정 항목 데이터 구성
   // ================================================================
 
+  // OAuth 제공자 판단 (백엔드에서 전달받은 정보 사용)
+  const getOAuthProvider = () => {
+    return profile?.oauthProvider || '-';
+  };
+
   const accountItems = [
     {
       id: 'profileEdit',
       title: '프로필 수정',
-      description: '닉네임, 프로필 사진 변경',
-      type: 'link'
-    },
-    {
-      id: 'passwordChange',
-      title: '비밀번호 변경',
+      description: '이름, 이메일 변경',
       type: 'link'
     },
     {
       id: 'connectedAccount',
       title: '연결된 계정',
-      rightText: allSettings?.account?.connectedAccounts?.[0]?.provider,
-      type: 'link'
+      rightText: getOAuthProvider(),
+      type: 'text',
+      borderBottom: false
     }
   ];
 
@@ -372,12 +362,12 @@ const SettingsPage = () => {
         /> */}
 
         {/* 화면 설정 */}
-        <SettingsSection
+        {/* <SettingsSection
           title="화면 설정"
           items={displayItems}
           onItemChange={(key, value) => handleSettingChange('display', key, value)}
           onItemClick={handleItemClick}
-        />
+        /> */}
 
         {/* 데이터 관리 */}
         <SettingsSection
@@ -399,6 +389,14 @@ const SettingsPage = () => {
         onClose={() => setShowTimeModal(false)}
         initialTime={localSettings.notifications.reminderTime}
         onSave={handleTimeSave}
+      />
+
+      {/* 프로필 수정 모달 */}
+      <ProfileEditModal
+        isOpen={showProfileEditModal}
+        onClose={() => setShowProfileEditModal(false)}
+        profile={profile}
+        onSave={handleProfileSave}
       />
     </div>
   );

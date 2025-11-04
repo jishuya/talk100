@@ -28,12 +28,21 @@ const SettingsSection = ({
     };
 
     return (
-      <div key={item.id} className={`p-4 ${item.borderBottom !== false ? 'border-b border-gray-border' : ''}`}>
+      <div
+        key={item.id}
+        className={`p-4 ${item.borderBottom !== false ? 'border-b border-gray-border' : ''} ${
+          (item.type === 'link' || item.type === 'button') ? 'cursor-pointer touchable' : ''
+        }`}
+        onClick={(item.type === 'link' || item.type === 'button') ? handleClick : undefined}
+      >
         {/* 기본 정보 영역 */}
         <div className="flex justify-between items-center mb-1">
           <span className="text-[15px] text-text-primary">{item.title}</span>
           {item.type === 'display' && (
             <span className="text-sm text-text-secondary">{item.displayValue}</span>
+          )}
+          {item.type === 'text' && item.rightText && (
+            <span className="text-sm text-text-secondary">{item.rightText}</span>
           )}
           {item.type === 'toggle' && (
             <ToggleSwitch
@@ -42,11 +51,11 @@ const SettingsSection = ({
             />
           )}
           {(item.type === 'link' || item.type === 'button') && (
-            <div className="flex items-center gap-2" onClick={handleClick}>
+            <div className="flex items-center gap-2">
               {item.rightText && (
                 <span className="text-sm text-text-secondary">{item.rightText}</span>
               )}
-              <span className="text-base text-text-secondary cursor-pointer">›</span>
+              <span className="text-base text-text-secondary">›</span>
             </div>
           )}
         </div>

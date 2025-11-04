@@ -139,15 +139,6 @@ export const useUpdateGoals = () => {
   });
 };
 
-export const useMypageSummary = () => {
-  return useQuery({
-    queryKey: ['mypage', 'summary'],
-    queryFn: () => api.getMypageSummary(),
-    staleTime: ENV.CACHE_TIMES.PROGRESS,
-    retry: 2,
-  });
-};
-
 export const useAvatarSystem = () => {
   return useQuery({
     queryKey: ['avatar', 'system'],
@@ -174,12 +165,14 @@ export const useUpdateAvatar = () => {
 // 설정 관련 훅
 // ==============================================
 
-export const useSettingsData = () => {
-  return useQuery({
-    queryKey: ['settings'],
-    queryFn: () => api.getSettings(),
-    staleTime: 0, // Always fetch fresh data
-    retry: 2,
+export const useUpdateProfile = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data) => api.updateProfile(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['mypage']);
+    },
   });
 };
 
@@ -189,7 +182,7 @@ export const useUpdateSettings = () => {
   return useMutation({
     mutationFn: (data) => api.updateSettings(data),
     onSuccess: () => {
-      queryClient.invalidateQueries(['settings']);
+      queryClient.invalidateQueries(['mypage']);
     },
   });
 };

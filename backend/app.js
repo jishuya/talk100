@@ -21,6 +21,7 @@ const quizRoutes = require('./routes/quiz');
 const progressRoutes = require('./routes/progress');
 const avatarRoutes = require('./routes/avatar');
 const settingsRoutes = require('./routes/settings');
+const mypageRoutes = require('./routes/mypage');
 
 const app = express();
 
@@ -83,6 +84,7 @@ app.get('/health', (req, res) => {
 
 // API 라우트
 app.use('/auth', authRoutes);
+app.use('/api/mypage', mypageRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/progress', progressRoutes);

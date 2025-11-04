@@ -21,9 +21,35 @@ const GoalEditModal = ({
   }, [goals]);
 
   const handleInputChange = (field, value) => {
+    // 빈 문자열이면 0으로 처리
+    if (value === '') {
+      setFormData(prev => ({
+        ...prev,
+        [field]: 0
+      }));
+      return;
+    }
+
+    const numValue = parseInt(value);
+
+    // 숫자가 아니면 무시
+    if (isNaN(numValue)) {
+      return;
+    }
+
+    // 필드별 범위 체크 및 제한
+    let limitedValue = numValue;
+    if (field === 'dailyGoal') {
+      limitedValue = Math.min(Math.max(numValue, 1), 10);
+    } else if (field === 'weeklyAttendance') {
+      limitedValue = Math.min(Math.max(numValue, 1), 7);
+    } else if (field === 'weeklyTotalQuiz') {
+      limitedValue = Math.min(Math.max(numValue, 1), 100);
+    }
+
     setFormData(prev => ({
       ...prev,
-      [field]: parseInt(value) || 0
+      [field]: limitedValue
     }));
   };
 

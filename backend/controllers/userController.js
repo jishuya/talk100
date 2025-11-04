@@ -462,10 +462,11 @@ class UserController {
     }
   }
 
-  // GET /api/users/mypage-summary
-  async getMypageSummary(req, res) {
+  // PUT /api/users/goals
+  async updateGoals(req, res) {
     try {
       const uid = req.user?.uid;
+      const { dailyGoal, weeklyAttendance, weeklyTotalQuiz } = req.body;
 
       if (!uid) {
         return res.status(401).json({
@@ -474,18 +475,107 @@ class UserController {
         });
       }
 
-      const summary = await userQueries.getMypageSummary(uid);
+      // 입력값 검증
+      if (dailyGoal !== undefined && (dailyGoal < 1 || dailyGoal > 10)) {
+        return res.status(400).json({
+          success: false,
+          message: 'dailyGoal must be between 1 and 10'
+        });
+      }
+
+      if (weeklyAttendance !== undefined && (weeklyAttendance < 1 || weeklyAttendance > 7)) {
+        return res.status(400).json({
+          success: false,
+          message: 'weeklyAttendance must be between 1 and 7'
+        });
+      }
+
+      if (weeklyTotalQuiz !== undefined && (weeklyTotalQuiz < 1 || weeklyTotalQuiz > 100)) {
+        return res.status(400).json({
+          success: false,
+          message: 'weeklyTotalQuiz must be between 1 and 100'
+        });
+      }
+
+      // 목표 업데이트
+      await userQueries.updateGoals(uid, {
+        dailyGoal,
+        weeklyAttendance,
+        weeklyTotalQuiz
+      });
 
       res.json({
         success: true,
-        data: summary
+        message: '학습 목표가 업데이트되었습니다.'
       });
 
     } catch (error) {
-      console.error('getMypageSummary controller error:', error);
+      console.error('updateGoals controller error:', error);
       res.status(500).json({
         success: false,
-        message: 'Failed to fetch mypage summary'
+        message: 'Failed to update goals'
+      });
+    }
+  }
+
+  // PUT /api/users/profile
+  async updateProfile(req, res) {
+    try {
+      const uid = req.user?.uid;
+      const { name, email } = req.body;
+
+      if (!uid) {
+        return res.status(401).json({
+          success: false,
+          message: 'User not authenticated'
+        });
+      }
+
+      // 입력값 검증
+      if (name !== undefined) {
+        if (!name.trim()) {
+          return res.status(400).json({
+            success: false,
+            message: 'Name cannot be empty'
+          });
+        }
+        if (name.length < 2 || name.length > 20) {
+          return res.status(400).json({
+            success: false,
+            message: 'Name must be between 2 and 20 characters'
+          });
+        }
+      }
+
+      if (email !== undefined) {
+        if (!email.trim()) {
+          return res.status(400).json({
+            success: false,
+            message: 'Email cannot be empty'
+          });
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          return res.status(400).json({
+            success: false,
+            message: 'Invalid email format'
+          });
+        }
+      }
+
+      // 프로필 업데이트
+      await userQueries.updateProfile(uid, { name, email });
+
+      res.json({
+        success: true,
+        message: '프로필이 업데이트되었습니다.'
+      });
+
+    } catch (error) {
+      console.error('updateProfile controller error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update profile'
       });
     }
   }

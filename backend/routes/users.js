@@ -40,7 +40,10 @@ router.get('/category-progress', verifyToken, userController.getCategoryProgress
 // GET /api/users/learning-pattern - 학습 패턴 분석 조회
 router.get('/learning-pattern', verifyToken, userController.getLearningPattern);
 
-// GET /api/users/mypage-summary - MyPage 요약 정보 조회 (오늘/주간 학습 데이터)
-router.get('/mypage-summary', verifyToken, userController.getMypageSummary);
+// PUT /api/users/goals - 학습 목표 업데이트
+router.put('/goals', verifyToken, userController.updateGoals);
+
+// PUT /api/users/profile - 프로필 업데이트 (이름, 이메일)
+router.put('/profile', verifyToken, userController.updateProfile);
 
 module.exports = router;

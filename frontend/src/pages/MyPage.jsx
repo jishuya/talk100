@@ -6,12 +6,10 @@ import { useTheme } from '../contexts/ThemeContext';
 // MyPage 관련 훅들
 import {
   useMypageData,
-  useMypageSummary,
   useUpdateGoals,
   useAvatarSystem,
   useUpdateAvatar,
   useLogout,
-  useSettingsData,
   useUpdateSettings
 } from '../hooks/useApi';
 
@@ -25,16 +23,16 @@ import GoalsSection from '../components/mypage/GoalsSection';
 import MenuSection from '../components/mypage/MenuSection';
 import AvatarModal from '../components/mypage/AvatarModal';
 import GoalEditModal from '../components/mypage/GoalEditModal';
+import FeedbackModal from '../components/mypage/FeedbackModal';
+import HelpModal from '../components/mypage/HelpModal';
 
 const MyPage = () => {
   const navigate = useNavigate();
   const { changeTheme } = useTheme();
 
-  // 데이터 훅들
+  // 데이터 훅들 - 이제 모든 데이터를 useMypageData()에서 가져옴
   const { data: apiMypageData, isLoading, error, refetch } = useMypageData();
-  const { data: apiMypageSummary } = useMypageSummary();
   const { data: apiAvatarSystem } = useAvatarSystem();
-  const { data: apiSettings } = useSettingsData();
 
   // 액션 훅들
   const updateGoalsMutation = useUpdateGoals();
@@ -46,15 +44,17 @@ const MyPage = () => {
   const finalMypageData = apiMypageData || mypageData;
   const avatarSystem = apiAvatarSystem || mypageData.avatarSystem;
 
-  // 데이터에서 값 추출
+  // 데이터에서 값 추출 - 이제 모두 apiMypageData에서 가져옴
   const profile = finalMypageData?.userProfile;
-  const summary = apiMypageSummary || finalMypageData?.summaryStats;
+  const summary = finalMypageData?.summaryStats;
   const goals = finalMypageData?.learningGoals;
-
+  const apiSettings = finalMypageData?.appSettings;
 
   // 모달 상태
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [showGoalEditModal, setShowGoalEditModal] = useState(false);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
   // 앱 설정 로컬 상태
   const [localAppSettings, setLocalAppSettings] = useState([]);
@@ -380,15 +380,12 @@ const MyPage = () => {
 
   // 피드백 보내기
   const handleFeedback = () => {
-    const feedback = window.prompt('개선사항이나 의견을 남겨주세요:');
-    if (feedback) {
-      alert('소중한 의견 감사합니다!');
-    }
+    setShowFeedbackModal(true);
   };
 
   // 도움말
   const handleHelp = () => {
-    navigate('/help');
+    setShowHelpModal(true);
   };
 
   // 앱 설정 항목 클릭 처리
@@ -476,6 +473,18 @@ const MyPage = () => {
         onClose={() => setShowGoalEditModal(false)}
         goals={goals}
         onSave={handleGoalsSave}
+      />
+
+      {/* 피드백 모달 */}
+      <FeedbackModal
+        isOpen={showFeedbackModal}
+        onClose={() => setShowFeedbackModal(false)}
+      />
+
+      {/* 도움말 모달 */}
+      <HelpModal
+        isOpen={showHelpModal}
+        onClose={() => setShowHelpModal(false)}
       />
       </div>
     </div>

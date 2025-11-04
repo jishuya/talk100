@@ -323,7 +323,7 @@ class ApiService {
 
   // 👤 MyPage.jsx에서 사용 - 목표 설정 업데이트
   updateGoals(data) {
-    return this.request('/api/mypage/goals', null, {
+    return this.request('/api/users/goals', null, {
       method: 'PUT',
       body: JSON.stringify(data)
     });
@@ -342,18 +342,12 @@ class ApiService {
     });
   }
 
-  // 👤 MyPage.jsx에서 사용 - 요약 정보 조회 (오늘/주간 학습 데이터)
-  getMypageSummary() {
-    return this.request('/api/users/mypage-summary', null);
-  }
-
-  // ==============================================
-  // ⚙️ SettingsPage - 설정 페이지 관련 API
-  // ==============================================
-
-  // ⚙️ SettingsPage.jsx에서 사용 - 설정 정보 조회
-  getSettings() {
-    return this.request('/api/settings', 'settings');
+  // 👤 SettingsPage.jsx에서 사용 - 프로필 업데이트 (이름, 이메일)
+  updateProfile(data) {
+    return this.request('/api/users/profile', null, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    });
   }
 
   // ⚙️ SettingsPage.jsx에서 사용 - 설정 정보 업데이트

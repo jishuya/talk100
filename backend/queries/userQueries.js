@@ -1,14 +1,20 @@
 const { db } = require('../config/database');
 
 class UserQueries {
-  // 사용자 프로필 조회 (name, goal, level)
+  // 사용자 프로필 조회 (MyPage용)
   async getUserProfile(uid) {
     try {
       const result = await db.oneOrNone(
         `SELECT
            name,
-           daily_goal as goal,
-           level
+           email,
+           profile_image,
+           level,
+           total_questions_attempted,
+           total_correct_answers,
+           total_days_studied,
+           current_streak,
+           longest_streak
          FROM users
          WHERE uid = $1`,
         [uid]
@@ -579,6 +585,140 @@ class UserQueries {
     } catch (error) {
       console.error('❌ [Get MyPage Summary] Query error:', error);
       throw new Error('Failed to fetch mypage summary');
+    }
+  }
+
+  // 학습 목표 조회
+  async getGoals(uid) {
+    try {
+      console.log('📖 [Get Goals] Start with uid:', uid);
+
+      const result = await db.oneOrNone(
+        `SELECT
+           daily_goal as "dailyGoal",
+           attandance_goal as "weeklyAttendance",
+           quiz_count_goal as "weeklyTotalQuiz"
+         FROM users
+         WHERE uid = $1`,
+        [uid]
+      );
+
+      console.log('✅ [Get Goals] Result:', result);
+
+      return result || {
+        dailyGoal: 1,
+        weeklyAttendance: 1,
+        weeklyTotalQuiz: 1
+      };
+
+    } catch (error) {
+      console.error('❌ [Get Goals] Query error:', error);
+      throw new Error('Failed to fetch goals');
+    }
+  }
+
+  // 학습 목표 업데이트
+  async updateGoals(uid, goals) {
+    try {
+      console.log('📝 [Update Goals] Start with params:', { uid, goals });
+
+      const { dailyGoal, weeklyAttendance, weeklyTotalQuiz } = goals;
+
+      // 동적 쿼리 빌드
+      const updateFields = [];
+      const values = [];
+      let paramIndex = 1;
+
+      if (dailyGoal !== undefined) {
+        updateFields.push(`daily_goal = $${paramIndex++}`);
+        values.push(dailyGoal);
+      }
+
+      if (weeklyAttendance !== undefined) {
+        updateFields.push(`attandance_goal = $${paramIndex++}`);
+        values.push(weeklyAttendance);
+      }
+
+      if (weeklyTotalQuiz !== undefined) {
+        updateFields.push(`quiz_count_goal = $${paramIndex++}`);
+        values.push(weeklyTotalQuiz);
+      }
+
+      // 업데이트할 필드가 없으면 리턴
+      if (updateFields.length === 0) {
+        console.log('⚠️ [Update Goals] No fields to update');
+        return;
+      }
+
+      // uid를 마지막 파라미터로 추가
+      values.push(uid);
+
+      const query = `
+        UPDATE users
+        SET ${updateFields.join(', ')}
+        WHERE uid = $${paramIndex}
+      `;
+
+      console.log('🔍 [Update Goals] Query:', query);
+      console.log('🔍 [Update Goals] Values:', values);
+
+      await db.none(query, values);
+
+      console.log('✅ [Update Goals] Success');
+
+    } catch (error) {
+      console.error('❌ [Update Goals] Query error:', error);
+      throw new Error('Failed to update goals');
+    }
+  }
+
+  // 프로필 업데이트 (이름, 이메일)
+  async updateProfile(uid, profileData) {
+    try {
+      console.log('📝 [Update Profile] Start with params:', { uid, profileData });
+
+      const { name, email } = profileData;
+
+      // 동적 쿼리 빌드
+      const updateFields = [];
+      const values = [];
+      let paramIndex = 1;
+
+      if (name !== undefined) {
+        updateFields.push(`name = $${paramIndex++}`);
+        values.push(name);
+      }
+
+      if (email !== undefined) {
+        updateFields.push(`email = $${paramIndex++}`);
+        values.push(email);
+      }
+
+      // 업데이트할 필드가 없으면 리턴
+      if (updateFields.length === 0) {
+        console.log('⚠️ [Update Profile] No fields to update');
+        return;
+      }
+
+      // uid를 마지막 파라미터로 추가
+      values.push(uid);
+
+      const query = `
+        UPDATE users
+        SET ${updateFields.join(', ')}
+        WHERE uid = $${paramIndex}
+      `;
+
+      console.log('🔍 [Update Profile] Query:', query);
+      console.log('🔍 [Update Profile] Values:', values);
+
+      await db.none(query, values);
+
+      console.log('✅ [Update Profile] Success');
+
+    } catch (error) {
+      console.error('❌ [Update Profile] Query error:', error);
+      throw new Error('Failed to update profile');
     }
   }
 }
