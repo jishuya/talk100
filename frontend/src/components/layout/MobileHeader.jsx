@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useUpdateSettings } from '../../hooks/useApi';
 import { getIcon } from '../../utils/iconMap';
 import HamburgerMenu from './HamburgerMenu';
 import { getSession } from '../../utils/sessionStorage';
@@ -10,6 +11,7 @@ const MobileHeader = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { theme, changeTheme } = useTheme();
+  const updateSettingsMutation = useUpdateSettings();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [quizTitle, setQuizTitle] = useState('오늘의 퀴즈');
 
@@ -106,6 +108,25 @@ const MobileHeader = () => {
     navigate('/settings');
   };
 
+  // 테마 토글 핸들러 (MyPage와 동일한 로직)
+  const handleThemeToggle = async () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+
+    try {
+      // 즉시 테마 변경 (Optimistic UI)
+      changeTheme(newTheme);
+
+      // 백엔드 업데이트
+      await updateSettingsMutation.mutateAsync({
+        display: { theme: newTheme }
+      });
+    } catch (error) {
+      console.error('Theme toggle error:', error);
+      // 에러 발생 시 원래 테마로 롤백
+      changeTheme(theme);
+    }
+  };
+
   const renderRightContent = () => {
     switch (config.rightContent) {
       case 'profile':
@@ -117,7 +138,7 @@ const MobileHeader = () => {
             </button>
             {/* 테마 토글 */}
             <button
-              onClick={() => changeTheme(theme === 'light' ? 'dark' : 'light')}
+              onClick={handleThemeToggle}
               className="w-8 h-8 flex items-center justify-center text-lg touchable"
             >
               {theme === 'light' ?
