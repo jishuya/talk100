@@ -5,21 +5,20 @@ const SummaryCards = ({ summary }) => {
 
   const cards = [
     {
-      value: summary.totalDays,
-      label: '총 학습일',
+      value: summary.todayQuestions || 0,
+      label: '오늘 학습한 문제',
       suffix: ''
     },
     {
-      value: summary.streakDays,
-      label: '현재 연속일수',
+      value: summary.weeklyAttendance || 0,
+      label: '주간 출석일',
       suffix: ''
     },
     {
-      value: summary.maxStreakDays,
-      label: '최장 연속일',
+      value: summary.weeklyQuestions || 0,
+      label: '주간 학습한 문제',
       suffix: ''
-    },
-    
+    }
   ];
 
   return (

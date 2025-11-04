@@ -139,6 +139,15 @@ export const useUpdateGoals = () => {
   });
 };
 
+export const useMypageSummary = () => {
+  return useQuery({
+    queryKey: ['mypage', 'summary'],
+    queryFn: () => api.getMypageSummary(),
+    staleTime: ENV.CACHE_TIMES.PROGRESS,
+    retry: 2,
+  });
+};
+
 export const useAvatarSystem = () => {
   return useQuery({
     queryKey: ['avatar', 'system'],

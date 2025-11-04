@@ -5,6 +5,7 @@ import { Button } from '../components/ui/Button';
 // MyPage 관련 훅들
 import {
   useMypageData,
+  useMypageSummary,
   useUpdateGoals,
   useAvatarSystem,
   useUpdateAvatar,
@@ -28,6 +29,7 @@ const MyPage = () => {
 
   // 데이터 훅들
   const { data: apiMypageData, isLoading, error, refetch } = useMypageData();
+  const { data: apiMypageSummary } = useMypageSummary();
   const { data: apiAvatarSystem } = useAvatarSystem();
 
   // 액션 훅들
@@ -41,7 +43,7 @@ const MyPage = () => {
 
   // 데이터에서 값 추출
   const profile = finalMypageData?.userProfile;
-  const summary = finalMypageData?.summaryStats;
+  const summary = apiMypageSummary || finalMypageData?.summaryStats;
   const goals = finalMypageData?.learningGoals;
 
 

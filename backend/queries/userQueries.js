@@ -527,6 +527,60 @@ class UserQueries {
       throw new Error('Failed to fetch learning pattern');
     }
   }
+
+  // MyPage - Summary 데이터 조회 (오늘 학습, 주간 출석, 주간 학습 문제)
+  async getMypageSummary(uid) {
+    try {
+      console.log('📊 [Get MyPage Summary] Fetching for uid:', uid);
+
+      // 주간 시작일 계산 (오늘 기준 7일 전)
+      const weekStartDate = new Date();
+      weekStartDate.setDate(weekStartDate.getDate() - 7);
+
+      const result = await db.one(
+        `SELECT
+          -- 1. 오늘 학습한 문제 수
+          (
+            SELECT COUNT(DISTINCT qa.question_id)
+            FROM question_attempts qa
+            WHERE qa.user_id = $1
+              AND qa.date = CURRENT_DATE
+          ) as today_questions,
+
+          -- 2. 주간 출석일 (최근 7일 중 학습한 일수)
+          (
+            SELECT COUNT(DISTINCT ds.date)
+            FROM daily_summary ds
+            WHERE ds.user_id = $1
+              AND ds.date >= $2
+              AND ds.date <= CURRENT_DATE
+              AND ds.questions_attempted > 0
+          ) as weekly_attendance,
+
+          -- 3. 주간 학습한 문제 수 (최근 7일간 푼 고유 문제 수)
+          (
+            SELECT COUNT(DISTINCT qa.question_id)
+            FROM question_attempts qa
+            WHERE qa.user_id = $1
+              AND qa.date >= $2
+              AND qa.date <= CURRENT_DATE
+          ) as weekly_questions`,
+        [uid, weekStartDate.toISOString().split('T')[0]]
+      );
+
+      console.log('✅ [Get MyPage Summary] Result:', result);
+
+      return {
+        todayQuestions: parseInt(result.today_questions) || 0,
+        weeklyAttendance: parseInt(result.weekly_attendance) || 0,
+        weeklyQuestions: parseInt(result.weekly_questions) || 0
+      };
+
+    } catch (error) {
+      console.error('❌ [Get MyPage Summary] Query error:', error);
+      throw new Error('Failed to fetch mypage summary');
+    }
+  }
 }
 
 module.exports = new UserQueries();

@@ -461,6 +461,34 @@ class UserController {
       });
     }
   }
+
+  // GET /api/users/mypage-summary
+  async getMypageSummary(req, res) {
+    try {
+      const uid = req.user?.uid;
+
+      if (!uid) {
+        return res.status(401).json({
+          success: false,
+          message: 'User not authenticated'
+        });
+      }
+
+      const summary = await userQueries.getMypageSummary(uid);
+
+      res.json({
+        success: true,
+        data: summary
+      });
+
+    } catch (error) {
+      console.error('getMypageSummary controller error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch mypage summary'
+      });
+    }
+  }
 }
 
 module.exports = new UserController();

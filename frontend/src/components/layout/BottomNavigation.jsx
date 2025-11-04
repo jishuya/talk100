@@ -8,29 +8,29 @@ const BottomNavigation = () => {
   const navItems = [
     {
       path: '/',
-      icon: 'IoHomeOutline',
-      activeIcon: 'IoHome',
+      icon: 'Home',
+      activeIcon: 'Home',
       label: '홈',
       isActive: location.pathname === '/',
     },
     {
       path: '/quiz',
       icon: 'IoBookOutline',
-      activeIcon: 'IoBook',
+      activeIcon: 'IoBookOutline',
       label: '학습',
       isActive: location.pathname.startsWith('/quiz'),  // /quiz/daily, /quiz/review 허용
     },
     {
       path: '/status',
       icon: 'IoStatsChartOutline',
-      activeIcon: 'IoStatsChart',
+      activeIcon: 'IoStatsChartOutline',
       label: '통계',
       isActive: location.pathname === '/status',
     },
     {
       path: '/mypage',
       icon: 'IoPersonOutline',
-      activeIcon: 'IoPerson',
+      activeIcon: 'IoPersonOutline',
       label: '마이',
       isActive: location.pathname === '/mypage',
     },
