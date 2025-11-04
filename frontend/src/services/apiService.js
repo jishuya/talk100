@@ -403,6 +403,34 @@ class ApiService {
   }
 
   // ==============================================
+  // 💾 SettingsPage - 백업 및 내보내기 관련 API
+  // ==============================================
+
+  // 💾 SettingsPage.jsx에서 사용 - 학습 기록 백업 데이터 조회
+  getBackupData() {
+    return this.request('/api/backup', null);
+  }
+
+  // 📤 SettingsPage.jsx에서 사용 - 데이터 내보내기용 통계 조회
+  getExportData() {
+    return this.request('/api/backup/export', null);
+  }
+
+  // 🗑️ SettingsPage.jsx에서 사용 - 학습 기록 초기화
+  resetLearningData() {
+    return this.request('/api/backup/reset', null, {
+      method: 'DELETE'
+    });
+  }
+
+  // 🚫 SettingsPage.jsx에서 사용 - 계정 완전 삭제
+  deleteAccount() {
+    return this.request('/api/backup/account', null, {
+      method: 'DELETE'
+    });
+  }
+
+  // ==============================================
   // 🔍 공통/기타 API (여러 페이지에서 사용)
   // ==============================================
 }

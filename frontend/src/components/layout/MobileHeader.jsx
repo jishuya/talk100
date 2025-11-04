@@ -82,7 +82,7 @@ const MobileHeader = () => {
           title: '설정',
           showBackButton: true,
           showLogo: false,
-          rightContent: 'save',
+          rightContent: '',
         };
       default:
         return {

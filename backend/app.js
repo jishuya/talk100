@@ -22,6 +22,7 @@ const progressRoutes = require('./routes/progress');
 const avatarRoutes = require('./routes/avatar');
 const settingsRoutes = require('./routes/settings');
 const mypageRoutes = require('./routes/mypage');
+const backupRoutes = require('./routes/backup');
 
 const app = express();
 
@@ -90,6 +91,7 @@ app.use('/api/quiz', quizRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/avatar', avatarRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/backup', backupRoutes);
 // app.use('/api/questions', questionRoutes);
 // app.use('/api/review', reviewRoutes);
 // app.use('/api/wrong-answers', wrongAnswersRoutes);

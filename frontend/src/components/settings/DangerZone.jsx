@@ -1,23 +1,14 @@
-import React from 'react';
 import { Button } from '../ui/Button';
 import { getIcon } from '../../utils/iconMap';
 
 const DangerZone = ({ onResetProgress, onDeleteAccount }) => {
+  // 모달을 열도록 부모 컴포넌트에 위임
   const handleResetProgress = () => {
-    if (window.confirm('정말로 모든 학습 기록을 초기화하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) {
-      if (window.confirm('한 번 더 확인합니다.\n모든 학습 기록이 삭제됩니다.')) {
-        onResetProgress();
-      }
-    }
+    onResetProgress();
   };
 
   const handleDeleteAccount = () => {
-    if (window.confirm('정말로 계정을 삭제하시겠습니까?\n모든 데이터가 영구적으로 삭제됩니다.')) {
-      const reason = window.prompt('계정 삭제 사유를 알려주세요 (선택사항):');
-      if (reason !== null) { // 사용자가 취소하지 않았다면
-        onDeleteAccount(reason);
-      }
-    }
+    onDeleteAccount();
   };
 
   return (
