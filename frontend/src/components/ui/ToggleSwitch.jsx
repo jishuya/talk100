@@ -1,4 +1,3 @@
-import React from 'react';
 import { cn } from '../../utils/cn';
 
 const ToggleSwitch = ({
@@ -30,13 +29,19 @@ const ToggleSwitch = ({
 
   const { toggle, thumb, translate } = sizeClasses[size];
 
+  const handleChange = (e) => {
+    if (onChange) {
+      onChange(e.target.checked);
+    }
+  };
+
   return (
     <label className={cn('inline-flex items-center cursor-pointer', className)} {...props}>
       <div className="relative">
         <input
           type="checkbox"
           checked={checked}
-          onChange={onChange}
+          onChange={handleChange}
           disabled={disabled}
           className="sr-only"
         />

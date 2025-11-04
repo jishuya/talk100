@@ -254,6 +254,24 @@ COMMENT ON TABLE question_attempts IS '사용자별 문제 시도 기록 (정답
 COMMENT ON COLUMN question_attempts.attempted_at IS '시도 시각 (학습 패턴 분석용 - 몇 시에 주로 학습하는지)';
 
 -- ================================================
+-- 11. USER_SETTING 테이블
+-- 목적: 사용자 설정 정보 저장
+-- ================================================
+CREATE TABLE user_settings (
+  user_id VARCHAR(255) PRIMARY KEY REFERENCES users(uid) ON DELETE CASCADE,
+  notifications_enabled BOOLEAN DEFAULT true,
+  notification_time TIME DEFAULT '20:00:00',
+  autoplay_enabled BOOLEAN DEFAULT false,
+  voice_speed DECIMAL(3,2) DEFAULT 1.0,
+  voice_gender VARCHAR(10) DEFAULT 'male',
+  theme VARCHAR(20) DEFAULT 'light',
+  font_size VARCHAR(20) DEFAULT 'medium',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+-- ================================================
 -- 인덱스 생성
 -- 자주 사용되는 쿼리 최적화
 -- ================================================

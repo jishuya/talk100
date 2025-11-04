@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
+import { useTheme } from '../contexts/ThemeContext';
 
 // MyPage 관련 훅들
 import {
@@ -9,7 +10,9 @@ import {
   useUpdateGoals,
   useAvatarSystem,
   useUpdateAvatar,
-  useLogout
+  useLogout,
+  useSettingsData,
+  useUpdateSettings
 } from '../hooks/useApi';
 
 // Mock 데이터
@@ -25,17 +28,19 @@ import GoalEditModal from '../components/mypage/GoalEditModal';
 
 const MyPage = () => {
   const navigate = useNavigate();
-
+  const { changeTheme } = useTheme();
 
   // 데이터 훅들
   const { data: apiMypageData, isLoading, error, refetch } = useMypageData();
   const { data: apiMypageSummary } = useMypageSummary();
   const { data: apiAvatarSystem } = useAvatarSystem();
+  const { data: apiSettings } = useSettingsData();
 
   // 액션 훅들
   const updateGoalsMutation = useUpdateGoals();
   const updateAvatarMutation = useUpdateAvatar();
   const logoutMutation = useLogout();
+  const updateSettingsMutation = useUpdateSettings();
 
   // Mock 데이터를 fallback으로 사용
   const finalMypageData = apiMypageData || mypageData;
@@ -52,14 +57,69 @@ const MyPage = () => {
   const [showGoalEditModal, setShowGoalEditModal] = useState(false);
 
   // 앱 설정 로컬 상태
-  const [localAppSettings, setLocalAppSettings] = useState(profile?.appSettings || []);
+  const [localAppSettings, setLocalAppSettings] = useState([]);
 
-  // profile 데이터가 로드되면 localAppSettings 초기화
+  // apiSettings 데이터가 로드되면 localAppSettings 초기화
   useEffect(() => {
-    if (profile?.appSettings) {
-      setLocalAppSettings(profile.appSettings);
+    if (apiSettings) {
+      // 백엔드 설정을 UI 형식으로 변환
+      const settingsArray = [
+        {
+          id: 'notifications',
+          icon: 'IoNotifications',
+          title: '알림',
+          type: 'toggle',
+          value: apiSettings.notifications?.learningReminder || false,
+          bgColor: 'bg-gray-light',
+          description: apiSettings.notifications?.reminderTime
+            ? `매일 ${apiSettings.notifications.reminderTime.hour >= 12 ? '오후' : '오전'} ${
+                apiSettings.notifications.reminderTime.hour > 12
+                  ? apiSettings.notifications.reminderTime.hour - 12
+                  : (apiSettings.notifications.reminderTime.hour === 0 ? 12 : apiSettings.notifications.reminderTime.hour)
+              }:${String(apiSettings.notifications.reminderTime.minute).padStart(2, '0')}`
+            : '매일 오후 8:00'
+        },
+        {
+          id: 'theme',
+          icon: 'IoMoon',
+          title: '다크 모드',
+          type: 'toggle',
+          value: apiSettings.display?.theme === 'dark',
+          bgColor: 'bg-gray-light'
+        },
+        {
+          id: 'voiceSpeed',
+          icon: 'IoSpeedometer',
+          title: '음성 속도',
+          type: 'slider',
+          value: apiSettings.learning?.voiceSpeed || 1.0,
+          displayValue: `${apiSettings.learning?.voiceSpeed || 1.0}x`,
+          min: 0.5,
+          max: 2,
+          step: 0.25,
+          sliderLabels: ['0.5x', '1.0x', '1.5x', '2.0x'],
+          bgColor: 'bg-gray-light'
+        },
+        {
+          id: 'feedback',
+          icon: 'noto:speech-balloon',
+          title: '피드백 보내기',
+          type: 'button',
+          bgColor: 'bg-gray-light'
+        },
+        {
+          id: 'help',
+          icon: 'noto:information',
+          title: '도움말',
+          type: 'button',
+          borderBottom: false,
+          bgColor: 'bg-gray-light'
+        }
+      ];
+
+      setLocalAppSettings(settingsArray);
     }
-  }, [profile?.appSettings]);
+  }, [apiSettings]);
 
   // 로딩 상태
   if (isLoading) {
@@ -112,26 +172,175 @@ const MyPage = () => {
   // 앱 설정 토글
   const handleAppSettingToggle = async (settingId, value) => {
     try {
-      await toggleSettingMutation.mutateAsync({ settingId, value });
+      // 로컬 상태 즉시 업데이트 (Optimistic UI)
+      setLocalAppSettings(prev =>
+        prev.map(setting =>
+          setting.id === settingId ? { ...setting, value } : setting
+        )
+      );
+
+      // 백엔드 업데이트
+      const updateData = {};
+
+      if (settingId === 'notifications') {
+        updateData.notifications = { learningReminder: value };
+      } else if (settingId === 'theme') {
+        // 테마 변경 (HomePage의 달 이모지 클릭과 동일한 로직)
+        const newTheme = value ? 'dark' : 'light';
+        changeTheme(newTheme);
+        updateData.display = { theme: newTheme };
+      }
+
+      await updateSettingsMutation.mutateAsync(updateData);
     } catch (error) {
       console.error('Setting toggle error:', error);
       alert('설정 변경에 실패했습니다.');
+
+      // 에러 발생시 이전 상태로 롤백
+      if (apiSettings) {
+        // 테마도 원래대로 롤백
+        if (settingId === 'theme') {
+          changeTheme(apiSettings.display?.theme || 'light');
+        }
+
+        const settingsArray = [
+          {
+            id: 'notifications',
+            icon: 'IoNotifications',
+            title: '알림',
+            type: 'toggle',
+            value: apiSettings.notifications?.learningReminder || false,
+            bgColor: 'bg-gray-light',
+            description: apiSettings.notifications?.reminderTime
+              ? `매일 ${apiSettings.notifications.reminderTime.hour >= 12 ? '오후' : '오전'} ${
+                  apiSettings.notifications.reminderTime.hour > 12
+                    ? apiSettings.notifications.reminderTime.hour - 12
+                    : (apiSettings.notifications.reminderTime.hour === 0 ? 12 : apiSettings.notifications.reminderTime.hour)
+                }:${String(apiSettings.notifications.reminderTime.minute).padStart(2, '0')}`
+              : '매일 오후 8:00'
+          },
+          {
+            id: 'theme',
+            icon: 'IoMoon',
+            title: '다크 모드',
+            type: 'toggle',
+            value: apiSettings.display?.theme === 'dark',
+            bgColor: 'bg-gray-light'
+          },
+          {
+            id: 'voiceSpeed',
+            icon: 'IoSpeedometer',
+            title: '음성 속도',
+            type: 'slider',
+            value: apiSettings.learning?.voiceSpeed || 1.0,
+            displayValue: `${apiSettings.learning?.voiceSpeed || 1.0}x`,
+            min: 0.5,
+            max: 2,
+            step: 0.25,
+            sliderLabels: ['0.5x', '1.0x', '1.5x', '2.0x'],
+            bgColor: 'bg-gray-light'
+          },
+          {
+            id: 'feedback',
+            icon: 'noto:speech-balloon',
+            title: '피드백 보내기',
+            type: 'button',
+            bgColor: 'bg-gray-light'
+          },
+          {
+            id: 'help',
+            icon: 'noto:information',
+            title: '도움말',
+            type: 'button',
+            borderBottom: false,
+            bgColor: 'bg-gray-light'
+          }
+        ];
+        setLocalAppSettings(settingsArray);
+      }
     }
   };
 
   // 앱 설정 슬라이더 변경
-  const handleAppSettingSlider = (settingId, value) => {
-    // 로컬 상태 즉시 업데이트
-    setLocalAppSettings(prev =>
-      prev.map(setting =>
-        setting.id === settingId
-          ? { ...setting, value, displayValue: `${value}x` }
-          : setting
-      )
-    );
+  const handleAppSettingSlider = async (settingId, value) => {
+    try {
+      // 로컬 상태 즉시 업데이트 (Optimistic UI)
+      setLocalAppSettings(prev =>
+        prev.map(setting =>
+          setting.id === settingId
+            ? { ...setting, value, displayValue: `${value}x` }
+            : setting
+        )
+      );
 
-    // TODO: 백엔드 API 호출 (디바운스 적용 필요)
-    console.log(`Setting ${settingId} changed to ${value}`);
+      // 백엔드 업데이트
+      if (settingId === 'voiceSpeed') {
+        await updateSettingsMutation.mutateAsync({
+          learning: { voiceSpeed: value }
+        });
+      }
+    } catch (error) {
+      console.error('Setting slider error:', error);
+      alert('설정 변경에 실패했습니다.');
+
+      // 에러 발생시 이전 상태로 롤백
+      if (apiSettings) {
+        const settingsArray = [
+          {
+            id: 'notifications',
+            icon: 'IoNotifications',
+            title: '알림',
+            type: 'toggle',
+            value: apiSettings.notifications?.learningReminder || false,
+            bgColor: 'bg-gray-light',
+            description: apiSettings.notifications?.reminderTime
+              ? `매일 ${apiSettings.notifications.reminderTime.hour >= 12 ? '오후' : '오전'} ${
+                  apiSettings.notifications.reminderTime.hour > 12
+                    ? apiSettings.notifications.reminderTime.hour - 12
+                    : (apiSettings.notifications.reminderTime.hour === 0 ? 12 : apiSettings.notifications.reminderTime.hour)
+                }:${String(apiSettings.notifications.reminderTime.minute).padStart(2, '0')}`
+              : '매일 오후 8:00'
+          },
+          {
+            id: 'theme',
+            icon: 'IoMoon',
+            title: '다크 모드',
+            type: 'toggle',
+            value: apiSettings.display?.theme === 'dark',
+            bgColor: 'bg-gray-light'
+          },
+          {
+            id: 'voiceSpeed',
+            icon: 'IoSpeedometer',
+            title: '음성 속도',
+            type: 'slider',
+            value: apiSettings.learning?.voiceSpeed || 1.0,
+            displayValue: `${apiSettings.learning?.voiceSpeed || 1.0}x`,
+            min: 0.5,
+            max: 2,
+            step: 0.25,
+            sliderLabels: ['0.5x', '1.0x', '1.5x', '2.0x'],
+            bgColor: 'bg-gray-light'
+          },
+          {
+            id: 'feedback',
+            icon: 'noto:speech-balloon',
+            title: '피드백 보내기',
+            type: 'button',
+            bgColor: 'bg-gray-light'
+          },
+          {
+            id: 'help',
+            icon: 'noto:information',
+            title: '도움말',
+            type: 'button',
+            borderBottom: false,
+            bgColor: 'bg-gray-light'
+          }
+        ];
+        setLocalAppSettings(settingsArray);
+      }
+    }
   };
 
   // 아바타 저장
@@ -249,7 +458,7 @@ const MyPage = () => {
         {/* 버전 정보 */}
         <div className="text-center py-5 text-text-secondary text-xs">
           talk100 v1.0.0<br />
-          © 2024 talk100. All rights reserved.
+          © 2025 talk100. All rights reserved.
         </div>
       </main>
 

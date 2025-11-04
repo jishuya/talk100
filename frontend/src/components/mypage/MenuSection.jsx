@@ -46,7 +46,7 @@ const MenuSection = ({
             onClick={() => handleItemClick(item)}
           >
             <div className="flex items-center gap-3">
-              <div className={`w-9 h-9 flex items-center justify-center ${item.bgColor} rounded-full text-lg`}>
+              <div className={`w-9 h-9 flex items-center justify-center ${item.bgColor} rounded-full text-lg border border-gray-border`}>
                 {getIcon(item.icon, { size: 'lg' })}
               </div>
               <div>

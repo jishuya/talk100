@@ -178,7 +178,7 @@ export const useSettingsData = () => {
   return useQuery({
     queryKey: ['settings'],
     queryFn: () => api.getSettings(),
-    staleTime: ENV.CACHE_TIMES.USER_DATA,
+    staleTime: 0, // Always fetch fresh data
     retry: 2,
   });
 };
