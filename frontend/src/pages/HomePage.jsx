@@ -9,7 +9,7 @@ import Modal, { ModalBody } from '../components/ui/Modal';
 import Button from '../components/ui/Button';
 
 // 데이터 훅들
-import { useUserData, useBadgesData, useTodayProgress, usePersonalQuizzesData, useHistoryData } from '../hooks/useApi';
+import { useUserData, useBadgesData, useTodayProgress, usePersonalQuizzesData, useHistoryData, useQuizMode } from '../hooks/useApi';
 
 // 세션 관리 유틸리티
 import { createSession } from '../utils/sessionStorage';
@@ -28,6 +28,7 @@ const HomePage = () => {
   const { data: badgesData } = useBadgesData();
   const { data: personalQuizzesData, isLoading: personalQuizzesLoading } = usePersonalQuizzesData();
   const { data: historyData } = useHistoryData();
+  const { data: quizModeData } = useQuizMode();
 
   // 통합 로딩 상태
   const isLoading = userLoading || progressLoading || personalQuizzesLoading;
@@ -149,7 +150,8 @@ const HomePage = () => {
         const question_ids = questions.map(q => q.question_id);
 
         // 세션 생성 및 데이터 저장 (day 대신 start_question_id 사용)
-        const sessionId = createSession(4, start_question_id, question_ids);
+        const userInputMode = quizModeData?.quizMode || 'keyboard';
+        const sessionId = createSession(4, start_question_id, question_ids, userInputMode);
         const session = JSON.parse(localStorage.getItem(`quiz_session_${sessionId}`));
         session.questions = questions;
         session.daily_goal = daily_goal;
@@ -189,7 +191,8 @@ const HomePage = () => {
         const question_ids = questions.map(q => q.question_id);
 
         // 세션 생성 및 데이터 저장
-        const sessionId = createSession(category_id, day, question_ids);
+        const userInputMode = quizModeData?.quizMode || 'keyboard';
+        const sessionId = createSession(category_id, day, question_ids, userInputMode);
         const session = JSON.parse(localStorage.getItem(`quiz_session_${sessionId}`));
         session.questions = questions;
         localStorage.setItem(`quiz_session_${sessionId}`, JSON.stringify(session));
@@ -238,7 +241,8 @@ const HomePage = () => {
         const question_ids = questions.map(q => q.question_id);
 
         // 세션 생성 및 데이터 저장
-        const sessionId = createSession(category_id, 1, question_ids);
+        const userInputMode = quizModeData?.quizMode || 'keyboard';
+        const sessionId = createSession(category_id, 1, question_ids, userInputMode);
         const session = JSON.parse(localStorage.getItem(`quiz_session_${sessionId}`));
         session.questions = questions;
         localStorage.setItem(`quiz_session_${sessionId}`, JSON.stringify(session));

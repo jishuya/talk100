@@ -24,9 +24,10 @@ const CATEGORY_MAP = {
  * @param {number} categoryId - 카테고리 ID (1-6)
  * @param {number} day - Day 번호 (기본값: 1)
  * @param {Array<number>} questionIds - 문제 ID 배열
+ * @param {string} inputMode - 입력 모드 ('voice' | 'keyboard', 기본값: 'keyboard')
  * @returns {string} 생성된 세션 ID
  */
-export const createSession = (categoryId, day = 1, questionIds = []) => {
+export const createSession = (categoryId, day = 1, questionIds = [], inputMode = 'keyboard') => {
   const sessionId = uuidv4();
   const categoryInfo = CATEGORY_MAP[categoryId];
 
@@ -40,7 +41,7 @@ export const createSession = (categoryId, day = 1, questionIds = []) => {
     categoryName: categoryInfo.name,
     day,
     startTime: new Date().toISOString(),
-    inputMode: 'keyboard', // 기본값: keyboard (사용자 설정에서 가져올 수도 있음)
+    inputMode, // 사용자 설정에서 가져온 입력 모드
 
     // 문제 관리
     questionIds: questionIds,

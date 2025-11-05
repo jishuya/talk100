@@ -125,7 +125,7 @@ const QuizPage = () => {
 
   // 로컬 상태
   const [userAnswer, setUserAnswer] = useState('');
-  const [inputMode, setInputMode] = useState(session?.inputMode || quizModeData?.quizMode || 'keyboard'); // 세션 > DB > 기본값
+  const [inputMode, setInputMode] = useState('keyboard'); // 초기값은 기본값, useEffect에서 세션/DB 값으로 업데이트
   const [quizMode, setQuizMode] = useState('solving'); // 'solving' | 'grading'
   const [showHint, setShowHint] = useState(false);
   const [showAnswer, setShowAnswer] = useState(false);
@@ -170,19 +170,18 @@ const QuizPage = () => {
   // 진행률 업데이트 mutation
   const updateProgressMutation = useUpdateProgress();
 
-  // DB에서 불러온 quizMode를 초기값으로 설정
+  // inputMode 초기화 및 동기화 (우선순위: 세션 > DB > 기본값)
   useEffect(() => {
-    if (quizModeData?.quizMode && !session?.inputMode) {
-      setInputMode(quizModeData.quizMode);
-    }
-  }, [quizModeData, session?.inputMode]);
-
-  // 세션 inputMode 동기화 (세션이 있으면 세션 우선)
-  useEffect(() => {
+    // 1순위: 세션에 inputMode가 있으면 세션 값 사용
     if (session?.inputMode) {
       setInputMode(session.inputMode);
     }
-  }, [session?.inputMode]);
+    // 2순위: 세션에 없고 DB에서 로드된 값이 있으면 DB 값 사용
+    else if (quizModeData?.quizMode) {
+      setInputMode(quizModeData.quizMode);
+    }
+    // 3순위: 둘 다 없으면 기본값 'keyboard' (이미 useState에 설정됨)
+  }, [session?.inputMode, quizModeData?.quizMode]);
 
   // 문제가 바뀔 때마다 즐겨찾기 & 별 상태 초기화 및 키워드 랜덤 선택 (문제 ID가 변경될 때만)
   useEffect(() => {
