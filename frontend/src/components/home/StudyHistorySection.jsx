@@ -1,8 +1,6 @@
 import { getIcon } from '../../utils/iconMap.jsx';
 
 const StudyHistorySection = ({ historyItems }) => {
-  console.log('📦 [StudyHistorySection] Received historyItems:', historyItems);
-
   const baseHistory = [
     {
       id: 1,
@@ -27,7 +25,6 @@ const StudyHistorySection = ({ historyItems }) => {
   // historyItems에서 백엔드 데이터를 id로 매칭하여 합치기
   const history = baseHistory.map(baseItem => {
     const dynamicItem = historyItems?.find(item => item.id === baseItem.id);
-    console.log(`🔍 [Matching] Category ${baseItem.id}:`, dynamicItem);
 
     // 카테고리 진행률 계산
     const categoryCompleted = dynamicItem?.category_completed || 0;
@@ -44,7 +41,6 @@ const StudyHistorySection = ({ historyItems }) => {
       progress
     };
 
-    console.log(`✅ [Mapped] Category ${baseItem.id}:`, result);
     return result;
   });
 

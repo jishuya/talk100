@@ -41,7 +41,7 @@ export const createSession = (categoryId, day = 1, questionIds = [], inputMode =
     categoryName: categoryInfo.name,
     day,
     startTime: new Date().toISOString(),
-    inputMode, // 사용자 설정에서 가져온 입력 모드
+    inputMode,
 
     // 문제 관리
     questionIds: questionIds,
@@ -200,6 +200,14 @@ export const toggleFavorite = (sessionId, questionId) => {
 
   if (!session) return false;
 
+  // userPreferences가 없으면 초기화
+  if (!session.userPreferences) {
+    session.userPreferences = {
+      favoriteIds: [],
+      starredIds: []
+    };
+  }
+
   const favoriteIds = session.userPreferences.favoriteIds || [];
   const isFavorite = favoriteIds.includes(questionId);
 
@@ -225,6 +233,14 @@ export const toggleStar = (sessionId, questionId) => {
   const session = getSession(sessionId);
 
   if (!session) return false;
+
+  // userPreferences가 없으면 초기화
+  if (!session.userPreferences) {
+    session.userPreferences = {
+      favoriteIds: [],
+      starredIds: []
+    };
+  }
 
   const starredIds = session.userPreferences.starredIds || [];
   const isStarred = starredIds.includes(questionId);

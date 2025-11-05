@@ -180,7 +180,6 @@ const QuizPage = () => {
     else if (quizModeData?.quizMode) {
       setInputMode(quizModeData.quizMode);
     }
-    // 3순위: 둘 다 없으면 기본값 'keyboard' (이미 useState에 설정됨)
   }, [session?.inputMode, quizModeData?.quizMode]);
 
   // 문제가 바뀔 때마다 즐겨찾기 & 별 상태 초기화 및 키워드 랜덤 선택 (문제 ID가 변경될 때만)
@@ -308,14 +307,7 @@ const QuizPage = () => {
     }
 
     // DB에 사용자 퀴즈 모드 업데이트
-    updateQuizModeMutation.mutate(mode, {
-      onSuccess: () => {
-        console.log('✅ Quiz mode updated in DB:', mode);
-      },
-      onError: (error) => {
-        console.error('❌ Failed to update quiz mode:', error);
-      }
-    });
+    updateQuizModeMutation.mutate(mode);
   };
 
   // 2️⃣ 답변 제출 핸들러 (제출 버튼용)
@@ -336,15 +328,12 @@ const QuizPage = () => {
 
   // 🎤 음성인식 결과를 userAnswer에 반영 및 키워드 자동 추출
   useEffect(() => {
-    console.log('🔍 [Voice Effect] 트리거됨:', {
-      voiceTranscript,
-      inputMode,
-      selectedKeywordsLength: selectedKeywords.length,
-      selectedKeywords
-    });
-
     if (voiceTranscript && inputMode === 'voice' && selectedKeywords.length > 0) {
-      console.log('🎤 음성인식 결과를 userAnswer에 반영:', voiceTranscript);
+      console.log('🎤 [음성인식] voiceTranscript:', voiceTranscript);
+      console.log('🎤 [음성인식] selectedKeywords:', selectedKeywords);
+      console.log('🎤 [음성인식] question.keywords (전체):', question?.keywords);
+      console.log('🎤 [음성인식] question.english:', question?.english);
+
       setUserAnswer(voiceTranscript);
 
       // 음성인식 결과에서 키워드 자동 추출
@@ -353,44 +342,43 @@ const QuizPage = () => {
 
       selectedKeywords.forEach(keyword => {
         const keywordLower = keyword.toLowerCase();
-
-        // 음성인식 결과에 키워드가 포함되어 있는지 확인
         if (voiceLower.includes(keywordLower)) {
-          // 키워드를 찾아서 입력값으로 설정
           newKeywordInputs[keyword] = keyword;
-          console.log(`✅ 키워드 "${keyword}" 자동 입력됨`);
         }
       });
 
-      console.log('🔍 추출된 키워드:', newKeywordInputs);
+      console.log('🎤 [음성인식] newKeywordInputs:', newKeywordInputs);
 
-      // 키워드 입력값 업데이트
-      if (Object.keys(newKeywordInputs).length > 0) {
-        setKeywordInputs(prev => ({
-          ...prev,
-          ...newKeywordInputs
-        }));
-      }
+      // 키워드 입력값 업데이트 (함수형 업데이트로 이전 키워드 유지)
+      setKeywordInputs(prevInputs => {
+        console.log('🎤 [음성인식] prevInputs:', prevInputs);
 
-      // 음성인식 결과로 자동 채점
-      console.log('📝 채점 시작...');
-      const result = submitAnswer(newKeywordInputs, voiceTranscript);
-      console.log('📝 채점 결과:', result);
+        const mergedKeywordInputs = {
+          ...prevInputs,  // 이전에 맞춘 키워드 유지
+          ...newKeywordInputs  // 새로 맞춘 키워드 추가
+        };
 
-      if (result.isAllCorrect) {
-        console.log('✅ 음성인식으로 정답!');
-        setQuizMode('grading');
-      } else {
-        console.log('❌ 오답 또는 일부 정답:', result);
-      }
-    } else {
-      console.log('⚠️ 조건 불충족:', {
-        hasTranscript: !!voiceTranscript,
-        isVoiceMode: inputMode === 'voice',
-        hasKeywords: selectedKeywords.length > 0
+        console.log('🎤 [음성인식] mergedKeywordInputs:', mergedKeywordInputs);
+
+        // 음성인식 결과로 자동 채점 (병합된 키워드로 채점)
+        const allCorrect = checkAllKeywords(mergedKeywordInputs);
+        console.log('🎤 [음성인식] allCorrect:', allCorrect);
+
+        submitAnswer(mergedKeywordInputs, voiceTranscript);
+
+        // checkAllKeywords 결과를 우선 사용
+        if (allCorrect) {
+          // 정답이면 녹음 중지하고 grading 모드로 전환
+          if (isVoiceListening) {
+            stopVoiceListening();
+          }
+          setQuizMode('grading');
+        }
+
+        return mergedKeywordInputs;
       });
     }
-  }, [voiceTranscript, inputMode, selectedKeywords, submitAnswer]);
+  }, [voiceTranscript, inputMode, selectedKeywords, submitAnswer, checkAllKeywords, isVoiceListening, stopVoiceListening]);
 
   // 🎤 음성인식 에러 표시
   useEffect(() => {
@@ -408,14 +396,24 @@ const QuizPage = () => {
 
     if (isVoiceListening) {
       // 녹음 중지
+      console.log('🛑 [녹음] 중지');
       stopVoiceListening();
     } else {
-      // 녹음 시작
+      // 이미 답변이 있고 모든 키워드가 정답이면 grading 모드로 전환 (제출)
+      // 부분 정답인 경우는 다시 녹음할 수 있도록 허용
+      if (userAnswer && gradingResult && gradingResult.isAllCorrect) {
+        console.log('✅ [녹음] 이미 모든 정답 - grading 모드로 전환');
+        setQuizMode('grading');
+        return;
+      }
+
+      // 녹음 시작 (부분 정답이더라도 다시 시도 가능)
+      console.log('🎙️ [녹음] 시작 - transcript 초기화');
+      console.log('🎙️ [녹음] 현재 keywordInputs:', keywordInputs);
       resetVoiceTranscript();
-      setUserAnswer('');
       startVoiceListening();
     }
-  }, [isVoiceListening, isVoiceSupported, startVoiceListening, stopVoiceListening, resetVoiceTranscript]);
+  }, [isVoiceListening, isVoiceSupported, startVoiceListening, stopVoiceListening, resetVoiceTranscript, userAnswer, gradingResult, keywordInputs]);
 
   // 메인 액션 버튼 핸들러
   const handleMainAction = useCallback(() => {
@@ -478,7 +476,8 @@ const QuizPage = () => {
       }
 
       // 세션 상태 갱신
-      setSession(getSession(sessionId));
+      const updatedSession = getSession(sessionId);
+      setSession(updatedSession);
 
       // 상태 초기화
       setUserAnswer('');
@@ -486,7 +485,8 @@ const QuizPage = () => {
       setShowHint(false);
       setShowAnswer(false);
       setKeywordInputs({});
-      resetGrading(); // 채점 결과 초기화
+      resetGrading();
+      resetVoiceTranscript();
 
       // 첫 번째 키워드 input에 포커스
       setTimeout(() => {
@@ -500,7 +500,7 @@ const QuizPage = () => {
       console.error('Move to next question error:', error);
       alert('다음 문제 로드에 실패했습니다.');
     }
-  }, [sessionId, question?.id, question?.day, session?.category, quizMode, navigate, resetGrading, updateProgressMutation]);
+  }, [sessionId, question?.id, question?.day, session?.category, quizMode, navigate, resetGrading, resetVoiceTranscript, updateProgressMutation]);
 
   // 다음 문제로 이동 (뱃지 체크 포함)
   const handleNextQuestion = useCallback(async () => {
@@ -511,7 +511,6 @@ const QuizPage = () => {
       if (question?.id) {
         try {
           const result = await api.recordQuestionAttempt(question.id);
-          console.log('✅ Question attempt recorded:', question.id);
 
           // 🎊 레벨업이 있으면 모달 표시 (최우선)
           if (result?.levelUp) {
@@ -620,11 +619,39 @@ const QuizPage = () => {
     }
   };
 
-  // 정답 보기 (전체) - 토글 기능
-  const handleShowFullAnswer = () => {
-    setShowAnswer(!showAnswer);
-    if (!showAnswer) {
+  // 정답 보기 (전체) - 토글 기능 + 틀린문제 자동 추가
+  const handleShowFullAnswer = async () => {
+    const willShowAnswer = !showAnswer;
+    setShowAnswer(willShowAnswer);
+
+    if (willShowAnswer) {
       setShowHint(false);
+
+      // 정답을 보면 자동으로 틀린문제(wrong_answer)에 추가 (별표가 안 되어 있을 때만)
+      if (!isStarred && question?.id && sessionId) {
+        try {
+          // 백엔드 API 호출 (isStarred를 false로 전달하여 추가 요청)
+          const result = await toggleWrongAnswerMutation.mutateAsync({
+            questionId: question.id,
+            isStarred: false
+          });
+
+          // 성공 시 즉시 UI 업데이트
+          if (result?.isStarred !== undefined) {
+            // 1. 로컬 상태 업데이트 (즉시 UI 반영)
+            setIsStarred(result.isStarred);
+
+            // 2. localStorage 세션 업데이트
+            toggleStar(sessionId, question.id);
+
+            // 3. 세션 상태 갱신
+            setSession(getSession(sessionId));
+          }
+        } catch (error) {
+          console.error('Failed to add to wrong answers:', error);
+          // 에러가 발생해도 정답은 계속 보여줌
+        }
+      }
     }
   };
 
@@ -731,11 +758,13 @@ const QuizPage = () => {
         // 4. 기존 세션 삭제
         deleteSession(sessionId);
 
-        // 5. 새 세션 생성
+        // 5. 새 세션 생성 (사용자의 quiz_mode 설정 유지)
         const { questions } = result.data;
         const questionIds = questions.map(q => q.question_id);
 
         const newSessionId = `session_${Date.now()}`;
+        const userInputMode = quizModeData?.quizMode || 'keyboard';
+
         const newSession = {
           sessionId: newSessionId,
           category: 4,
@@ -744,7 +773,7 @@ const QuizPage = () => {
           progress: { completed: 0, total: questions.length, percentage: 0 },
           currentQuestionIndex: 0,
           completedQuestionIds: [],
-          inputMode: 'keyboard',
+          inputMode: userInputMode, // DB에서 가져온 사용자 설정 사용
           createdAt: Date.now()
         };
 
@@ -759,6 +788,7 @@ const QuizPage = () => {
         setShowAnswer(false);
         setKeywordInputs({});
         resetGrading();
+        resetVoiceTranscript();
 
         // 7. 새 세션으로 페이지 이동
         navigate(`/quiz?session=${newSessionId}`);

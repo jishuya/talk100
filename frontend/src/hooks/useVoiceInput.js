@@ -45,38 +45,33 @@ export const useVoiceInput = () => {
 
     // 음성인식 결과 처리
     recognitionInstance.onresult = (event) => {
-      let interimTranscript = '';
       let finalTranscript = '';
 
-      // 모든 결과 처리 (중간 결과 + 최종 결과)
+      // 최종 결과만 처리 (isFinal이 true인 것만)
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript;
         if (event.results[i].isFinal) {
-          finalTranscript += transcript + ' ';
-        } else {
-          interimTranscript += transcript;
+          finalTranscript += event.results[i][0].transcript + ' ';
         }
       }
 
-      // 최종 결과가 있으면 사용, 없으면 중간 결과 사용
-      const recognizedText = (finalTranscript || interimTranscript).trim();
+      // 최종 결과가 있을 때만 처리
+      if (finalTranscript.trim()) {
+        const recognizedText = finalTranscript.trim();
 
-      if (recognizedText) {
-        console.log('🎤 음성인식 결과:', recognizedText, event.results[event.results.length - 1].isFinal ? '(최종)' : '(중간)');
+        console.log('🎤 [useVoiceInput] 음성인식 결과:', recognizedText);
 
         // 마지막 결과 저장
         lastTranscriptRef.current = recognizedText;
         setTranscript(recognizedText);
         setError(null);
 
-        // 🎯 침묵 감지: 음성이 인식될 때마다 타이머 리셋
+        // 🎯 침묵 감지: 최종 결과가 나올 때마다 타이머 리셋
         if (silenceTimerRef.current) {
           clearTimeout(silenceTimerRef.current);
         }
 
         // 새로운 타이머 시작 (1초 후 자동 중지)
         silenceTimerRef.current = setTimeout(() => {
-          console.log('⏱️ 침묵 감지 (1초) - 자동 녹음 중지');
           if (recognitionRef.current) {
             try {
               recognitionRef.current.stop();
@@ -120,20 +115,16 @@ export const useVoiceInput = () => {
 
     // 음성인식 종료 처리
     recognitionInstance.onend = () => {
-      console.log('🎤 음성인식 종료');
       setIsListening(false);
 
       // 🎯 중요: 자동 중지된 경우, 마지막 transcript를 다시 설정하여 useEffect 트리거
       if (lastTranscriptRef.current) {
-        console.log('📝 최종 결과 재설정:', lastTranscriptRef.current);
-        // transcript를 다시 설정하여 QuizPage의 useEffect가 트리거되도록
         setTranscript(lastTranscriptRef.current);
       }
     };
 
     // 음성인식 시작 처리
     recognitionInstance.onstart = () => {
-      console.log('🎤 음성인식 시작');
       setIsListening(true);
       setError(null);
     };
@@ -207,9 +198,14 @@ export const useVoiceInput = () => {
 
   // 인식 결과 초기화
   const resetTranscript = useCallback(() => {
+    console.log('🔄 [useVoiceInput] resetTranscript 호출됨');
+    console.log('🔄 [useVoiceInput] 이전 transcript:', transcript);
+    console.log('🔄 [useVoiceInput] 이전 lastTranscriptRef:', lastTranscriptRef.current);
     setTranscript('');
+    lastTranscriptRef.current = '';
     setError(null);
-  }, []);
+    console.log('🔄 [useVoiceInput] transcript 초기화 완료');
+  }, [transcript]);
 
   return {
     isListening,

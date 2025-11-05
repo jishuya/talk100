@@ -64,12 +64,9 @@ class ApiService {
 
     // 2. 실제 API 호출 시도
     try {
-      console.log(`🌐 [API] Calling ${endpoint}`);
       const result = await this.apiCall(endpoint, options);
-      console.log(`✅ [API] Success: ${endpoint}`);
       return result;
     } catch (error) {
-      console.error(`❌ [API] Failed: ${endpoint}`, error.message);
 
       // 3. API 실패시 Mock 데이터로 자동 fallback
       if (mockData) {
@@ -226,7 +223,6 @@ class ApiService {
   // 🏠 HomePage.jsx > StudyHistorySection에서 사용 - 최근 학습 기록
   async getHistory() {
     const result = await this.request('/api/users/history', 'history');
-    console.log('📋 [getHistory] API Response:', result);
     return result;
   }
 

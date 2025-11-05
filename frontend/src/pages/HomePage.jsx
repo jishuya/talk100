@@ -30,6 +30,7 @@ const HomePage = () => {
   const { data: historyData } = useHistoryData();
   const { data: quizModeData } = useQuizMode();
 
+
   // 통합 로딩 상태
   const isLoading = userLoading || progressLoading || personalQuizzesLoading;
 
@@ -136,7 +137,6 @@ const HomePage = () => {
       }
 
       const result = await response.json();
-      console.log('Today quiz response:', result.data);
 
       if (result.success && result.data) {
         const { start_question_id, daily_goal, progress, questions } = result.data;
@@ -152,6 +152,8 @@ const HomePage = () => {
         // 세션 생성 및 데이터 저장 (day 대신 start_question_id 사용)
         const userInputMode = quizModeData?.quizMode || 'keyboard';
         const sessionId = createSession(4, start_question_id, question_ids, userInputMode);
+
+        // updateSession을 사용하여 안전하게 업데이트 (inputMode 유지)
         const session = JSON.parse(localStorage.getItem(`quiz_session_${sessionId}`));
         session.questions = questions;
         session.daily_goal = daily_goal;

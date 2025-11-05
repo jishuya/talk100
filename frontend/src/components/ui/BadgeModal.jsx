@@ -67,17 +67,20 @@ const BadgeModal = ({ badges, onClose }) => {
         </div>
 
         {/* 축하 메시지 */}
-        <h2 className="text-2xl font-bold text-primary mb-2">
+        <h2 className="text-2xl font-bold text-primary mb-4">
           🎉 축하합니다!
         </h2>
 
-        {/* 뱃지 이름 */}
-        <h3 className="text-xl font-bold text-text-primary mb-3">
-          {currentBadge.name}
-        </h3>
+        {/* 뱃지 획득 메시지 */}
+        <p className="text-lg font-semibold text-text-primary mb-2">
+          <span className="text-primary">{currentBadge.name}</span> 뱃지를
+        </p>
+        <p className="text-lg font-semibold text-text-primary mb-4">
+          획득하였습니다
+        </p>
 
         {/* 뱃지 설명 */}
-        <p className="text-text-secondary mb-6">
+        <p className="text-sm text-text-secondary mb-6 px-4">
           {currentBadge.description}
         </p>
 
