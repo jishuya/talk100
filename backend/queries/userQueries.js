@@ -10,7 +10,7 @@ class UserQueries {
            email,
            profile_image,
            level,
-           custom_avatar,
+           profile_image as custom_avatar,
            total_questions_attempted,
            total_correct_answers,
            total_days_studied,
@@ -597,7 +597,7 @@ class UserQueries {
       const result = await db.oneOrNone(
         `SELECT
            daily_goal as "dailyGoal",
-           COALESCE(attendance_goal, attandance_goal) as "weeklyAttendance",
+           attendance_goal as "weeklyAttendance",
            quiz_count_goal as "weeklyTotalQuiz"
          FROM users
          WHERE uid = $1`,
@@ -636,7 +636,7 @@ class UserQueries {
       }
 
       if (weeklyAttendance !== undefined) {
-        updateFields.push(`attandance_goal = $${paramIndex++}`);
+        updateFields.push(`attendance_goal = $${paramIndex++}`);
         values.push(weeklyAttendance);
       }
 

@@ -5,9 +5,11 @@ class MypageController {
   // GET /api/mypage
   async getMypageData(req, res) {
     try {
+      console.log('🔍 [MyPage] Start - uid:', req.user?.uid);
       const uid = req.user?.uid;
 
       if (!uid) {
+        console.error('❌ [MyPage] No uid found');
         return res.status(401).json({
           success: false,
           message: 'User not authenticated'
@@ -15,9 +17,12 @@ class MypageController {
       }
 
       // 1. 사용자 프로필 조회
+      console.log('🔍 [MyPage] Fetching user profile...');
       const userProfile = await userQueries.getUserProfile(uid);
+      console.log('✅ [MyPage] User profile:', userProfile);
 
       if (!userProfile) {
+        console.error('❌ [MyPage] User not found');
         return res.status(404).json({
           success: false,
           message: 'User not found'
@@ -25,10 +30,14 @@ class MypageController {
       }
 
       // 2. 학습 목표 조회
+      console.log('🔍 [MyPage] Fetching goals...');
       const goals = await userQueries.getGoals(uid);
+      console.log('✅ [MyPage] Goals:', goals);
 
       // 3. 마이페이지 요약 통계 (오늘/주간 학습 데이터)
+      console.log('🔍 [MyPage] Fetching summary stats...');
       const summaryStats = await userQueries.getMypageSummary(uid);
+      console.log('✅ [MyPage] Summary stats:', summaryStats);
 
       // 4. 앱 설정 조회
       let settings;
@@ -116,7 +125,9 @@ class MypageController {
       });
 
     } catch (error) {
-      console.error('getMypageData controller error:', error);
+      console.error('❌❌❌ [MyPage] FATAL ERROR:', error);
+      console.error('❌ [MyPage] Error message:', error.message);
+      console.error('❌ [MyPage] Error stack:', error.stack);
       res.status(500).json({
         success: false,
         message: 'Failed to fetch mypage data'
