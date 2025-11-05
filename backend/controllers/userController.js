@@ -580,6 +580,72 @@ class UserController {
       });
     }
   }
+
+  // GET /api/users/quiz-mode
+  async getQuizMode(req, res) {
+    try {
+      const uid = req.user?.uid;
+
+      if (!uid) {
+        return res.status(401).json({
+          success: false,
+          message: 'User not authenticated'
+        });
+      }
+
+      const quizMode = await userQueries.getQuizMode(uid);
+
+      res.json({
+        success: true,
+        data: { quizMode }
+      });
+
+    } catch (error) {
+      console.error('getQuizMode controller error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch quiz mode'
+      });
+    }
+  }
+
+  // PUT /api/users/quiz-mode
+  async updateQuizMode(req, res) {
+    try {
+      const uid = req.user?.uid;
+      const { quizMode } = req.body;
+
+      if (!uid) {
+        return res.status(401).json({
+          success: false,
+          message: 'User not authenticated'
+        });
+      }
+
+      // 입력값 검증
+      if (!quizMode || !['voice', 'keyboard'].includes(quizMode)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid quiz mode. Must be "voice" or "keyboard"'
+        });
+      }
+
+      await userQueries.updateQuizMode(uid, quizMode);
+
+      res.json({
+        success: true,
+        message: '퀴즈 모드가 업데이트되었습니다.',
+        data: { quizMode }
+      });
+
+    } catch (error) {
+      console.error('updateQuizMode controller error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update quiz mode'
+      });
+    }
+  }
 }
 
 module.exports = new UserController();

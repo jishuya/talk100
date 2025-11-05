@@ -235,6 +235,19 @@ class ApiService {
     return this.request('/api/users/personal-quizzes', 'personalQuizzes');
   }
 
+  // 🎮 사용자 퀴즈 모드 조회 (voice/keyboard)
+  getQuizMode() {
+    return this.request('/api/users/quiz-mode', null);
+  }
+
+  // 🎮 사용자 퀴즈 모드 업데이트 (voice/keyboard)
+  updateQuizMode(quizMode) {
+    return this.request('/api/users/quiz-mode', null, {
+      method: 'PUT',
+      body: { quizMode }
+    });
+  }
+
   // ==============================================
   // 🧩 QuizPage - 퀴즈 관련 API
   // ==============================================

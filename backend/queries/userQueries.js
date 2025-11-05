@@ -722,6 +722,49 @@ class UserQueries {
       throw new Error('Failed to update profile');
     }
   }
+
+  // 퀴즈 모드 조회
+  async getQuizMode(uid) {
+    try {
+      console.log('🎮 [Get Quiz Mode] Fetching for uid:', uid);
+
+      const result = await db.oneOrNone(
+        `SELECT quiz_mode FROM users WHERE uid = $1`,
+        [uid]
+      );
+
+      console.log('✅ [Get Quiz Mode] Result:', result);
+
+      return result ? result.quiz_mode : 'keyboard';
+
+    } catch (error) {
+      console.error('❌ [Get Quiz Mode] Query error:', error);
+      throw new Error('Failed to fetch quiz mode');
+    }
+  }
+
+  // 퀴즈 모드 업데이트
+  async updateQuizMode(uid, quizMode) {
+    try {
+      console.log('🎮 [Update Quiz Mode] Start with params:', { uid, quizMode });
+
+      // 유효성 검사
+      if (!['voice', 'keyboard'].includes(quizMode)) {
+        throw new Error('Invalid quiz mode. Must be "voice" or "keyboard"');
+      }
+
+      await db.none(
+        `UPDATE users SET quiz_mode = $1 WHERE uid = $2`,
+        [quizMode, uid]
+      );
+
+      console.log('✅ [Update Quiz Mode] Success');
+
+    } catch (error) {
+      console.error('❌ [Update Quiz Mode] Query error:', error);
+      throw new Error('Failed to update quiz mode');
+    }
+  }
 }
 
 module.exports = new UserQueries();

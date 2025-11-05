@@ -32,7 +32,7 @@ import { useQuizGrading } from '../hooks/useQuizGrading';
 import { useVoiceInput } from '../hooks/useVoiceInput';
 
 // API 훅 및 서비스
-import { useToggleWrongAnswer, useToggleFavorite, useUpdateProgress } from '../hooks/useApi';
+import { useToggleWrongAnswer, useToggleFavorite, useUpdateProgress, useQuizMode, useUpdateQuizMode } from '../hooks/useApi';
 import { api } from '../services/apiService';
 
 const QuizPage = () => {
@@ -119,9 +119,13 @@ const QuizPage = () => {
   const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
   const audioUrl = userInfo.voice_gender === 'female' ? question?.femaleAudioUrl : question?.maleAudioUrl;
 
+  // 퀴즈 모드 조회 (DB에서 사용자 설정 불러오기)
+  const { data: quizModeData } = useQuizMode();
+  const updateQuizModeMutation = useUpdateQuizMode();
+
   // 로컬 상태
   const [userAnswer, setUserAnswer] = useState('');
-  const [inputMode, setInputMode] = useState(session?.inputMode || 'keyboard'); // 세션에서 로드
+  const [inputMode, setInputMode] = useState(session?.inputMode || quizModeData?.quizMode || 'keyboard'); // 세션 > DB > 기본값
   const [quizMode, setQuizMode] = useState('solving'); // 'solving' | 'grading'
   const [showHint, setShowHint] = useState(false);
   const [showAnswer, setShowAnswer] = useState(false);
@@ -166,7 +170,14 @@ const QuizPage = () => {
   // 진행률 업데이트 mutation
   const updateProgressMutation = useUpdateProgress();
 
-  // 세션 inputMode 동기화
+  // DB에서 불러온 quizMode를 초기값으로 설정
+  useEffect(() => {
+    if (quizModeData?.quizMode && !session?.inputMode) {
+      setInputMode(quizModeData.quizMode);
+    }
+  }, [quizModeData, session?.inputMode]);
+
+  // 세션 inputMode 동기화 (세션이 있으면 세션 우선)
   useEffect(() => {
     if (session?.inputMode) {
       setInputMode(session.inputMode);
@@ -296,6 +307,16 @@ const QuizPage = () => {
       // 세션 상태 갱신
       setSession(getSession(sessionId));
     }
+
+    // DB에 사용자 퀴즈 모드 업데이트
+    updateQuizModeMutation.mutate(mode, {
+      onSuccess: () => {
+        console.log('✅ Quiz mode updated in DB:', mode);
+      },
+      onError: (error) => {
+        console.error('❌ Failed to update quiz mode:', error);
+      }
+    });
   };
 
   // 2️⃣ 답변 제출 핸들러 (제출 버튼용)

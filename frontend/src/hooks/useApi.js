@@ -35,6 +35,29 @@ export const usePersonalQuizzesData = () => {
   });
 };
 
+// 퀴즈 모드 조회 (voice/keyboard)
+export const useQuizMode = () => {
+  return useQuery({
+    queryKey: ['user', 'quizMode'],
+    queryFn: () => api.getQuizMode(),
+    staleTime: ENV.CACHE_TIMES.USER_DATA,
+    retry: 2,
+  });
+};
+
+// 퀴즈 모드 업데이트
+export const useUpdateQuizMode = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (quizMode) => api.updateQuizMode(quizMode),
+    onSuccess: () => {
+      // 퀴즈 모드 캐시 무효화
+      queryClient.invalidateQueries(['user', 'quizMode']);
+    },
+  });
+};
+
 // ==============================================
 // 진행률 관련 훅
 // ==============================================

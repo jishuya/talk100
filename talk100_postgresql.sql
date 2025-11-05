@@ -64,6 +64,7 @@ CREATE TABLE users (
     daily_goal INTEGER DEFAULT 1 CHECK (daily_goal >= 1),  -- Quiz Set (Day 개수)
 	attendance_goal int4 DEFAULT 1 NULL,	-- 주간 목표 출석일
 	quiz_count_goal int4 DEFAULT 1 NULL,	-- 주간 목표 문제수
+    quiz_mode VARCHAR(20) DEFAULT 'keyboard' NOT NULL CHECK (quiz_mode IN ('voice', 'keyboard')),  -- 퀴즈 입력 모드
     
     -- 통계
     total_questions_attempted INTEGER DEFAULT 0,
@@ -76,9 +77,6 @@ CREATE TABLE users (
     -- PostgreSQL 배열 타입
     weekly_attendance INTEGER[] DEFAULT ARRAY[0,0,0,0,0,0,0],  -- 주간 출석 [월,화,수,목,금,토,일]
 	earned_badges JSONB DEFAULT '[]'::jsonb,
-
-	ADD COLUMN quiz_mode VARCHAR(20) DEFAULT 'keyboard' NOT NULL
-	CHECK (quiz_mode IN ('voice', 'keyboard'))
 
 );
 

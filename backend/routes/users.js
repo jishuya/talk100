@@ -46,4 +46,10 @@ router.put('/goals', verifyToken, userController.updateGoals);
 // PUT /api/users/profile - 프로필 업데이트 (이름, 이메일)
 router.put('/profile', verifyToken, userController.updateProfile);
 
+// GET /api/users/quiz-mode - 퀴즈 모드 조회
+router.get('/quiz-mode', verifyToken, userController.getQuizMode);
+
+// PUT /api/users/quiz-mode - 퀴즈 모드 업데이트
+router.put('/quiz-mode', verifyToken, userController.updateQuizMode);
+
 module.exports = router;

@@ -244,18 +244,12 @@ export const QuizContent = ({
               {getIcon('noto:check-mark', { size: 'sm' })}
             </span>
           )}
-          {isVoiceListening && (
-            <span className="inline-flex items-center gap-1 text-error animate-pulse">
-              {getIcon('IoMic', { size: 'sm' })}
-              <span className="font-semibold">듣는 중...</span>
-            </span>
-          )}
           <span>내 답변</span>
         </div>
         <div className="text-base leading-relaxed text-text-primary min-h-[24px]">
           {isVoiceListening ? (
             <span className="text-primary italic animate-pulse">
-              🎤 말씀하세요...
+              🎤 듣는 중입니다...
             </span>
           ) : userAnswer ? (
             userAnswer
