@@ -26,7 +26,8 @@ export const QuizContent = ({
   onStarToggle,
   isFavorite = false,
   isStarred = false,
-  gradingResult = null
+  gradingResult = null,
+  isVoiceListening = false
 }) => {
   if (!question) {
     return (
@@ -92,13 +93,22 @@ export const QuizContent = ({
                   </span>
                 );
               } else if (isKeyword && quizMode === 'solving') {
-                // 음성 모드의 문제풀이 모드에서는 빈 박스 표시
+                // 음성 모드의 문제풀이 모드
+                const hasInput = keywordInputs[cleanWord.toLowerCase()];
+                const isCorrect = gradingResult?.keywordResults?.[cleanWord.toLowerCase()]?.isCorrect;
+
                 return (
                   <span
                     key={index}
-                    className="bg-yellow-200 px-1 py-0.5 rounded font-semibold"
+                    className={`px-2 py-0.5 rounded font-semibold ${
+                      hasInput
+                        ? isCorrect
+                          ? 'bg-green-200 text-green-800'  // 정답이면 초록색
+                          : 'bg-yellow-200 text-gray-800'   // 입력됐지만 채점 전이면 노란색
+                        : 'bg-yellow-100 text-gray-400'      // 아직 입력 안 됐으면 연한 노란색
+                    }`}
                   >
-                    {'_'.repeat(cleanWord.length)}
+                    {hasInput ? cleanWord : '_'.repeat(cleanWord.length)}
                     {punctuation}
                   </span>
                 );
@@ -234,10 +244,22 @@ export const QuizContent = ({
               {getIcon('noto:check-mark', { size: 'sm' })}
             </span>
           )}
+          {isVoiceListening && (
+            <span className="inline-flex items-center gap-1 text-error animate-pulse">
+              {getIcon('IoMic', { size: 'sm' })}
+              <span className="font-semibold">듣는 중...</span>
+            </span>
+          )}
           <span>내 답변</span>
         </div>
         <div className="text-base leading-relaxed text-text-primary min-h-[24px]">
-          {userAnswer || (
+          {isVoiceListening ? (
+            <span className="text-primary italic animate-pulse">
+              🎤 말씀하세요...
+            </span>
+          ) : userAnswer ? (
+            userAnswer
+          ) : (
             <span className="text-text-secondary italic">
               {inputMode === 'keyboard'
                 ? '위의 키워드 박스를 클릭해서 답변을 작성하세요'

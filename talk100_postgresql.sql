@@ -76,6 +76,10 @@ CREATE TABLE users (
     -- PostgreSQL 배열 타입
     weekly_attendance INTEGER[] DEFAULT ARRAY[0,0,0,0,0,0,0],  -- 주간 출석 [월,화,수,목,금,토,일]
 	earned_badges JSONB DEFAULT '[]'::jsonb,
+
+	ADD COLUMN quiz_mode VARCHAR(20) DEFAULT 'keyboard' NOT NULL
+	CHECK (quiz_mode IN ('voice', 'keyboard'))
+
 );
 
 -- ================================================

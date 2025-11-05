@@ -28,6 +28,9 @@ import {
 // 채점 훅
 import { useQuizGrading } from '../hooks/useQuizGrading';
 
+// 음성인식 훅
+import { useVoiceInput } from '../hooks/useVoiceInput';
+
 // API 훅 및 서비스
 import { useToggleWrongAnswer, useToggleFavorite, useUpdateProgress } from '../hooks/useApi';
 import { api } from '../services/apiService';
@@ -97,14 +100,6 @@ const QuizPage = () => {
       }
     }
 
-    // 🎲 키워드 랜덤 선택: 백엔드에서 받은 키워드 중 랜덤으로 2개만 선택
-    let selectedKeywords = currentQuestion.keywords || [];
-    if (selectedKeywords.length > 2) {
-      // Fisher-Yates 셔플 알고리즘으로 랜덤 선택
-      const shuffled = [...selectedKeywords].sort(() => Math.random() - 0.5);
-      selectedKeywords = shuffled.slice(0, 2);
-    }
-
     return {
       id: currentQuestion.question_id,
       day: currentQuestion.day,
@@ -114,7 +109,7 @@ const QuizPage = () => {
       english,
       maleAudioUrl,
       femaleAudioUrl,
-      keywords: selectedKeywords,
+      keywords: currentQuestion.keywords || [], // 전체 키워드 반환
       answer: english,
       isFavorite: currentQuestion.is_favorite || false,
       isWrongAnswer: currentQuestion.is_wrong_answer || false
@@ -128,10 +123,10 @@ const QuizPage = () => {
   const [userAnswer, setUserAnswer] = useState('');
   const [inputMode, setInputMode] = useState(session?.inputMode || 'keyboard'); // 세션에서 로드
   const [quizMode, setQuizMode] = useState('solving'); // 'solving' | 'grading'
-  const [isRecording, setIsRecording] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [showAnswer, setShowAnswer] = useState(false);
   const [keywordInputs, setKeywordInputs] = useState({});
+  const [selectedKeywords, setSelectedKeywords] = useState([]); // 선택된 키워드 유지
 
   // 모달 상태
   const [showGoalAchievedModal, setShowGoalAchievedModal] = useState(false);
@@ -147,8 +142,20 @@ const QuizPage = () => {
   const [isStarred, setIsStarred] = useState(question?.isWrongAnswer || false);
 
 
-  // 채점 훅 사용
-  const { gradingResult, checkKeyword, checkAllKeywords, submitAnswer, resetGrading } = useQuizGrading(question, inputMode);
+  // 채점 훅 사용 (selectedKeywords를 포함한 question 전달)
+  const questionWithSelectedKeywords = question ? { ...question, keywords: selectedKeywords } : null;
+  const { gradingResult, checkKeyword, checkAllKeywords, submitAnswer, resetGrading } = useQuizGrading(questionWithSelectedKeywords, inputMode);
+
+  // 음성인식 훅 사용
+  const {
+    isListening: isVoiceListening,
+    transcript: voiceTranscript,
+    isSupported: isVoiceSupported,
+    error: voiceError,
+    startListening: startVoiceListening,
+    stopListening: stopVoiceListening,
+    resetTranscript: resetVoiceTranscript
+  } = useVoiceInput();
 
   // 틀린 문제 토글 mutation
   const toggleWrongAnswerMutation = useToggleWrongAnswer();
@@ -166,11 +173,21 @@ const QuizPage = () => {
     }
   }, [session?.inputMode]);
 
-  // 문제가 바뀔 때마다 즐겨찾기 & 별 상태 초기화 (문제 ID가 변경될 때만)
+  // 문제가 바뀔 때마다 즐겨찾기 & 별 상태 초기화 및 키워드 랜덤 선택 (문제 ID가 변경될 때만)
   useEffect(() => {
     if (question) {
       setIsFavorite(question.isFavorite || false);
       setIsStarred(question.isWrongAnswer || false);
+
+      // 🎲 키워드 랜덤 선택: 백엔드에서 받은 키워드 중 랜덤으로 2개만 선택
+      const keywords = question.keywords || [];
+      if (keywords.length > 2) {
+        // Fisher-Yates 셔플 알고리즘으로 랜덤 선택
+        const shuffled = [...keywords].sort(() => Math.random() - 0.5);
+        setSelectedKeywords(shuffled.slice(0, 2));
+      } else {
+        setSelectedKeywords(keywords);
+      }
     }
   }, [question?.id]);
 
@@ -270,10 +287,8 @@ const QuizPage = () => {
   // 입력 모드 전환 (음성 ↔ 키보드)
   const handleInputModeChange = (mode) => {
     setInputMode(mode);
-    if (mode === 'keyboard') {
-      setUserAnswer('');
-      setKeywordInputs({});
-    }
+    // 키워드 입력값은 유지 (음성모드에서 입력한 값이 키보드모드에서도 보이도록)
+    // setKeywordInputs는 초기화하지 않음
 
     // localStorage의 세션 데이터 업데이트
     if (sessionId) {
@@ -299,27 +314,88 @@ const QuizPage = () => {
     }
   }, [keywordInputs, userAnswer, submitAnswer]);
 
-  // 음성 녹음 토글
-  const handleToggleRecording = useCallback(() => {
-    if (isRecording) {
-      // 녹음 중지
-      setIsRecording(false);
+  // 🎤 음성인식 결과를 userAnswer에 반영 및 키워드 자동 추출
+  useEffect(() => {
+    console.log('🔍 [Voice Effect] 트리거됨:', {
+      voiceTranscript,
+      inputMode,
+      selectedKeywordsLength: selectedKeywords.length,
+      selectedKeywords
+    });
 
-      // TODO: 실제 음성 인식 구현 (MediaRecorder API)
-      try {
-        // Mock 음성 인식 결과
-        const mockTranscription = 'I see no point in continuing this interview';
-        setUserAnswer(mockTranscription);
-      } catch (error) {
-        console.error('Speech recognition error:', error);
-        alert('음성 인식에 실패했습니다. 다시 시도해주세요.');
+    if (voiceTranscript && inputMode === 'voice' && selectedKeywords.length > 0) {
+      console.log('🎤 음성인식 결과를 userAnswer에 반영:', voiceTranscript);
+      setUserAnswer(voiceTranscript);
+
+      // 음성인식 결과에서 키워드 자동 추출
+      const newKeywordInputs = {};
+      const voiceLower = voiceTranscript.toLowerCase();
+
+      selectedKeywords.forEach(keyword => {
+        const keywordLower = keyword.toLowerCase();
+
+        // 음성인식 결과에 키워드가 포함되어 있는지 확인
+        if (voiceLower.includes(keywordLower)) {
+          // 키워드를 찾아서 입력값으로 설정
+          newKeywordInputs[keyword] = keyword;
+          console.log(`✅ 키워드 "${keyword}" 자동 입력됨`);
+        }
+      });
+
+      console.log('🔍 추출된 키워드:', newKeywordInputs);
+
+      // 키워드 입력값 업데이트
+      if (Object.keys(newKeywordInputs).length > 0) {
+        setKeywordInputs(prev => ({
+          ...prev,
+          ...newKeywordInputs
+        }));
+      }
+
+      // 음성인식 결과로 자동 채점
+      console.log('📝 채점 시작...');
+      const result = submitAnswer(newKeywordInputs, voiceTranscript);
+      console.log('📝 채점 결과:', result);
+
+      if (result.isAllCorrect) {
+        console.log('✅ 음성인식으로 정답!');
+        setQuizMode('grading');
+      } else {
+        console.log('❌ 오답 또는 일부 정답:', result);
       }
     } else {
-      // 녹음 시작
-      setIsRecording(true);
-      setUserAnswer('');
+      console.log('⚠️ 조건 불충족:', {
+        hasTranscript: !!voiceTranscript,
+        isVoiceMode: inputMode === 'voice',
+        hasKeywords: selectedKeywords.length > 0
+      });
     }
-  }, [isRecording]);
+  }, [voiceTranscript, inputMode, selectedKeywords, submitAnswer]);
+
+  // 🎤 음성인식 에러 표시
+  useEffect(() => {
+    if (voiceError) {
+      alert(voiceError);
+    }
+  }, [voiceError]);
+
+  // 음성 녹음 토글
+  const handleToggleRecording = useCallback(() => {
+    if (!isVoiceSupported) {
+      alert('이 브라우저는 음성인식을 지원하지 않습니다. Chrome이나 Safari를 사용해주세요.');
+      return;
+    }
+
+    if (isVoiceListening) {
+      // 녹음 중지
+      stopVoiceListening();
+    } else {
+      // 녹음 시작
+      resetVoiceTranscript();
+      setUserAnswer('');
+      startVoiceListening();
+    }
+  }, [isVoiceListening, isVoiceSupported, startVoiceListening, stopVoiceListening, resetVoiceTranscript]);
 
   // 메인 액션 버튼 핸들러
   const handleMainAction = useCallback(() => {
@@ -712,7 +788,7 @@ const QuizPage = () => {
 
       {/* 메인 콘텐츠 */}
       <QuizContent
-        question={question}
+        question={questionWithSelectedKeywords}
         userAnswer={userAnswer}
         inputMode={inputMode}
         quizMode={quizMode}
@@ -722,6 +798,7 @@ const QuizPage = () => {
         isFavorite={isFavorite}
         isStarred={isStarred}
         gradingResult={gradingResult}
+        isVoiceListening={isVoiceListening}
         onKeywordInputChange={handleKeywordInputChange}
         onKeywordKeyDown={handleKeywordKeyDown}
         onInputModeChange={handleInputModeChange}
@@ -733,7 +810,7 @@ const QuizPage = () => {
       <QuizControls
         inputMode={inputMode}
         quizMode={quizMode}
-        isRecording={isRecording}
+        isRecording={isVoiceListening}
         showHint={showHint}
         showAnswer={showAnswer}
         onMainAction={handleMainAction}
