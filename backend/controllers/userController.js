@@ -28,7 +28,8 @@ class UserController {
         data: {
           name: userProfile.name,
           goal: userProfile.goal,
-          level: userProfile.level
+          level: userProfile.level,
+          custom_avatar: userProfile.custom_avatar
         }
       });
 

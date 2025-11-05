@@ -31,7 +31,43 @@ class MypageController {
       const summaryStats = await userQueries.getMypageSummary(uid);
 
       // 4. 앱 설정 조회
-      const settings = await settingsQueries.getUserSettings(uid);
+      let settings;
+      try {
+        settings = await settingsQueries.getUserSettings(uid);
+      } catch (error) {
+        console.warn('⚠️ Failed to fetch user settings, using defaults:', error.message);
+        // 앱 설정 조회 실패 시 기본값 사용
+        settings = {
+          notifications: {
+            learningReminder: true,
+            reminderTime: { hour: 20, minute: 0 },
+            reviewReminder: true,
+            weeklyReport: false
+          },
+          learning: {
+            autoPlay: false,
+            voiceSpeed: 1.0,
+            voiceGender: 'male',
+            difficulty: 2,
+            reviewCount: 6
+          },
+          display: {
+            theme: 'light',
+            fontSize: 'medium'
+          },
+          account: {
+            nickname: userProfile.name || '',
+            email: userProfile.email || '',
+            profileImage: userProfile.profile_image || null,
+            connectedAccounts: []
+          },
+          data: {
+            cacheSize: 0,
+            lastBackup: null,
+            totalData: 0
+          }
+        };
+      }
 
       // 5. 레벨에 따른 등급명 결정
       let gradeName = '초급 학습자';

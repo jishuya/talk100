@@ -1,4 +1,3 @@
-import React from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -12,29 +11,29 @@ const HamburgerMenu = ({ isOpen, onClose }) => {
     {
       id: 'home',
       title: '홈',
-      icon: 'Home',
+      icon: 'IoHomeOutline',
       path: '/',
       description: '대시보드'
     },
     {
-      id: 'categories',
-      title: '카테고리',
-      icon: 'OpenFolder',
-      path: '/categories',
-      description: '학습 카테고리'
+      id: 'today-quiz',
+      title: '오늘의 퀴즈',
+      icon: 'IoBookOutline',
+      path: '/today-quiz',
+      description: '일일 학습 목표'
     },
     {
       id: 'wrong-answers',
       title: '틀린 문제',
       icon: 'fluent:star-24-regular',
-      path: '/quiz/wrong-answers',
+      path: '/wrong-answers',
       description: '복습이 필요한 문제들'
     },
     {
       id: 'favorites',
       title: '즐겨찾기',
       icon: 'IoHeartOutline',
-      path: '/quiz/favorites',
+      path: '/favorites',
       description: '중요 표시한 문제들'
     },
     {
@@ -54,15 +53,43 @@ const HamburgerMenu = ({ isOpen, onClose }) => {
     {
       id: 'settings',
       title: '설정',
-      icon: 'fluent:settings-24-regular',
+      icon: 'IoSettingsOutline',
       path: '/settings',
       description: '앱 설정'
     }
   ];
 
-  const handleMenuClick = (item) => {
-    navigate(item.path);
+  const handleMenuClick = async (item) => {
     onClose();
+
+    // 특별한 처리가 필요한 메뉴들
+    if (item.id === 'today-quiz') {
+      // 홈페이지로 이동한 후 오늘의 퀴즈 클릭 효과
+      navigate('/');
+      setTimeout(() => {
+        const todayQuizButton = document.querySelector('.btn-start-learning');
+        if (todayQuizButton) {
+          todayQuizButton.click();
+        }
+      }, 100);
+      return;
+    }
+
+    if (item.id === 'wrong-answers' || item.id === 'favorites') {
+      // HomePage로 이동한 후 해당 퀴즈 섹션 찾아서 클릭
+      navigate('/');
+      setTimeout(() => {
+        const categoryId = item.id === 'wrong-answers' ? 5 : 6;
+        const quizCard = document.querySelector(`[data-category-id="${categoryId}"]`);
+        if (quizCard) {
+          quizCard.click();
+        }
+      }, 100);
+      return;
+    }
+
+    // 나머지 메뉴는 일반적인 네비게이션
+    navigate(item.path);
   };
 
   const handleLogout = async () => {

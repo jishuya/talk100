@@ -10,6 +10,7 @@ class UserQueries {
            email,
            profile_image,
            level,
+           custom_avatar,
            total_questions_attempted,
            total_correct_answers,
            total_days_studied,
@@ -596,7 +597,7 @@ class UserQueries {
       const result = await db.oneOrNone(
         `SELECT
            daily_goal as "dailyGoal",
-           attandance_goal as "weeklyAttendance",
+           COALESCE(attendance_goal, attandance_goal) as "weeklyAttendance",
            quiz_count_goal as "weeklyTotalQuiz"
          FROM users
          WHERE uid = $1`,

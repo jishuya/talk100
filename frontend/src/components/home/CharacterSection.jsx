@@ -11,7 +11,8 @@ const CharacterSection = ({
 }) => {
   // 사용자 레벨에 따른 아바타 정보 가져오기
   const avatarInfo = getAvatarByLevel(user?.level || 1);
-  const displayAvatar = getAvatarEmoji(user?.level || 1);
+  // custom_avatar가 있으면 우선 사용, 없으면 레벨 기반 아바타 사용
+  const displayAvatar = user?.custom_avatar || getAvatarEmoji(user?.level || 1);
 
   return (
     <div className="character-card animate-fade-in">
@@ -30,7 +31,7 @@ const CharacterSection = ({
       <div className="mb-4">
         <div className="text-xl font-bold text-text-primary mb-1">{user?.name || '사용자'}</div>
         <div className="flex items-center justify-center text-sm text-text-secondary">
-          학습 목표: {user?.goal || 20}문제
+          학습 목표: {user?.goal || 20}문제  
           {/* {getIcon('IoChevronDownOutline', { size: 'md', className: 'ml-1' })} */}
         </div>
       </div>

@@ -44,6 +44,7 @@ const QuizPersonalSection = ({ personalQuizzes, onPersonalQuizClick }) => {
           <div
             key={quiz.id}
             className="quiz-card-personal animate-slide-up"
+            data-category-id={quiz.category_id}
             onClick={() => handleQuizClick(quiz)}
             style={{ animationDelay: `${index * 0.1}s` }}
           >
