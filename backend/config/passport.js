@@ -1,6 +1,7 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const NaverStrategy = require('passport-naver-v2').Strategy;
+const KakaoStrategy = require('passport-kakao').Strategy;
 const userQueries = require('../queries/userQueries');
 
 require('dotenv').config();
@@ -95,6 +96,47 @@ passport.use(new NaverStrategy({
 
   } catch (error) {
     console.error('Naver OAuth Error:', error.message);
+    return done(error, null);
+  }
+}));
+
+// Kakao OAuth Strategy 설정
+passport.use(new KakaoStrategy({
+  clientID: process.env.KAKAO_CLIENT_ID,
+  clientSecret: process.env.KAKAO_CLIENT_SECRET,
+  callbackURL: process.env.KAKAO_CALLBACK_URL || "http://localhost:5000/auth/kakao/callback"
+}, async (accessToken, refreshToken, profile, done) => {
+  try {
+    // 필수 정보 검증
+    if (!profile.id) {
+      console.error('Kakao OAuth Error: No profile ID');
+      return done(new Error('Kakao profile ID is missing'), null);
+    }
+
+    // Kakao 프로필에서 이메일 추출
+    const kakaoAccount = profile._json?.kakao_account;
+    const email = kakaoAccount?.email;
+
+    if (!email) {
+      console.error('Kakao OAuth Error: No email in profile');
+      return done(new Error('Kakao profile email is missing'), null);
+    }
+
+    // Kakao 프로필 정보를 우리 형식으로 변환
+    const userData = {
+      uid: `kakao_${profile.id}`,
+      name: profile.displayName || kakaoAccount?.profile?.nickname || 'Kakao User',
+      email: email,
+      profile_image: kakaoAccount?.profile?.profile_image_url || '🦊',
+      voice_gender: 'male',
+      default_difficulty: 2
+    };
+
+    const user = await userQueries.findOrCreateUser(userData);
+    return done(null, user);
+
+  } catch (error) {
+    console.error('Kakao OAuth Error:', error.message);
     return done(error, null);
   }
 }));

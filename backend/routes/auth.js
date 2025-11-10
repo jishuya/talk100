@@ -92,6 +92,49 @@ router.get('/naver/callback', (req, res, next) => {
   })(req, res, next);
 });
 
+// Kakao OAuth 로그인 시작
+router.get('/kakao', passport.authenticate('kakao'));
+
+// Kakao OAuth 콜백 처리
+router.get('/kakao/callback', (req, res, next) => {
+  passport.authenticate('kakao', (err, user, info) => {
+    if (err) {
+      console.error('Kakao OAuth authentication error:', err);
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      return res.redirect(`${frontendUrl}?login=error&reason=auth_error`);
+    }
+
+    if (!user) {
+      console.error('Kakao OAuth failed - no user:', info);
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      return res.redirect(`${frontendUrl}?login=error&reason=no_user`);
+    }
+
+    try {
+      // JWT 토큰 생성
+      const token = generateToken(user);
+
+      // 쿠키에 토큰 설정
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7일
+      });
+
+      // 프론트엔드로 리디렉트 (사용자 정보 포함)
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      const userParam = encodeURIComponent(JSON.stringify(user));
+      res.redirect(`${frontendUrl}?token=${token}&user=${userParam}&login=success`);
+
+    } catch (error) {
+      console.error('Kakao OAuth callback error:', error.message);
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      res.redirect(`${frontendUrl}?login=error&reason=token_error`);
+    }
+  })(req, res, next);
+});
+
 // 로그아웃
 router.post('/logout', verifyToken, (req, res) => {
   try {

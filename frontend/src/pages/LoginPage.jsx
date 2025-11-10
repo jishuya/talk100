@@ -11,6 +11,10 @@ const LoginPage = () => {
     window.location.href = `${API_BASE_URL}/auth/naver`;
   };
 
+  const handleKakaoLogin = () => {
+    window.location.href = `${API_BASE_URL}/auth/kakao`;
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
       <div className="bg-white p-8 rounded-lg shadow-xl w-96">
@@ -33,6 +37,14 @@ const LoginPage = () => {
           >
             <span className="text-xl font-bold mr-2">N</span>
             네이버로 로그인
+          </button>
+
+          <button
+            onClick={handleKakaoLogin}
+            className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-900 bg-yellow-400 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors"
+          >
+            <span className="text-xl font-bold mr-2">K</span>
+            카카오로 로그인
           </button>
         </div>
 
