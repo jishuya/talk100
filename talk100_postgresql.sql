@@ -54,16 +54,17 @@ CREATE TABLE users (
     -- 기본 정보
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
-    profile_image VARCHAR(500),
+    profile_image VARCHAR(500) DEFAULT '🦊',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_login_at TIMESTAMP,  -- 마지막 로그인 시간
     
     -- 설정
-    voice_gender VARCHAR(10) DEFAULT 'male' CHECK (voice_gender IN ('male', 'female')),
+    voice_gender VARCHAR(20) DEFAULT 'us_female'
+        CHECK (voice_gender IN ('us_male', 'us_female', 'uk_male', 'uk_female')),
     default_difficulty INTEGER DEFAULT 2 CHECK (default_difficulty BETWEEN 1 AND 3),
     daily_goal INTEGER DEFAULT 1 CHECK (daily_goal >= 1),  -- Quiz Set (Day 개수)
-	attendance_goal int4 DEFAULT 1 NULL,	-- 주간 목표 출석일
-	quiz_count_goal int4 DEFAULT 1 NULL,	-- 주간 목표 문제수
+    attendance_goal int4 DEFAULT 1 NULL,   -- 주간 목표 출석일
+    quiz_count_goal int4 DEFAULT 1 NULL,   -- 주간 목표 문제수
     quiz_mode VARCHAR(20) DEFAULT 'keyboard' NOT NULL CHECK (quiz_mode IN ('voice', 'keyboard')),  -- 퀴즈 입력 모드
     
     -- 통계
@@ -76,8 +77,7 @@ CREATE TABLE users (
     
     -- PostgreSQL 배열 타입
     weekly_attendance INTEGER[] DEFAULT ARRAY[0,0,0,0,0,0,0],  -- 주간 출석 [월,화,수,목,금,토,일]
-	earned_badges JSONB DEFAULT '[]'::jsonb,
-
+    earned_badges JSONB DEFAULT '[]'::jsonb
 );
 
 -- ================================================

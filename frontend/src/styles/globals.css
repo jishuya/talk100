@@ -234,3 +234,28 @@ body {
 .animate-slide-right {
   animation: slideRight 0.3s ease-out;
 }
+
+/* =================================================================
+   Logo Animations
+   ================================================================= */
+
+/* Sound wave animation for logo */
+@keyframes sound {
+  0%, 100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.5);
+  }
+}
+
+.logo-animated .wave {
+  animation: sound 0.5s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.logo-animated .wave1 { animation-delay: 0s; }
+.logo-animated .wave2 { animation-delay: 0.1s; }
+.logo-animated .wave3 { animation-delay: 0.2s; }
+.logo-animated .wave4 { animation-delay: 0.3s; }
+.logo-animated .wave5 { animation-delay: 0.4s; }
