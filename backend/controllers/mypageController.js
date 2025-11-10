@@ -135,6 +135,8 @@ class MypageController {
         oauthProvider = 'Google';
       } else if (uid.startsWith('naver_')) {
         oauthProvider = 'Naver';
+      } else if (uid.startsWith('kakao_')) {
+        oauthProvider = 'Kakao';
       }
 
       // 7. 응답 데이터 구성
