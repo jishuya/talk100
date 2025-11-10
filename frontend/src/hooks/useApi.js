@@ -199,6 +199,18 @@ export const useUpdateProfile = () => {
   });
 };
 
+export const useUpdateVoiceGender = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (voiceGender) => api.updateVoiceGender(voiceGender),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['mypage']);
+      queryClient.invalidateQueries(['user', 'profile']);
+    },
+  });
+};
+
 export const useUpdateSettings = () => {
   const queryClient = useQueryClient();
 

@@ -244,6 +244,14 @@ class ApiService {
     });
   }
 
+  // 🎤 음성 성별 업데이트 (us_male, us_female, uk_male, uk_female)
+  updateVoiceGender(voiceGender) {
+    return this.request('/api/mypage/voice-gender', null, {
+      method: 'PUT',
+      body: { voiceGender }
+    });
+  }
+
   // ==============================================
   // 🧩 QuizPage - 퀴즈 관련 API
   // ==============================================

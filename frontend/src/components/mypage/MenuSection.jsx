@@ -6,11 +6,12 @@ const MenuSection = ({
   items,
   onItemClick,
   onToggleChange,
-  onSliderChange
+  onSliderChange,
+  onRadioChange
 }) => {
   const handleItemClick = (item) => {
-    // slider 타입은 클릭 이벤트 무시
-    if (item.type === 'slider') {
+    // slider, radio, select 타입은 클릭 이벤트 무시
+    if (item.type === 'slider' || item.type === 'radio' || item.type === 'select') {
       return;
     }
 
@@ -24,6 +25,15 @@ const MenuSection = ({
   const handleSliderChange = (item, value) => {
     const numValue = parseFloat(value);
     onSliderChange?.(item.id, numValue);
+  };
+
+  const handleRadioChange = (item, value) => {
+    onRadioChange?.(item.id, value);
+  };
+
+  const handleSelectChange = (item, e) => {
+    const value = e.target.value;
+    item.onChange?.(value);
   };
 
   return (
@@ -65,6 +75,19 @@ const MenuSection = ({
                 />
               ) : item.type === 'slider' ? (
                 <span className="text-sm font-semibold text-primary">{item.displayValue}</span>
+              ) : item.type === 'select' ? (
+                <select
+                  className="px-3 py-1.5 bg-accent-pale border border-gray-border rounded-lg text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  value={item.value}
+                  onChange={(e) => handleSelectChange(item, e)}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {item.options?.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.flag} {option.label}
+                    </option>
+                  ))}
+                </select>
               ) : (
                 <>
                   {item.count !== undefined && (
@@ -96,6 +119,34 @@ const MenuSection = ({
                 onChange={(e) => handleSliderChange(item, e.target.value)}
                 onClick={(e) => e.stopPropagation()}
               />
+            </div>
+          )}
+
+          {/* 라디오 버튼 UI (버튼 그룹 스타일) */}
+          {item.type === 'radio' && (
+            <div className="px-4 pb-4">
+              <div className="grid grid-cols-4 gap-2">
+                {item.options?.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    className={`flex flex-col items-center justify-center p-2 border rounded-xl cursor-pointer transition-all ${
+                      item.value === option.value
+                        ? 'border-primary bg-primary text-white'
+                        : 'border-gray-border bg-white text-text-primary hover:border-primary-light'
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRadioChange(item, option.value);
+                    }}
+                  >
+                    <span className="text-xl mb-0.5">{option.flag}</span>
+                    <span className="text-[10px] font-medium text-center leading-tight">
+                      {option.label}
+                    </span>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </div>

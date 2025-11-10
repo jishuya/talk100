@@ -10,6 +10,7 @@ class UserQueries {
            email,
            profile_image,
            level,
+           voice_gender,
            profile_image as custom_avatar,
            total_questions_attempted,
            total_correct_answers,
@@ -763,6 +764,30 @@ class UserQueries {
     } catch (error) {
       console.error('❌ [Update Quiz Mode] Query error:', error);
       throw new Error('Failed to update quiz mode');
+    }
+  }
+
+  // 음성 성별 업데이트
+  async updateVoiceGender(uid, voiceGender) {
+    try {
+      console.log('🎤 [Update Voice Gender] Start with params:', { uid, voiceGender });
+
+      // 유효성 검사
+      const validVoices = ['us_male', 'us_female', 'uk_male', 'uk_female'];
+      if (!validVoices.includes(voiceGender)) {
+        throw new Error('Invalid voice gender. Must be one of: us_male, us_female, uk_male, uk_female');
+      }
+
+      await db.none(
+        `UPDATE users SET voice_gender = $1 WHERE uid = $2`,
+        [voiceGender, uid]
+      );
+
+      console.log('✅ [Update Voice Gender] Success');
+
+    } catch (error) {
+      console.error('❌ [Update Voice Gender] Query error:', error);
+      throw new Error('Failed to update voice gender');
     }
   }
 }

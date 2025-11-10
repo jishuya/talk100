@@ -10,7 +10,8 @@ import {
   useAvatarSystem,
   useUpdateAvatar,
   useLogout,
-  useUpdateSettings
+  useUpdateSettings,
+  useUpdateVoiceGender
 } from '../hooks/useApi';
 
 // Mock 데이터
@@ -39,6 +40,7 @@ const MyPage = () => {
   const updateAvatarMutation = useUpdateAvatar();
   const logoutMutation = useLogout();
   const updateSettingsMutation = useUpdateSettings();
+  const updateVoiceGenderMutation = useUpdateVoiceGender();
 
   // Mock 데이터를 fallback으로 사용
   const finalMypageData = apiMypageData || mypageData;
@@ -61,7 +63,7 @@ const MyPage = () => {
 
   // apiSettings 데이터가 로드되면 localAppSettings 초기화
   useEffect(() => {
-    if (apiSettings) {
+    if (apiSettings && profile) {
       // 백엔드 설정을 UI 형식으로 변환
       const settingsArray = [
         {
@@ -101,6 +103,30 @@ const MyPage = () => {
           bgColor: 'bg-gray-light'
         },
         {
+          id: 'voiceGender',
+          icon: 'IoMic',
+          title: '음성 선택',
+          description: '문제 음성 설정',
+          type: 'select',
+          value: profile.voiceGender || 'us_male',
+          options: [
+            { value: 'us_female', label: 'Ava (미국 여성)', flag: '🇺🇸' },
+            { value: 'us_male', label: 'Andrew (미국 남성)', flag: '🇺🇸' },
+            { value: 'uk_female', label: 'Sonia (영국 여성)', flag: '🇬🇧' },
+            { value: 'uk_male', label: 'Ryan (영국 남성)', flag: '🇬🇧' }
+          ],
+          onChange: async (value) => {
+            try {
+              await updateVoiceGenderMutation.mutateAsync(value);
+              console.log('✅ Voice gender updated successfully:', value);
+            } catch (error) {
+              console.error('Voice gender update error:', error);
+              alert('음성 선택 변경에 실패했습니다.');
+            }
+          },
+          bgColor: 'bg-gray-light'
+        },
+        {
           id: 'feedback',
           icon: 'noto:speech-balloon',
           title: '피드백 보내기',
@@ -119,7 +145,7 @@ const MyPage = () => {
 
       setLocalAppSettings(settingsArray);
     }
-  }, [apiSettings]);
+  }, [apiSettings, profile]);
 
   // 로딩 상태
   if (isLoading) {
@@ -343,6 +369,38 @@ const MyPage = () => {
     }
   };
 
+  // 앱 설정 라디오 변경 (음성 선택)
+  const handleAppSettingRadio = async (settingId, value) => {
+    try {
+      // 로컬 상태 즉시 업데이트 (Optimistic UI)
+      setLocalAppSettings(prev =>
+        prev.map(setting =>
+          setting.id === settingId ? { ...setting, value } : setting
+        )
+      );
+
+      // 백엔드 업데이트
+      if (settingId === 'voiceGender') {
+        await updateVoiceGenderMutation.mutateAsync(value);
+        console.log('✅ Voice gender updated successfully:', value);
+      }
+    } catch (error) {
+      console.error('Setting radio error:', error);
+      alert('음성 선택 변경에 실패했습니다.');
+
+      // 에러 발생시 이전 상태로 롤백
+      if (profile) {
+        setLocalAppSettings(prev =>
+          prev.map(setting =>
+            setting.id === settingId
+              ? { ...setting, value: profile.voiceGender || 'us_male' }
+              : setting
+          )
+        );
+      }
+    }
+  };
+
   // 아바타 저장
   const handleAvatarSave = async (avatar) => {
     try {
@@ -440,6 +498,7 @@ const MyPage = () => {
           onItemClick={handleAppSettingClick}
           onToggleChange={handleAppSettingToggle}
           onSliderChange={handleAppSettingSlider}
+          onRadioChange={handleAppSettingRadio}
         />
 
         {/* 로그아웃 버튼 */}

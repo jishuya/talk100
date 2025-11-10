@@ -27,6 +27,15 @@ const SettingsSection = ({
       onItemChange?.(item.id, value);
     };
 
+    const handleSelectChange = (e) => {
+      const value = e.target.value;
+      item.onChange?.(value);
+    };
+
+    const handleRadioChange = (value) => {
+      item.onChange?.(value);
+    };
+
     return (
       <div
         key={item.id}
@@ -101,6 +110,53 @@ const SettingsSection = ({
               value={item.value}
               onChange={(e) => handleSliderChange(e.target.value)}
             />
+          </div>
+        )}
+
+        {/* 셀렉트 (음성 선택) */}
+        {item.type === 'select' && (
+          <div className="mt-3">
+            <select
+              className="w-full p-3 bg-accent-pale border border-gray-border rounded-xl text-text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              value={item.value}
+              onChange={handleSelectChange}
+            >
+              {item.options.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.flag} {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* 라디오 버튼 (음성 선택) */}
+        {item.type === 'radio' && (
+          <div className="mt-3 space-y-2">
+            {item.options.map((option) => (
+              <label
+                key={option.value}
+                className={`flex items-center p-3 border rounded-xl cursor-pointer transition-all ${
+                  item.value === option.value
+                    ? 'border-primary bg-accent-pale'
+                    : 'border-gray-border bg-white hover:border-primary-light'
+                }`}
+                onClick={() => handleRadioChange(option.value)}
+              >
+                <input
+                  type="radio"
+                  name={item.id}
+                  value={option.value}
+                  checked={item.value === option.value}
+                  onChange={() => {}}
+                  className="w-4 h-4 text-primary focus:ring-primary focus:ring-2 cursor-pointer"
+                />
+                <span className="ml-3 flex-1 text-sm text-text-primary">
+                  <span className="mr-2">{option.flag}</span>
+                  {option.label}
+                </span>
+              </label>
+            ))}
           </div>
         )}
       </div>

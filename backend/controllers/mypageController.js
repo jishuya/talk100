@@ -2,6 +2,49 @@ const userQueries = require('../queries/userQueries');
 const settingsQueries = require('../queries/settingsQueries');
 
 class MypageController {
+  // PUT /api/mypage/voice-gender - 음성 성별 업데이트
+  async updateVoiceGender(req, res) {
+    try {
+      console.log('🎤 [Update Voice Gender] Start - uid:', req.user?.uid);
+      const uid = req.user?.uid;
+      const { voiceGender } = req.body;
+
+      if (!uid) {
+        console.error('❌ [Update Voice Gender] No uid found');
+        return res.status(401).json({
+          success: false,
+          message: 'User not authenticated'
+        });
+      }
+
+      if (!voiceGender) {
+        console.error('❌ [Update Voice Gender] No voiceGender provided');
+        return res.status(400).json({
+          success: false,
+          message: 'voiceGender is required'
+        });
+      }
+
+      // 음성 성별 업데이트
+      await userQueries.updateVoiceGender(uid, voiceGender);
+
+      console.log('✅ [Update Voice Gender] Success');
+
+      res.json({
+        success: true,
+        message: 'Voice gender updated successfully',
+        data: { voiceGender }
+      });
+
+    } catch (error) {
+      console.error('❌ [Update Voice Gender] Error:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Failed to update voice gender'
+      });
+    }
+  }
+
   // GET /api/mypage
   async getMypageData(req, res) {
     try {
@@ -104,6 +147,7 @@ class MypageController {
             email: userProfile.email,
             avatar: userProfile.profile_image || '🦊',
             level: userProfile.level,
+            voiceGender: userProfile.voice_gender || 'us_male',
             gradeName: gradeName,
             oauthProvider: oauthProvider,
             totalQuestionsAttempted: userProfile.total_questions_attempted,
