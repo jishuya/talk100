@@ -12,6 +12,7 @@ export const QuizControls = ({
   isRecording = false,
   onMainAction,
   onPlayAudio,
+  onPlayAudioSlow, // 0.5배속 재생
   onShowFirstLetters,
   onShowFullAnswer,
   onSkipQuestion,
@@ -58,9 +59,23 @@ export const QuizControls = ({
           </div>
         )}
 
-        {/* 컨트롤 버튼들 (채점모드에서만) */}
+        {/* 컨트롤 버튼들 (채점모드에서만) - 다시듣기 x0.5, x1, 다음문제 */}
         {quizMode === 'grading' && (
           <div className="flex gap-2 mb-3">
+            <button
+              onClick={() => handleButtonClick('playAudioSlow', onPlayAudioSlow)}
+              className={`flex-1 p-3 border rounded-brand-sm transition-all duration-200 flex flex-col items-center gap-1 ${
+                clickedButton === 'playAudioSlow'
+                  ? 'bg-primary border-primary scale-95 shadow-lg'
+                  : 'bg-white border-gray-border hover:border-primary active:scale-[0.97]'
+              }`}
+            >
+              {getIcon('IoVolumeHigh', {
+                size: 'xl',
+                className: clickedButton === 'playAudioSlow' ? 'text-white animate-pulse' : 'text-gray-600'
+              })}
+              <span className={`${LABEL_STYLE} ${clickedButton === 'playAudioSlow' ? 'text-white font-bold' : ''}`}>다시 듣기 x0.8</span>
+            </button>
             <button
               onClick={() => handleButtonClick('playAudio', onPlayAudio)}
               className={`flex-1 p-3 border rounded-brand-sm transition-all duration-200 flex flex-col items-center gap-1 ${
@@ -73,7 +88,7 @@ export const QuizControls = ({
                 size: 'xl',
                 className: clickedButton === 'playAudio' ? 'text-white animate-pulse' : 'text-gray-600'
               })}
-              <span className={`${LABEL_STYLE} ${clickedButton === 'playAudio' ? 'text-white font-bold' : ''}`}>다시 듣기</span>
+              <span className={`${LABEL_STYLE} ${clickedButton === 'playAudio' ? 'text-white font-bold' : ''}`}>다시 듣기 x1</span>
             </button>
             <button
               onClick={() => handleButtonClick('skipQuestion', onSkipQuestion)}

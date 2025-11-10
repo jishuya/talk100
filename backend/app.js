@@ -34,8 +34,10 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'"],
       scriptSrc: ["'self'"],
       imgSrc: ["'self'", "data:", "https:"],
+      mediaSrc: ["'self'", process.env.FRONTEND_URL || 'http://localhost:5173'], // 음원 파일 로드 허용
     },
   },
+  crossOriginResourcePolicy: { policy: "cross-origin" }, // 음원 파일 cross-origin 로드 허용
 }));
 
 // CORS 설정
@@ -72,6 +74,26 @@ app.use(session({
 // Passport 미들웨어
 app.use(passport.initialize());
 app.use(passport.session());
+
+// 정적 파일 서빙 (음원 파일)
+const path = require('path');
+app.use('/audio', express.static(path.join(__dirname, 'public/audio'), {
+  maxAge: '7d',        // 7일간 브라우저 캐싱
+  etag: true,          // ETag 헤더 활성화 (파일 변경 감지)
+  lastModified: true,  // Last-Modified 헤더 활성화
+  immutable: true,     // 캐시 불변성 (음원은 변경되지 않음)
+  setHeaders: (res, filePath) => {
+    // CORS 헤더 명시적 설정
+    res.setHeader('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'http://localhost:5173');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Range');
+    // 음원 파일용 Content-Type (자동 설정되지만 명시)
+    if (filePath.endsWith('.mp3')) {
+      res.setHeader('Content-Type', 'audio/mpeg');
+    }
+  }
+}));
 
 // 헬스 체크 엔드포인트
 app.get('/health', (req, res) => {

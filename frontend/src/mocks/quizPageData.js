@@ -13,12 +13,7 @@ export const MOCK_QUIZ_DATA = [
     english_a: null,
     korean_b: null,
     english_b: null,
-    audio_male: '/audio/day01/q1_male.mp3',
-    audio_female: '/audio/day01/q1_female.mp3',
-    audio_male_a: null,
-    audio_female_a: null,
-    audio_male_b: null,
-    audio_female_b: null,
+    audio: '/audio/001_01.mp3',
     keywords: ['working', 'home', 'for', 'me']
   },
   {
@@ -33,12 +28,7 @@ export const MOCK_QUIZ_DATA = [
     english_a: null,
     korean_b: null,
     english_b: null,
-    audio_male: '/audio/day01/q2_male.mp3',
-    audio_female: '/audio/day01/q2_female.mp3',
-    audio_male_a: null,
-    audio_female_a: null,
-    audio_male_b: null,
-    audio_female_b: null,
+    audio: '/audio/001_02.mp3',
     keywords: ['working', 'home', 'for', 'me', 'distracted']
   },
   {
@@ -53,12 +43,7 @@ export const MOCK_QUIZ_DATA = [
     english_a: null,
     korean_b: null,
     english_b: null,
-    audio_male: '/audio/day01/q3_male.mp3',
-    audio_female: '/audio/day01/q3_female.mp3',
-    audio_male_a: null,
-    audio_female_a: null,
-    audio_male_b: null,
-    audio_female_b: null,
+    audio: '/audio/001_03.mp3',
     keywords: ['going', 'date', 'for', 'me']
   },
   {
@@ -73,12 +58,7 @@ export const MOCK_QUIZ_DATA = [
     english_a: null,
     korean_b: null,
     english_b: null,
-    audio_male: '/audio/day01/q4_male.mp3',
-    audio_female: '/audio/day01/q4_female.mp3',
-    audio_male_a: null,
-    audio_female_a: null,
-    audio_male_b: null,
-    audio_female_b: null,
+    audio: '/audio/001_04.mp3',
     keywords: ['laptops', 'for', 'me', 'keyboard', 'uncomfortable']
   },
   {
@@ -93,12 +73,7 @@ export const MOCK_QUIZ_DATA = [
     english_a: null,
     korean_b: null,
     english_b: null,
-    audio_male: '/audio/day01/q5_male.mp3',
-    audio_female: '/audio/day01/q5_female.mp3',
-    audio_male_a: null,
-    audio_female_a: null,
-    audio_male_b: null,
-    audio_female_b: null,
+    audio: '/audio/001_05.mp3',
     keywords: ['electronic', 'cars', 'for', 'me', 'charging', 'stations', 'hassle']
   },
   {
@@ -113,12 +88,7 @@ export const MOCK_QUIZ_DATA = [
     english_a: null,
     korean_b: null,
     english_b: null,
-    audio_male: '/audio/day01/q6_male.mp3',
-    audio_female: '/audio/day01/q6_female.mp3',
-    audio_male_a: null,
-    audio_female_a: null,
-    audio_male_b: null,
-    audio_female_b: null,
+    audio: '/audio/001_06.mp3',
     keywords: ['decent', 'job', 'guys', 'for', 'me']
   }
 ];

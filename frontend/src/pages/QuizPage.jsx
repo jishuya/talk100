@@ -35,6 +35,9 @@ import { useVoiceInput } from '../hooks/useVoiceInput';
 import { useToggleWrongAnswer, useToggleFavorite, useUpdateProgress, useQuizMode, useUpdateQuizMode } from '../hooks/useApi';
 import { api } from '../services/apiService';
 
+// 음원 유틸리티
+import { getAudioUrl } from '../utils/audioUtils';
+
 const QuizPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -79,24 +82,18 @@ const QuizPage = () => {
     if (!currentQuestion) return null;
 
     // 백엔드 데이터 형식을 QuizPage가 기대하는 형식으로 변환
-    let korean, english, maleAudioUrl, femaleAudioUrl;
+    let korean, english;
 
     if (currentQuestion.question_type === 'short' || currentQuestion.question_type === 'long') {
       korean = currentQuestion.korean;
       english = currentQuestion.english;
-      maleAudioUrl = currentQuestion.audio_male;
-      femaleAudioUrl = currentQuestion.audio_female;
     } else if (currentQuestion.question_type === 'dialogue') {
       if (currentQuestion.korean_a !== "" && currentQuestion.korean_a !== null) {
         korean = currentQuestion.korean_a;
         english = currentQuestion.english_a;
-        maleAudioUrl = currentQuestion.audio_male_a;
-        femaleAudioUrl = currentQuestion.audio_female_a;
       } else {
         korean = currentQuestion.korean_b;
         english = currentQuestion.english_b;
-        maleAudioUrl = currentQuestion.audio_male_b;
-        femaleAudioUrl = currentQuestion.audio_female_b;
       }
     }
 
@@ -107,17 +104,13 @@ const QuizPage = () => {
       type: currentQuestion.question_type,
       korean,
       english,
-      maleAudioUrl,
-      femaleAudioUrl,
+      audio: currentQuestion.audio, // DB의 audio 컬럼 (파일명: '001_01.mp3')
       keywords: currentQuestion.keywords || [], // 전체 키워드 반환
       answer: english,
       isFavorite: currentQuestion.is_favorite || false,
       isWrongAnswer: currentQuestion.is_wrong_answer || false
     };
   }, [questionsData, currentQuestionIndex]);
-
-  const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
-  const audioUrl = userInfo.voice_gender === 'female' ? question?.femaleAudioUrl : question?.maleAudioUrl;
 
   // 퀴즈 모드 조회 (DB에서 사용자 설정 불러오기)
   const { data: quizModeData } = useQuizMode();
@@ -140,6 +133,17 @@ const QuizPage = () => {
 
   // 모달 버튼 ref
   const continueButtonRef = useRef(null);
+
+  // 🎵 음원 재생 관련 상태 및 ref
+  const audioRef = useRef(null);
+  const [isAudioReady, setIsAudioReady] = useState(false);
+  const [audioError, setAudioError] = useState(false);
+
+  // 음원 URL 생성
+  const audioUrl = useMemo(() => {
+    if (!question?.audio) return null;
+    return getAudioUrl(question.audio);
+  }, [question?.audio]);
 
   // 즐겨찾기 & 별 상태 (로컬 상태로 관리하여 즉시 UI 업데이트)
   const [isFavorite, setIsFavorite] = useState(question?.isFavorite || false);
@@ -199,6 +203,45 @@ const QuizPage = () => {
       }
     }
   }, [question?.id]);
+
+  // 🎵 음원 자동재생: 정답을 맞췄을 때 (grading 모드로 전환될 때) 실행
+  useEffect(() => {
+    if (quizMode !== 'grading' || !audioRef.current || !audioUrl) {
+      return;
+    }
+
+    const playAudio = async () => {
+      try {
+        setAudioError(false);
+
+        // 1배속으로 설정
+        audioRef.current.playbackRate = 1.0;
+        // 음원 로드
+        audioRef.current.load();
+
+        // 자동 재생 시도
+        await audioRef.current.play();
+        console.log('🎵 Audio auto-playing on correct answer:', audioUrl);
+
+      } catch (error) {
+        console.warn('⚠️ Autoplay failed:', error.message);
+        setAudioError(true);
+      }
+    };
+
+    playAudio();
+  }, [quizMode, audioUrl]); // grading 모드로 전환될 때마다 재생
+
+  // 음원 로딩 완료 처리
+  const handleAudioCanPlay = useCallback(() => {
+    setIsAudioReady(true);
+  }, []);
+
+  // 음원 에러 처리
+  const handleAudioError = useCallback(() => {
+    setAudioError(true);
+    console.error('❌ Audio loading failed:', audioUrl);
+  }, [audioUrl]);
 
   // 첫 문제 로드 시 첫 번째 키워드 input에 자동 포커스
   useEffect(() => {
@@ -600,16 +643,49 @@ const QuizPage = () => {
     return () => window.removeEventListener('keydown', handleModalKeyPress);
   }, [showGoalAchievedModal]);
 
-  // 문제 오디오 재생
-  const handlePlayAudio = () => {
-    if (audioUrl) {
-      const audio = new Audio(audioUrl);
-      audio.play().catch(error => {
-        console.error('Audio playback error:', error);
-        alert('오디오 재생에 실패했습니다.');
-      });
+  // 🔁 수동 음원 재생 (다시 듣기 버튼 - 1배속)
+  const handlePlayAudio = useCallback(async () => {
+    if (!audioRef.current || !audioUrl) {
+      alert('음원을 찾을 수 없습니다.');
+      return;
     }
-  };
+
+    try {
+      // 1배속 설정
+      audioRef.current.playbackRate = 1.0;
+      // 처음부터 재생
+      audioRef.current.currentTime = 0;
+      await audioRef.current.play();
+      setAudioError(false);
+      console.log('🔁 Audio replaying at 1x:', audioUrl);
+    } catch (error) {
+      console.error('Audio playback error:', error);
+      setAudioError(true);
+      alert('오디오 재생에 실패했습니다.');
+    }
+  }, [audioUrl]);
+
+  // 🔁 수동 음원 재생 (다시 듣기 버튼 - 0.8배속)
+  const handlePlayAudioSlow = useCallback(async () => {
+    if (!audioRef.current || !audioUrl) {
+      alert('음원을 찾을 수 없습니다.');
+      return;
+    }
+
+    try {
+      // 0.8배속 설정
+      audioRef.current.playbackRate = 0.8;
+      // 처음부터 재생
+      audioRef.current.currentTime = 0;
+      await audioRef.current.play();
+      setAudioError(false);
+      console.log('🔁 Audio replaying at 0.8x:', audioUrl);
+    } catch (error) {
+      console.error('Audio playback error:', error);
+      setAudioError(true);
+      alert('오디오 재생에 실패했습니다.');
+    }
+  }, [audioUrl]);
 
   // 힌트 보기 (첫 글자) - 토글 기능
   const handleShowFirstLetters = () => {
@@ -833,8 +909,38 @@ const QuizPage = () => {
 
   return (
     <div className="quiz-container min-h-screen bg-background flex flex-col">
+      {/* 🎵 숨겨진 Audio 엘리먼트 (자동재생용) */}
+      {audioUrl && (
+        <audio
+          ref={audioRef}
+          src={audioUrl}
+          onCanPlay={handleAudioCanPlay}
+          onError={handleAudioError}
+          preload="auto"
+          style={{ display: 'none' }}
+        />
+      )}
+
       {/* 프로그레스 바 */}
       <QuizProgressBar />
+
+      {/* 🎵 음원 상태 표시 */}
+      {audioUrl && (
+        <div className="fixed top-20 right-4 z-50">
+          {!isAudioReady && !audioError && (
+            <div className="bg-white/90 backdrop-blur-sm px-3 py-2 rounded-lg shadow-md border border-primary/20 flex items-center gap-2">
+              <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+              <span className="text-xs text-gray-600">음원 로딩 중...</span>
+            </div>
+          )}
+          {audioError && (
+            <div className="bg-error/10 backdrop-blur-sm px-3 py-2 rounded-lg shadow-md border border-error/30 flex items-center gap-2">
+              {getIcon('IoWarning', { size: 'sm', className: 'text-error' })}
+              <span className="text-xs text-error">음원 로드 실패</span>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* 메인 콘텐츠 */}
       <QuizContent
@@ -865,6 +971,7 @@ const QuizPage = () => {
         showAnswer={showAnswer}
         onMainAction={handleMainAction}
         onPlayAudio={handlePlayAudio}
+        onPlayAudioSlow={handlePlayAudioSlow}
         onShowFirstLetters={handleShowFirstLetters}
         onShowFullAnswer={handleShowFullAnswer}
         onSkipQuestion={handleNextQuestion}
