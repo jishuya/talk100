@@ -170,11 +170,6 @@ class UserController {
 
       // 시간 계산 및 퍼센트 계산
       const processedHistory = historyData.map(item => {
-          last_studied_day: item.last_studied_day,
-          completed_question_number: item.completed_question_number,
-          timestamp: item.timestamp
-        });
-
         // percent 계산: question_number / total_questions * 100
         // question_number는 이미 Day 내에서 몇 번째 문제인지를 나타냄
         const totalQuestions = parseInt(item.total_questions) || 1;
