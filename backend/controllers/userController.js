@@ -167,11 +167,9 @@ class UserController {
       }
 
       const historyData = await userQueries.getUserHistory(uid);
-      console.log('📊 [getHistory Controller] Raw data:', JSON.stringify(historyData, null, 2));
 
       // 시간 계산 및 퍼센트 계산
       const processedHistory = historyData.map(item => {
-        console.log(`🔍 [Processing Category ${item.id}]:`, {
           last_studied_day: item.last_studied_day,
           completed_question_number: item.completed_question_number,
           timestamp: item.timestamp

@@ -220,7 +220,6 @@ export const useUpdateVoiceGender = () => {
         }
       }
       keysToRemove.forEach(key => localStorage.removeItem(key));
-      console.log(`✅ Voice gender updated. Cleared ${keysToRemove.length} quiz sessions.`);
     },
   });
 };

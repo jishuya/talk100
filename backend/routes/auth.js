@@ -94,21 +94,13 @@ router.get('/naver/callback', (req, res, next) => {
 
 // Kakao OAuth 로그인 시작
 router.get('/kakao', (req, res, next) => {
-  console.log('=== Kakao OAuth 로그인 시작 ===');
-  console.log('Timestamp:', new Date().toISOString());
-  console.log('Request headers:', req.headers);
   passport.authenticate('kakao')(req, res, next);
 });
 
 // Kakao OAuth 콜백 처리
 router.get('/kakao/callback', (req, res, next) => {
-  console.log('=== Kakao OAuth 콜백 처리 시작 ===');
-  console.log('Timestamp:', new Date().toISOString());
-  console.log('Query params:', req.query);
-  console.log('Request URL:', req.url);
 
   passport.authenticate('kakao', (err, user, info) => {
-    console.log('=== Kakao Passport Authenticate 결과 ===');
 
     if (err) {
       console.error('❌ Kakao OAuth authentication error:', err);
@@ -125,14 +117,9 @@ router.get('/kakao/callback', (req, res, next) => {
     }
 
     try {
-      console.log('✅ Kakao OAuth 성공 - 사용자 정보:');
-      console.log('User UID:', user.uid);
-      console.log('User name:', user.name);
-      console.log('User email:', user.email);
 
       // JWT 토큰 생성
       const token = generateToken(user);
-      console.log('✅ JWT 토큰 생성 완료');
 
       // 쿠키에 토큰 설정
       res.cookie('token', token, {
@@ -141,13 +128,11 @@ router.get('/kakao/callback', (req, res, next) => {
         sameSite: 'strict',
         maxAge: 7 * 24 * 60 * 60 * 1000 // 7일
       });
-      console.log('✅ 쿠키 설정 완료');
 
       // 프론트엔드로 리디렉트 (사용자 정보 포함)
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
       const userParam = encodeURIComponent(JSON.stringify(user));
       const redirectUrl = `${frontendUrl}?token=${token}&user=${userParam}&login=success`;
-      console.log('✅ 프론트엔드로 리디렉트:', redirectUrl);
       res.redirect(redirectUrl);
 
     } catch (error) {

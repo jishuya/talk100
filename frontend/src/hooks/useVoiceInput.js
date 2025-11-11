@@ -58,7 +58,6 @@ export const useVoiceInput = () => {
       if (finalTranscript.trim()) {
         const recognizedText = finalTranscript.trim();
 
-        console.log('🎤 [useVoiceInput] 음성인식 결과:', recognizedText);
 
         // 마지막 결과 저장
         lastTranscriptRef.current = recognizedText;
@@ -198,13 +197,9 @@ export const useVoiceInput = () => {
 
   // 인식 결과 초기화
   const resetTranscript = useCallback(() => {
-    console.log('🔄 [useVoiceInput] resetTranscript 호출됨');
-    console.log('🔄 [useVoiceInput] 이전 transcript:', transcript);
-    console.log('🔄 [useVoiceInput] 이전 lastTranscriptRef:', lastTranscriptRef.current);
     setTranscript('');
     lastTranscriptRef.current = '';
     setError(null);
-    console.log('🔄 [useVoiceInput] transcript 초기화 완료');
   }, [transcript]);
 
   return {

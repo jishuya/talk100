@@ -112,7 +112,6 @@ class UserQueries {
   // 사용자 진행률 정보 조회 (current, total, percentage)
   async getUserProgress(uid) {
     try {
-      console.log('📊 [Get User Progress] Fetching for uid:', uid);
 
       const result = await db.oneOrNone(
         `SELECT
@@ -138,7 +137,6 @@ class UserQueries {
       const total = result.total || 20;
       const percentage = Math.round((current / total) * 100);
 
-      console.log('✅ [Get User Progress] Result:', { current, total, percentage });
 
       return {
         current,
@@ -187,7 +185,6 @@ class UserQueries {
   // 최근 학습 기록 조회 (Model Example, Small Talk, Cases in Point만)
   async getUserHistory(uid) {
     try {
-      console.log('📋 [getUserHistory] Fetching for uid:', uid);
 
       // 모든 카테고리(1,2,3)를 반환하되, user_progress가 없어도 기본 정보는 제공
       const result = await db.manyOrNone(
@@ -221,7 +218,6 @@ class UserQueries {
         [uid]
       );
 
-      console.log('✅ [getUserHistory] Result:', result);
       return result || [];
     } catch (error) {
       console.error('❌ [getUserHistory] Query error:', error);
@@ -232,7 +228,6 @@ class UserQueries {
   // 통계 - StreakSection 데이터 조회
   async getStreakData(uid) {
     try {
-      console.log('🔥 [Get Streak Data] Fetching for uid:', uid);
 
       const result = await db.one(
         `SELECT
@@ -243,7 +238,6 @@ class UserQueries {
         [uid]
       );
 
-      console.log('✅ [Get Streak Data] Result:', result);
 
       return {
         current: parseInt(result.current) || 0,
@@ -259,7 +253,6 @@ class UserQueries {
   // 통계 - WeeklyChart 데이터 조회 (요일별 학습 문제 수)
   async getWeeklyChart(uid, period = 'week') {
     try {
-      console.log('📊 [Get Weekly Chart] Fetching for uid:', uid, 'period:', period);
 
       // 기간 계산
       let startDate;
@@ -331,7 +324,6 @@ class UserQueries {
         weeklyData[dayIndex].count = parseInt(row.question_count) || 0;
       });
 
-      console.log('✅ [Get Weekly Chart] Result:', weeklyData);
 
       return weeklyData;
 
@@ -344,7 +336,6 @@ class UserQueries {
   // 통계 - SummaryCard 데이터 조회 (기간별)
   async getSummaryStats(uid, period = 'week') {
     try {
-      console.log('📊 [Get Summary Stats] Fetching for uid:', uid, 'period:', period);
 
       // 기간 계산
       let startDate;
@@ -411,7 +402,6 @@ class UserQueries {
         [uid, startDate.toISOString().split('T')[0]]
       );
 
-      console.log('✅ [Get Summary Stats] Result:', result);
 
       return {
         totalDays: parseInt(result.total_days) || 0,
@@ -429,7 +419,6 @@ class UserQueries {
   // 통계 - CategoryProgress 데이터 조회 (카테고리별 진행률)
   async getCategoryProgress(uid) {
     try {
-      console.log('📊 [Get Category Progress] Fetching for uid:', uid);
 
       const results = await db.any(
         `SELECT
@@ -464,7 +453,6 @@ class UserQueries {
         total: parseInt(row.total_questions) || 0
       }));
 
-      console.log('✅ [Get Category Progress] Result:', categoryProgress);
 
       return categoryProgress;
 
@@ -477,7 +465,6 @@ class UserQueries {
   // 통계 - LearningPattern 데이터 조회 (학습 패턴 분석)
   async getLearningPattern(uid, period = 'week') {
     try {
-      console.log('📊 [Get Learning Pattern] Fetching for uid:', uid, 'period:', period);
 
       // 기간 계산
       let startDate;
@@ -521,7 +508,6 @@ class UserQueries {
         [uid, startDate.toISOString().split('T')[0]]
       );
 
-      console.log('✅ [Get Learning Pattern] Result:', result);
 
       return {
         dailyAvgQuestions: parseFloat(result.daily_avg_questions) || 0,
@@ -539,7 +525,6 @@ class UserQueries {
   // MyPage - Summary 데이터 조회 (오늘 학습, 주간 출석, 주간 학습 문제)
   async getMypageSummary(uid) {
     try {
-      console.log('📊 [Get MyPage Summary] Fetching for uid:', uid);
 
       // 주간 시작일 계산 (오늘 기준 7일 전)
       const weekStartDate = new Date();
@@ -576,7 +561,6 @@ class UserQueries {
         [uid, weekStartDate.toISOString().split('T')[0]]
       );
 
-      console.log('✅ [Get MyPage Summary] Result:', result);
 
       return {
         todayQuestions: parseInt(result.today_questions) || 0,
@@ -593,7 +577,6 @@ class UserQueries {
   // 학습 목표 조회
   async getGoals(uid) {
     try {
-      console.log('📖 [Get Goals] Start with uid:', uid);
 
       const result = await db.oneOrNone(
         `SELECT
@@ -605,7 +588,6 @@ class UserQueries {
         [uid]
       );
 
-      console.log('✅ [Get Goals] Result:', result);
 
       return result || {
         dailyGoal: 1,
@@ -622,7 +604,6 @@ class UserQueries {
   // 학습 목표 업데이트
   async updateGoals(uid, goals) {
     try {
-      console.log('📝 [Update Goals] Start with params:', { uid, goals });
 
       const { dailyGoal, weeklyAttendance, weeklyTotalQuiz } = goals;
 
@@ -648,7 +629,6 @@ class UserQueries {
 
       // 업데이트할 필드가 없으면 리턴
       if (updateFields.length === 0) {
-        console.log('⚠️ [Update Goals] No fields to update');
         return;
       }
 
@@ -661,12 +641,9 @@ class UserQueries {
         WHERE uid = $${paramIndex}
       `;
 
-      console.log('🔍 [Update Goals] Query:', query);
-      console.log('🔍 [Update Goals] Values:', values);
 
       await db.none(query, values);
 
-      console.log('✅ [Update Goals] Success');
 
     } catch (error) {
       console.error('❌ [Update Goals] Query error:', error);
@@ -677,7 +654,6 @@ class UserQueries {
   // 프로필 업데이트 (이름, 이메일)
   async updateProfile(uid, profileData) {
     try {
-      console.log('📝 [Update Profile] Start with params:', { uid, profileData });
 
       const { name, email } = profileData;
 
@@ -698,7 +674,6 @@ class UserQueries {
 
       // 업데이트할 필드가 없으면 리턴
       if (updateFields.length === 0) {
-        console.log('⚠️ [Update Profile] No fields to update');
         return;
       }
 
@@ -711,12 +686,9 @@ class UserQueries {
         WHERE uid = $${paramIndex}
       `;
 
-      console.log('🔍 [Update Profile] Query:', query);
-      console.log('🔍 [Update Profile] Values:', values);
 
       await db.none(query, values);
 
-      console.log('✅ [Update Profile] Success');
 
     } catch (error) {
       console.error('❌ [Update Profile] Query error:', error);
@@ -727,14 +699,12 @@ class UserQueries {
   // 퀴즈 모드 조회
   async getQuizMode(uid) {
     try {
-      console.log('🎮 [Get Quiz Mode] Fetching for uid:', uid);
 
       const result = await db.oneOrNone(
         `SELECT quiz_mode FROM users WHERE uid = $1`,
         [uid]
       );
 
-      console.log('✅ [Get Quiz Mode] Result:', result);
 
       return result ? result.quiz_mode : 'keyboard';
 
@@ -747,7 +717,6 @@ class UserQueries {
   // 퀴즈 모드 업데이트
   async updateQuizMode(uid, quizMode) {
     try {
-      console.log('🎮 [Update Quiz Mode] Start with params:', { uid, quizMode });
 
       // 유효성 검사
       if (!['voice', 'keyboard'].includes(quizMode)) {
@@ -759,7 +728,6 @@ class UserQueries {
         [quizMode, uid]
       );
 
-      console.log('✅ [Update Quiz Mode] Success');
 
     } catch (error) {
       console.error('❌ [Update Quiz Mode] Query error:', error);
@@ -770,7 +738,6 @@ class UserQueries {
   // 음성 성별 업데이트
   async updateVoiceGender(uid, voiceGender) {
     try {
-      console.log('🎤 [Update Voice Gender] Start with params:', { uid, voiceGender });
 
       // 유효성 검사
       const validVoices = ['us_male', 'us_female', 'uk_male', 'uk_female'];
@@ -783,7 +750,6 @@ class UserQueries {
         [voiceGender, uid]
       );
 
-      console.log('✅ [Update Voice Gender] Success');
 
     } catch (error) {
       console.error('❌ [Update Voice Gender] Query error:', error);

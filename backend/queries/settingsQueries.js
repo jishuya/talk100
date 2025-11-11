@@ -4,7 +4,6 @@ class SettingsQueries {
   // 사용자 설정 조회
   async getUserSettings(uid) {
     try {
-      console.log('⚙️ [Get User Settings] Fetching for uid:', uid);
 
       // 설정 조회
       const settingsResult = await db.oneOrNone(
@@ -36,11 +35,9 @@ class SettingsQueries {
 
       // 설정이 없으면 기본값 생성
       if (!settingsResult) {
-        console.log('⚙️ [Get User Settings] No settings found, creating default settings');
         return await this.createDefaultSettings(uid);
       }
 
-      console.log('✅ [Get User Settings] Result:', settingsResult);
 
       return {
         notifications: {
@@ -85,7 +82,6 @@ class SettingsQueries {
   // 기본 설정 생성
   async createDefaultSettings(uid) {
     try {
-      console.log('⚙️ [Create Default Settings] For uid:', uid);
 
       await db.none(
         `INSERT INTO user_settings (
@@ -150,7 +146,6 @@ class SettingsQueries {
   // 사용자 설정 업데이트
   async updateUserSettings(uid, settings) {
     try {
-      console.log('⚙️ [Update User Settings] For uid:', uid, 'Settings:', settings);
 
       // 설정이 없으면 먼저 생성
       const existingSettings = await db.oneOrNone(
@@ -212,7 +207,6 @@ class SettingsQueries {
       updates.push(`updated_at = CURRENT_TIMESTAMP`);
 
       if (updates.length === 1) { // updated_at만 있으면 업데이트할 것이 없음
-        console.log('⚙️ [Update User Settings] No fields to update');
         return await this.getUserSettings(uid);
       }
 
@@ -225,7 +219,6 @@ class SettingsQueries {
 
       const result = await db.one(query, values);
 
-      console.log('✅ [Update User Settings] Success:', result);
 
       return await this.getUserSettings(uid);
 

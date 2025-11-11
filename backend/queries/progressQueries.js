@@ -89,7 +89,6 @@ class ProgressQueries {
             [userId, today]
           );
 
-          console.log(`✅ [Day Completed] User: ${userId}, Day: ${day}, Category: ${categoryId}`);
         }
       } catch (dayCompletionError) {
         console.error('⚠️ [Day Completion] Update failed (non-critical):', dayCompletionError);

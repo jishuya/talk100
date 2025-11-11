@@ -32,9 +32,6 @@ export const QuizContent = ({
 }) => {
   // userAnswer 변경 로그
   useEffect(() => {
-    console.log('📝 [QuizContent] userAnswer 업데이트됨:', userAnswer);
-    console.log('📝 [QuizContent] keywordInputs:', keywordInputs);
-    console.log('📝 [QuizContent] gradingResult:', gradingResult);
   }, [userAnswer, keywordInputs, gradingResult]);
   if (!question) {
     return (

@@ -54,7 +54,6 @@ class ApiService {
     // 1. Mock 모드인 경우 Mock 데이터 반환
     if (import.meta.env.VITE_USE_MOCK_DATA === 'true') {
       if (mockData) {
-        console.log(`🔧 [Mock Mode] Using mock data for ${mockKey}`);
         return this.simulateNetworkDelay(mockData, options.delay || 500);
       } else {
         console.warn(`⚠️ [Mock Mode] Mock 데이터를 찾을 수 없습니다: ${mockKey}`);
@@ -70,7 +69,6 @@ class ApiService {
 
       // 3. API 실패시 Mock 데이터로 자동 fallback
       if (mockData) {
-        console.log(`🔄 [Fallback] Using mock data for ${mockKey} due to API failure`);
         return this.simulateNetworkDelay(mockData, options.delay || 300);
       }
 
@@ -175,7 +173,6 @@ class ApiService {
 
     // 인증 오류 - 로그인 페이지로 리다이렉트
     if (error.message?.includes('인증이 만료') || error.message?.includes('401')) {
-      console.log('🔄 [Redirect] Redirecting to login page');
       setTimeout(() => {
         window.location.href = '/login';
       }, 1000);

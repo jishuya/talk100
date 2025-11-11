@@ -109,7 +109,6 @@ class BadgeService {
    */
   async checkAndUpdateBadges(userId) {
     try {
-      console.log('🏆 [Badge Service] Checking badges for user:', userId);
 
       // 1. 현재 사용자 데이터 조회
       const user = await db.one(
@@ -205,7 +204,6 @@ class BadgeService {
 
         if (shouldEarn) {
           newBadges.push(badge.id);
-          console.log(`  ✅ New badge earned: ${badge.name}`);
         }
       }
 
@@ -219,9 +217,7 @@ class BadgeService {
           [JSON.stringify(updatedBadges), userId]
         );
 
-        console.log(`🎉 User ${userId} earned ${newBadges.length} new badge(s):`, newBadges);
       } else {
-        console.log('  ℹ️ No new badges earned');
       }
 
       return {
@@ -258,7 +254,6 @@ class BadgeService {
    */
   async getUserBadges(userId) {
     try {
-      console.log('🏆 [Badge Service] Fetching badges for user:', userId);
 
       const user = await db.oneOrNone(
         `SELECT earned_badges FROM users WHERE uid = $1`,
@@ -272,7 +267,6 @@ class BadgeService {
         earned: earnedBadgeIds.includes(badge.id)
       }));
 
-      console.log(`✅ [Badge Service] Found ${earnedBadgeIds.length} earned badges`);
 
       return badges;
 

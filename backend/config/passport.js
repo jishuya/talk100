@@ -106,43 +106,27 @@ passport.use(new KakaoStrategy({
   clientSecret: process.env.KAKAO_CLIENT_SECRET,
   callbackURL: process.env.KAKAO_CALLBACK_URL || "http://localhost:5000/auth/kakao/callback"
 }, async (accessToken, refreshToken, profile, done) => {
-  console.log('\n=== Kakao Strategy 실행 시작 ===');
-  console.log('Timestamp:', new Date().toISOString());
-  console.log('Access Token 존재:', !!accessToken);
-  console.log('Refresh Token 존재:', !!refreshToken);
 
   try {
-    console.log('📦 Kakao 프로필 전체 데이터:');
-    console.log(JSON.stringify(profile, null, 2));
-    console.log('📦 Kakao _json 데이터:');
-    console.log(JSON.stringify(profile._json, null, 2));
 
     // 필수 정보 검증
-    console.log('✓ 프로필 ID 검증 중...');
     if (!profile.id) {
       console.error('❌ Kakao OAuth Error: No profile ID');
       return done(new Error('Kakao profile ID is missing'), null);
     }
-    console.log('✓ 프로필 ID 확인:', profile.id);
 
     // Kakao 프로필에서 이메일 추출 (선택사항)
-    console.log('✓ 이메일 추출 중...');
     const kakaoAccount = profile._json?.kakao_account;
-    console.log('kakao_account 존재:', !!kakaoAccount);
 
     if (kakaoAccount) {
-      console.log('kakao_account 데이터:', JSON.stringify(kakaoAccount, null, 2));
     }
 
     const email = kakaoAccount?.email;
-    console.log('추출된 이메일:', email);
 
     // 이메일이 없으면 가상 이메일 생성
     const finalEmail = email || `kakao_${profile.id}@kakao.local`;
     if (!email) {
-      console.log('⚠️ 이메일 미제공 - 가상 이메일 사용:', finalEmail);
     } else {
-      console.log('✓ 이메일 확인 완료:', email);
     }
 
     // 닉네임 추출 (동의 필요 시 기본값 사용)
@@ -150,10 +134,8 @@ passport.use(new KakaoStrategy({
     if (kakaoAccount?.profile?.nickname) {
       nickname = kakaoAccount.profile.nickname;
     }
-    console.log('✓ 닉네임:', nickname);
 
     // Kakao 프로필 정보를 우리 형식으로 변환
-    console.log('✓ 사용자 데이터 변환 중...');
     const userData = {
       uid: `kakao_${profile.id}`,
       name: nickname,
@@ -162,12 +144,8 @@ passport.use(new KakaoStrategy({
       voice_gender: 'male',
       default_difficulty: 2
     };
-    console.log('✓ 변환된 사용자 데이터:', JSON.stringify(userData, null, 2));
 
-    console.log('✓ DB에 사용자 찾기/생성 중...');
     const user = await userQueries.findOrCreateUser(userData);
-    console.log('✅ 사용자 생성/조회 성공:', user.uid);
-    console.log('사용자 정보:', JSON.stringify(user, null, 2));
 
     return done(null, user);
 

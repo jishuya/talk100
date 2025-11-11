@@ -108,7 +108,6 @@ const MyPage = () => {
           onChange: async (value) => {
             try {
               await updateVoiceGenderMutation.mutateAsync(value);
-              console.log('✅ Voice gender updated successfully:', value);
             } catch (error) {
               console.error('Voice gender update error:', error);
               alert('음성 선택 변경에 실패했습니다.');
@@ -277,7 +276,6 @@ const MyPage = () => {
       // 백엔드 업데이트
       if (settingId === 'voiceGender') {
         await updateVoiceGenderMutation.mutateAsync(value);
-        console.log('✅ Voice gender updated successfully:', value);
       }
     } catch (error) {
       console.error('Setting radio error:', error);

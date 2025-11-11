@@ -61,7 +61,6 @@ class AvatarQueries {
         [avatarEmoji, userId]
       );
 
-      console.log(`🦊 [Avatar Updated] User: ${userId}, Avatar: ${avatarEmoji}`);
 
       return {
         success: true,
