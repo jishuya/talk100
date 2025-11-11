@@ -171,10 +171,10 @@ class QuizQueries {
         if (!userProgress) {
           await t.none(
             `INSERT INTO user_progress (user_id, category_id, last_studied_question_id, solved_count)
-             VALUES ($1, 4, 0, 0)`,
+             VALUES ($1, 4, NULL, 0)`,
             [userId]
           );
-          userProgress = { last_studied_question_id: 0, solved_count: 0 };
+          userProgress = { last_studied_question_id: null, solved_count: 0 };
         } else {
           // 🌅 자정 리셋 체크: last_studied_timestamp가 오늘이 아니면 solved_count를 0으로 리셋
           const lastStudiedDate = userProgress.last_studied_timestamp
@@ -196,7 +196,7 @@ class QuizQueries {
         // 3. 다음 문제 범위 계산 (question_id 기준)
         // 남은 문제 수 = daily_goal - solved_count
         const remainingQuestions = Math.max(0, dailyGoal - userProgress.solved_count);
-        const startQuestionId = userProgress.last_studied_question_id + 1;
+        const startQuestionId = (userProgress.last_studied_question_id || 0) + 1;
 
         // 목표 달성 후 추가 학습: remainingQuestions = 0이면 daily_goal 만큼 추가 제공
         const questionsToFetch = remainingQuestions > 0 ? remainingQuestions : dailyGoal;

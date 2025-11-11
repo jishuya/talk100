@@ -64,9 +64,9 @@ CREATE TABLE users (
     audio_speed NUMERIC(2,1) DEFAULT 1.0
         CHECK (audio_speed IN (0.5, 1.0, 1.5, 2.0)),
     default_difficulty INTEGER DEFAULT 2 CHECK (default_difficulty BETWEEN 1 AND 3),
-    daily_goal INTEGER DEFAULT 1 CHECK (daily_goal >= 1),  -- Quiz Set (Day 개수)
-    attendance_goal int4 DEFAULT 1 NULL,   -- 주간 목표 출석일
-    quiz_count_goal int4 DEFAULT 1 NULL,   -- 주간 목표 문제수
+    daily_goal INTEGER DEFAULT 10 CHECK (daily_goal >= 1),  -- Quiz Set (Day 개수) - 일일 학습목표 10문제
+    attendance_goal int4 DEFAULT 3 NULL,   -- 주간 목표 출석일 - 주 3일
+    quiz_count_goal int4 DEFAULT 30 NULL,   -- 주간 목표 문제수 - 주 30문제
     quiz_mode VARCHAR(20) DEFAULT 'keyboard' NOT NULL CHECK (quiz_mode IN ('voice', 'keyboard')),  -- 퀴즈 입력 모드
     
     -- 통계
