@@ -129,9 +129,9 @@ KAKAO_CALLBACK_URL=https://your-backend-url.up.railway.app/auth/kakao/callback
 
 ---
 
-#### 옵션 B: 새로운 DB 초기화 (추천)
+#### 옵션 B: 완전한 DB 덤프 사용 (추천)
 
-**talk100_postgresql.sql 파일 사용** (스키마 + 초기 데이터 포함)
+**talk100.sql 파일 사용** (pg_dump로 생성된 완전한 덤프)
 
 1. **Railway CLI 설치**
 ```bash
@@ -155,17 +155,24 @@ railway connect postgres
 
 5. **SQL 파일 실행**
 
-**방법 1: 파일 경로로 실행**
+**방법 1: 파일 경로로 실행 (추천)**
 ```sql
-\i /home/jishu/workspace/lab/talk100/talk100_postgresql.sql
+\i /home/jishu/workspace/lab/talk100/talk100.sql
 ```
 
-**방법 2: 파일 내용 복사 붙여넣기**
+**방법 2: psql 명령으로 실행**
+```bash
+# Railway DB 연결 정보로 직접 실행
+railway run psql < talk100.sql
+```
+
+**방법 3: 파일 내용 복사 붙여넣기 (파일이 너무 크면 비추천)**
 ```bash
 # 로컬 터미널에서
-cat talk100_postgresql.sql
+cat talk100.sql
 
 # 출력된 내용을 복사하여 Railway PostgreSQL에 붙여넣기
+# 주의: 파일이 커서 시간이 오래 걸릴 수 있음
 ```
 
 6. **데이터 확인**
@@ -173,14 +180,26 @@ cat talk100_postgresql.sql
 -- 테이블 목록 확인
 \dt
 
--- 문제 수 확인 (약 400개 이상 있어야 함)
-SELECT COUNT(*) FROM questions;
+-- 문제 수 확인
+SELECT COUNT(*) as total_questions FROM questions;
 
 -- 카테고리 확인
 SELECT * FROM category;
 
+-- 사용자 수 확인 (있다면)
+SELECT COUNT(*) as total_users FROM users;
+
+-- 음원 파일 경로 확인
+SELECT audio_us_male FROM questions LIMIT 5;
+
 -- 종료
 \q
+```
+
+**예상 결과**:
+```
+total_questions: 400개 이상
+categories: Model Example, Small Talk, Cases in Point, Today, Wrong Answers, Favorites
 ```
 
 ---
