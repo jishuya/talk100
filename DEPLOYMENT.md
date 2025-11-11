@@ -116,6 +116,23 @@ KAKAO_CALLBACK_URL=https://your-backend-url.up.railway.app/auth/kakao/callback
 
 ### Step 4: 데이터베이스 초기화
 
+#### 옵션 A: 로컬 DB 데이터 확인 (먼저 실행)
+
+```bash
+# 로컬에 중요한 데이터가 있는지 확인
+./scripts/check-local-db.sh
+```
+
+**결과에 따라:**
+- ✅ "덤프 불필요" → **옵션 B 진행**
+- ⚠️ "중요한 데이터 발견" → **옵션 C 진행**
+
+---
+
+#### 옵션 B: 새로운 DB 초기화 (추천)
+
+**talk100_postgresql.sql 파일 사용** (스키마 + 초기 데이터 포함)
+
 1. **Railway CLI 설치**
 ```bash
 npm install -g @railway/cli
@@ -131,30 +148,83 @@ railway login
 railway link
 ```
 
-4. **데이터베이스 연결 및 초기화**
+4. **PostgreSQL 연결**
 ```bash
-# PostgreSQL 접속
 railway connect postgres
-
-# 또는 로컬에서 psql 사용
-psql "postgresql://postgres:...@...railway.app:5432/railway"
-
-# SQL 파일 실행
-\i /path/to/talk100_postgresql.sql
-
-# 또는 직접 복사 붙여넣기
 ```
 
-5. **데이터 확인**
+5. **SQL 파일 실행**
+
+**방법 1: 파일 경로로 실행**
+```sql
+\i /home/jishu/workspace/lab/talk100/talk100_postgresql.sql
+```
+
+**방법 2: 파일 내용 복사 붙여넣기**
+```bash
+# 로컬 터미널에서
+cat talk100_postgresql.sql
+
+# 출력된 내용을 복사하여 Railway PostgreSQL에 붙여넣기
+```
+
+6. **데이터 확인**
 ```sql
 -- 테이블 목록 확인
 \dt
 
+-- 문제 수 확인 (약 400개 이상 있어야 함)
+SELECT COUNT(*) FROM questions;
+
+-- 카테고리 확인
+SELECT * FROM category;
+
+-- 종료
+\q
+```
+
+---
+
+#### 옵션 C: 로컬 DB 덤프 및 마이그레이션
+
+**로컬에 중요한 데이터가 있는 경우**
+
+1. **로컬 DB 덤프 생성**
+```bash
+# SQL 파일로 덤프
+pg_dump -U postgres -d talk100 -f talk100_production_backup.sql
+
+# 또는 바이너리 포맷 (더 빠름)
+pg_dump -U postgres -d talk100 -F c -f talk100_production_backup.backup
+```
+
+2. **Railway로 덤프 복원**
+
+**SQL 파일인 경우:**
+```bash
+railway connect postgres
+\i /path/to/talk100_production_backup.sql
+```
+
+**바이너리 파일인 경우:**
+```bash
+# Railway DB 연결 정보 확인
+railway variables
+
+# pg_restore 사용
+pg_restore -h [PGHOST] -p [PGPORT] -U [PGUSER] -d [PGDATABASE] talk100_production_backup.backup
+```
+
+3. **데이터 확인**
+```sql
 -- 사용자 수 확인
 SELECT COUNT(*) FROM users;
 
--- 문제 수 확인
-SELECT COUNT(*) FROM questions;
+-- 퀴즈 시도 기록 확인
+SELECT COUNT(*) FROM question_attempts;
+
+-- 최근 활동 확인
+SELECT * FROM users ORDER BY last_login_at DESC LIMIT 5;
 ```
 
 ---
