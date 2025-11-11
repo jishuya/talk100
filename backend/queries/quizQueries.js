@@ -152,8 +152,6 @@ class QuizQueries {
   async getTodayQuizQuestions(userId) {
     try {
       const result = await db.task(async t => {
-        console.log('📅 [Today Quiz] Starting for userId:', userId);
-
         // 1. 사용자 설정 조회 (daily_goal)
         const settings = await this._getUserQuizSettings(t, userId);
         const dailyGoal = settings.daily_goal || 20; // 기본값 20문제
@@ -185,7 +183,6 @@ class QuizQueries {
           const today = new Date().toISOString().split('T')[0];
 
           if (lastStudiedDate && lastStudiedDate !== today) {
-            console.log('🌅 [Today Quiz] New day detected - resetting solved_count');
             await t.none(
               `UPDATE user_progress
                SET solved_count = 0
@@ -262,20 +259,8 @@ class QuizQueries {
           };
         });
 
-        console.log('✅ [Today Quiz] Questions loaded:', processedQuestions.length);
-        if (processedQuestions.length > 0) {
-          console.log('[Backend] User voice_gender:', processedQuestions[0]?.voice_gender);
-          console.log('[Backend] audio returned to frontend:', processedQuestions[0]?.audio);
-        }
-
         // 5. 진행률 계산 (solved_count / daily_goal * 100)
         const percentage = Math.round((userProgress.solved_count / dailyGoal) * 100);
-
-        console.log('📊 [Today Quiz] Progress:', {
-          solved: userProgress.solved_count,
-          goal: dailyGoal,
-          percentage
-        });
 
         return {
           quiz_type: 'daily',
@@ -664,8 +649,6 @@ class QuizQueries {
              WHERE user_id = $1 AND date = $2`,
             [userId, today]
           );
-
-          console.log(`🎯 [Goal Met] User: ${userId}, Questions: ${summary.questions_attempted}/${user.daily_goal}`);
         }
 
         // 3. 오늘 첫 학습이면 streak 업데이트
@@ -707,8 +690,6 @@ class QuizQueries {
           );
 
           streakUpdated = true;
-
-          console.log(`✅ [Streak Updated] User: ${userId}, New Streak: ${newStreak}, Longest: ${newLongest}`);
         }
 
         // 4. 레벨업 체크 및 users 테이블 업데이트
@@ -736,13 +717,6 @@ class QuizQueries {
            WHERE uid = $3`,
           [currentQuestions, newLevel, userId]
         );
-
-        console.log(`📊 [Questions Updated] User: ${userId}, Total: ${currentQuestions}, Level: ${newLevel}`);
-
-        // 4-4. 레벨업 시 로그
-        if (levelUpInfo) {
-          console.log(`🎉 [Level Up!] User: ${userId}, ${levelUpInfo.previousLevel} → ${levelUpInfo.newLevel}, Avatar: ${levelUpInfo.avatar}`);
-        }
 
         return {
           success: true,

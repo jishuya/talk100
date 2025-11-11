@@ -142,13 +142,9 @@ const QuizPage = () => {
   // 음원 URL 생성
   const audioUrl = useMemo(() => {
     if (!question?.audio) {
-      console.log('[QuizPage] No audio in question');
       return null;
     }
-    console.log('[QuizPage] voice_gender from backend:', question.voice_gender);
-    console.log('[QuizPage] question.audio from backend:', question.audio);
     const url = getAudioUrl(question.audio);
-    console.log('[QuizPage] Generated audioUrl:', url);
     return url;
   }, [question?.audio]);
 
@@ -228,10 +224,8 @@ const QuizPage = () => {
 
         // 자동 재생 시도
         await audioRef.current.play();
-        console.log('🎵 Audio auto-playing on correct answer:', audioUrl);
 
       } catch (error) {
-        console.warn('⚠️ Autoplay failed:', error.message);
         setAudioError(true);
       }
     };
@@ -379,11 +373,6 @@ const QuizPage = () => {
   // 🎤 음성인식 결과를 userAnswer에 반영 및 키워드 자동 추출
   useEffect(() => {
     if (voiceTranscript && inputMode === 'voice' && selectedKeywords.length > 0) {
-      console.log('🎤 [음성인식] voiceTranscript:', voiceTranscript);
-      console.log('🎤 [음성인식] selectedKeywords:', selectedKeywords);
-      console.log('🎤 [음성인식] question.keywords (전체):', question?.keywords);
-      console.log('🎤 [음성인식] question.english:', question?.english);
-
       setUserAnswer(voiceTranscript);
 
       // 음성인식 결과에서 키워드 자동 추출
@@ -397,22 +386,15 @@ const QuizPage = () => {
         }
       });
 
-      console.log('🎤 [음성인식] newKeywordInputs:', newKeywordInputs);
-
       // 키워드 입력값 업데이트 (함수형 업데이트로 이전 키워드 유지)
       setKeywordInputs(prevInputs => {
-        console.log('🎤 [음성인식] prevInputs:', prevInputs);
-
         const mergedKeywordInputs = {
           ...prevInputs,  // 이전에 맞춘 키워드 유지
           ...newKeywordInputs  // 새로 맞춘 키워드 추가
         };
 
-        console.log('🎤 [음성인식] mergedKeywordInputs:', mergedKeywordInputs);
-
         // 음성인식 결과로 자동 채점 (병합된 키워드로 채점)
         const allCorrect = checkAllKeywords(mergedKeywordInputs);
-        console.log('🎤 [음성인식] allCorrect:', allCorrect);
 
         submitAnswer(mergedKeywordInputs, voiceTranscript);
 
@@ -446,20 +428,16 @@ const QuizPage = () => {
 
     if (isVoiceListening) {
       // 녹음 중지
-      console.log('🛑 [녹음] 중지');
       stopVoiceListening();
     } else {
       // 이미 답변이 있고 모든 키워드가 정답이면 grading 모드로 전환 (제출)
       // 부분 정답인 경우는 다시 녹음할 수 있도록 허용
       if (userAnswer && gradingResult && gradingResult.isAllCorrect) {
-        console.log('✅ [녹음] 이미 모든 정답 - grading 모드로 전환');
         setQuizMode('grading');
         return;
       }
 
       // 녹음 시작 (부분 정답이더라도 다시 시도 가능)
-      console.log('🎙️ [녹음] 시작 - transcript 초기화');
-      console.log('🎙️ [녹음] 현재 keywordInputs:', keywordInputs);
       resetVoiceTranscript();
       startVoiceListening();
     }
@@ -664,9 +642,7 @@ const QuizPage = () => {
       audioRef.current.currentTime = 0;
       await audioRef.current.play();
       setAudioError(false);
-      console.log('🔁 Audio replaying at 1x:', audioUrl);
     } catch (error) {
-      console.error('Audio playback error:', error);
       setAudioError(true);
       alert('오디오 재생에 실패했습니다.');
     }
@@ -686,9 +662,7 @@ const QuizPage = () => {
       audioRef.current.currentTime = 0;
       await audioRef.current.play();
       setAudioError(false);
-      console.log('🔁 Audio replaying at 0.8x:', audioUrl);
     } catch (error) {
-      console.error('Audio playback error:', error);
       setAudioError(true);
       alert('오디오 재생에 실패했습니다.');
     }
