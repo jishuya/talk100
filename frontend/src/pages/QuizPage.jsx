@@ -32,7 +32,7 @@ import { useQuizGrading } from '../hooks/useQuizGrading';
 import { useVoiceInput } from '../hooks/useVoiceInput';
 
 // API 훅 및 서비스
-import { useToggleWrongAnswer, useToggleFavorite, useUpdateProgress, useQuizMode, useUpdateQuizMode } from '../hooks/useApi';
+import { useToggleWrongAnswer, useToggleFavorite, useUpdateProgress, useQuizMode, useUpdateQuizMode, useHistoryData } from '../hooks/useApi';
 import { api } from '../services/apiService';
 
 // 음원 유틸리티
@@ -115,6 +115,16 @@ const QuizPage = () => {
   // 퀴즈 모드 조회 (DB에서 사용자 설정 불러오기)
   const { data: quizModeData } = useQuizMode();
   const updateQuizModeMutation = useUpdateQuizMode();
+
+  // 카테고리 진행률 정보 (카테고리 퀴즈용)
+  const { data: historyData } = useHistoryData();
+  const categoryProgress = useMemo(() => {
+    if (!historyData || !session?.category) return null;
+    const categoryId = session.category;
+    // historyData에서 해당 category 찾기
+    const categoryInfo = historyData.find(item => item.id === categoryId);
+    return categoryInfo || null;
+  }, [historyData, session?.category]);
 
   // 로컬 상태
   const [userAnswer, setUserAnswer] = useState('');
@@ -903,7 +913,13 @@ const QuizPage = () => {
       )}
 
       {/* 프로그레스 바 */}
-      <QuizProgressBar />
+      <QuizProgressBar
+        category={session?.category}
+        currentIndex={currentQuestionIndex}
+        totalQuestions={questionsData?.length || 0}
+        categoryCompleted={categoryProgress?.category_completed || 0}
+        categoryTotal={categoryProgress?.category_total || 0}
+      />
 
       {/* 🎵 음원 상태 표시 */}
       {audioUrl && (
