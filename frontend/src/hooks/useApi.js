@@ -205,8 +205,22 @@ export const useUpdateVoiceGender = () => {
   return useMutation({
     mutationFn: (voiceGender) => api.updateVoiceGender(voiceGender),
     onSuccess: () => {
+      // React Query 캐시 무효화
       queryClient.invalidateQueries(['mypage']);
       queryClient.invalidateQueries(['user', 'profile']);
+
+      // localStorage에서 모든 퀴즈 세션 삭제 (voice_gender가 포함된 audio 경로 갱신)
+      const keysToRemove = [];
+      for (let key in localStorage) {
+        if (Object.prototype.hasOwnProperty.call(localStorage, key)) {
+          // quiz_session으로 시작하는 키만 삭제
+          if (key.startsWith('quiz_session_')) {
+            keysToRemove.push(key);
+          }
+        }
+      }
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+      console.log(`✅ Voice gender updated. Cleared ${keysToRemove.length} quiz sessions.`);
     },
   });
 };

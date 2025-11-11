@@ -61,6 +61,8 @@ CREATE TABLE users (
     -- 설정
     voice_gender VARCHAR(20) DEFAULT 'us_female'
         CHECK (voice_gender IN ('us_male', 'us_female', 'uk_male', 'uk_female')),
+    audio_speed NUMERIC(2,1) DEFAULT 1.0
+        CHECK (audio_speed IN (0.5, 1.0, 1.5, 2.0)),
     default_difficulty INTEGER DEFAULT 2 CHECK (default_difficulty BETWEEN 1 AND 3),
     daily_goal INTEGER DEFAULT 1 CHECK (daily_goal >= 1),  -- Quiz Set (Day 개수)
     attendance_goal int4 DEFAULT 1 NULL,   -- 주간 목표 출석일
@@ -79,6 +81,7 @@ CREATE TABLE users (
     weekly_attendance INTEGER[] DEFAULT ARRAY[0,0,0,0,0,0,0],  -- 주간 출석 [월,화,수,목,금,토,일]
     earned_badges JSONB DEFAULT '[]'::jsonb
 );
+
 
 -- ================================================
 -- 3. category 테이블
@@ -119,12 +122,10 @@ CREATE TABLE questions (
     english_b TEXT,
 
     -- 음성 파일 경로
-    audio_male VARCHAR(500),
-    audio_female VARCHAR(500),
-    audio_male_a VARCHAR(500),
-    audio_female_a VARCHAR(500),
-    audio_male_b VARCHAR(500),
-    audio_female_b VARCHAR(500),
+    audio_us_male VARCHAR(500),
+    audio_us_female VARCHAR(500),
+    audio_uk_male VARCHAR(500),
+    audio_uk_female VARCHAR(500),
 
     -- 채점용
     keywords TEXT[],  -- 핵심 단어 배열

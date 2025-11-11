@@ -1,7 +1,25 @@
+import { useEffect } from 'react';
 import Modal, { ModalBody } from '../ui/Modal';
 import { Button } from '../ui/Button';
 
 const HelpModal = ({ isOpen, onClose }) => {
+  // Enter 키 이벤트 처리
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Enter' && isOpen) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
   return (
     <Modal
       isOpen={isOpen}

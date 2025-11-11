@@ -141,8 +141,15 @@ const QuizPage = () => {
 
   // 음원 URL 생성
   const audioUrl = useMemo(() => {
-    if (!question?.audio) return null;
-    return getAudioUrl(question.audio);
+    if (!question?.audio) {
+      console.log('[QuizPage] No audio in question');
+      return null;
+    }
+    console.log('[QuizPage] voice_gender from backend:', question.voice_gender);
+    console.log('[QuizPage] question.audio from backend:', question.audio);
+    const url = getAudioUrl(question.audio);
+    console.log('[QuizPage] Generated audioUrl:', url);
+    return url;
   }, [question?.audio]);
 
   // 즐겨찾기 & 별 상태 (로컬 상태로 관리하여 즉시 UI 업데이트)

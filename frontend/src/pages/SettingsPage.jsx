@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
 // Settings 관련 훅들
-import { useMypageData, useUpdateProfile, useUpdateVoiceGender } from '../hooks/useApi';
+import { useMypageData, useUpdateProfile } from '../hooks/useApi';
 import { api } from '../services/apiService';
 
 // Settings 컴포넌트들
@@ -21,30 +21,19 @@ const SettingsPage = () => {
 
   // 액션 훅들
   const updateProfileMutation = useUpdateProfile();
-  const updateVoiceGenderMutation = useUpdateVoiceGender();
 
   // 모달 상태
   const [showProfileEditModal, setShowProfileEditModal] = useState(false);
   const [showResetConfirmModal, setShowResetConfirmModal] = useState(false);
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
 
-  // 음성 성별 상태
-  const [selectedVoice, setSelectedVoice] = useState('us_male');
-
   // 캐시 크기 상태
   const [cacheSize, setCacheSize] = useState(0);
 
-  // 캐시 크기 계산 및 음성 초기화 (컴포넌트 마운트 시)
+  // 캐시 크기 계산 (컴포넌트 마운트 시)
   useEffect(() => {
     setCacheSize(calculateCacheSize());
   }, []);
-
-  // 프로필 데이터가 로드되면 음성 성별 설정
-  useEffect(() => {
-    if (profile?.voiceGender) {
-      setSelectedVoice(profile.voiceGender);
-    }
-  }, [profile]);
 
   // ================================================================
   // 헬퍼 함수들
@@ -310,20 +299,6 @@ const SettingsPage = () => {
     }
   };
 
-  // 음성 성별 변경
-  const handleVoiceChange = async (voiceGender) => {
-    try {
-      setSelectedVoice(voiceGender);
-      await updateVoiceGenderMutation.mutateAsync(voiceGender);
-      console.log('✅ Voice gender updated:', voiceGender);
-    } catch (error) {
-      console.error('Voice gender update error:', error);
-      // 실패 시 이전 값으로 복원
-      setSelectedVoice(profile?.voiceGender || 'us_male');
-      alert('음성 설정 변경에 실패했습니다.');
-    }
-  };
-
   // 설정 항목 클릭 처리
   const handleItemClick = (item) => {
     switch (item.id) {
@@ -353,14 +328,6 @@ const SettingsPage = () => {
     return profile?.oauthProvider || '-';
   };
 
-  // 음성 옵션 매핑
-  const voiceOptions = [
-    { value: 'us_female', label: 'Ava (미국 여성)', flag: '🇺🇸' },
-    { value: 'us_male', label: 'Andrew (미국 남성)', flag: '🇺🇸' },
-    { value: 'uk_female', label: 'Sonia (영국 여성)', flag: '🇬🇧' },
-    { value: 'uk_male', label: 'Ryan (영국 남성)', flag: '🇬🇧' }
-  ];
-
   const accountItems = [
     {
       id: 'profileEdit',
@@ -372,16 +339,7 @@ const SettingsPage = () => {
       id: 'connectedAccount',
       title: '연결된 계정',
       rightText: getOAuthProvider(),
-      type: 'text'
-    },
-    {
-      id: 'voiceGender',
-      title: '음성 선택',
-      description: '문제 음성 설정',
-      type: 'radio',
-      value: selectedVoice,
-      options: voiceOptions,
-      onChange: handleVoiceChange,
+      type: 'text',
       borderBottom: false
     }
   ];

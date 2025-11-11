@@ -76,16 +76,50 @@ class QuizQueries {
         q.english_a,
         q.korean_b,
         q.english_b,
-        q.audio,
+        u.voice_gender,
+        CASE u.voice_gender
+          WHEN 'us_male' THEN q.audio_us_male
+          WHEN 'us_female' THEN q.audio_us_female
+          WHEN 'uk_male' THEN q.audio_uk_male
+          WHEN 'uk_female' THEN q.audio_uk_female
+          ELSE q.audio_us_male
+        END as audio,
         q.keywords,
         EXISTS(SELECT 1 FROM favorites WHERE question_id = q.question_id AND user_id = $2) as is_favorite,
         EXISTS(SELECT 1 FROM wrong_answers WHERE question_id = q.question_id AND user_id = $2) as is_wrong_answer
       FROM questions q
+      JOIN users u ON u.uid = $2
       WHERE q.category_id = $3 AND q.day = $1 AND q.question_number >= $4
       ORDER BY q.question_number ASC`,
       [day, userId, categoryId, startQuestionNumber]
     );
-    return questions;
+
+    // voice_gender에 따라 audio 경로 가공 (프론트엔드 getAudioUrl이 /audio/ 추가)
+    const processedQuestions = questions.map(q => {
+      let audioPath = '';
+      switch (q.voice_gender) {
+        case 'us_male':
+          audioPath = `US_Andrew/${q.audio}`;
+          break;
+        case 'us_female':
+          audioPath = `US_Ava/${q.audio}`;
+          break;
+        case 'uk_male':
+          audioPath = `UK_Ryan/${q.audio}`;
+          break;
+        case 'uk_female':
+          audioPath = `UK_Sonia/${q.audio}`;
+          break;
+        default:
+          audioPath = `US_Andrew/${q.audio}`;
+      }
+      return {
+        ...q,
+        audio: audioPath
+      };
+    });
+
+    return processedQuestions;
   }
 
   /**
@@ -185,17 +219,54 @@ class QuizQueries {
             q.english_a,
             q.korean_b,
             q.english_b,
-            q.audio,
+            u.voice_gender,
+            CASE u.voice_gender
+              WHEN 'us_male' THEN q.audio_us_male
+              WHEN 'us_female' THEN q.audio_us_female
+              WHEN 'uk_male' THEN q.audio_uk_male
+              WHEN 'uk_female' THEN q.audio_uk_female
+              ELSE q.audio_us_male
+            END as audio,
             q.keywords,
             EXISTS(SELECT 1 FROM favorites WHERE question_id = q.question_id AND user_id = $3) as is_favorite,
             EXISTS(SELECT 1 FROM wrong_answers WHERE question_id = q.question_id AND user_id = $3) as is_wrong_answer
           FROM questions q
+          JOIN users u ON u.uid = $3
           WHERE q.question_id >= $1 AND q.question_id <= $2
           ORDER BY q.question_id ASC`,
           [startQuestionId, endQuestionId, userId]
         );
 
-        console.log('✅ [Today Quiz] Questions loaded:', questions.length);
+        // voice_gender에 따라 audio 경로 가공 (프론트엔드 getAudioUrl이 /audio/ 추가)
+        const processedQuestions = questions.map(q => {
+          let audioPath = '';
+          switch (q.voice_gender) {
+            case 'us_male':
+              audioPath = `US_Andrew/${q.audio}`;
+              break;
+            case 'us_female':
+              audioPath = `US_Ava/${q.audio}`;
+              break;
+            case 'uk_male':
+              audioPath = `UK_Ryan/${q.audio}`;
+              break;
+            case 'uk_female':
+              audioPath = `UK_Sonia/${q.audio}`;
+              break;
+            default:
+              audioPath = `US_Andrew/${q.audio}`;
+          }
+          return {
+            ...q,
+            audio: audioPath
+          };
+        });
+
+        console.log('✅ [Today Quiz] Questions loaded:', processedQuestions.length);
+        if (processedQuestions.length > 0) {
+          console.log('[Backend] User voice_gender:', processedQuestions[0]?.voice_gender);
+          console.log('[Backend] audio returned to frontend:', processedQuestions[0]?.audio);
+        }
 
         // 5. 진행률 계산 (solved_count / daily_goal * 100)
         const percentage = Math.round((userProgress.solved_count / dailyGoal) * 100);
@@ -216,7 +287,7 @@ class QuizQueries {
             total: dailyGoal,
             percentage
           },
-          questions
+          questions: processedQuestions
         };
       });
 
@@ -319,19 +390,52 @@ class QuizQueries {
           q.english_a,
           q.korean_b,
           q.english_b,
-          q.audio,
+          u.voice_gender,
+          CASE u.voice_gender
+            WHEN 'us_male' THEN q.audio_us_male
+            WHEN 'us_female' THEN q.audio_us_female
+            WHEN 'uk_male' THEN q.audio_uk_male
+            WHEN 'uk_female' THEN q.audio_uk_female
+            ELSE q.audio_us_male
+          END as audio,
           q.keywords,
           EXISTS(SELECT 1 FROM favorites WHERE question_id = q.question_id AND user_id = $1) as is_favorite,
           true as is_wrong_answer,
           wa.added_at
         FROM wrong_answers wa
         JOIN questions q ON q.question_id = wa.question_id
+        JOIN users u ON u.uid = $1
         WHERE wa.user_id = $1
         ORDER BY wa.added_at DESC`,
         [userId]
       );
 
-      const total = questions.length;
+      // voice_gender에 따라 audio 경로 가공 (프론트엔드 getAudioUrl이 /audio/ 추가)
+      const processedQuestions = questions.map(q => {
+        let audioPath = '';
+        switch (q.voice_gender) {
+          case 'us_male':
+            audioPath = `US_Andrew/${q.audio}`;
+            break;
+          case 'us_female':
+            audioPath = `US_Ava/${q.audio}`;
+            break;
+          case 'uk_male':
+            audioPath = `UK_Ryan/${q.audio}`;
+            break;
+          case 'uk_female':
+            audioPath = `UK_Sonia/${q.audio}`;
+            break;
+          default:
+            audioPath = `US_Andrew/${q.audio}`;
+        }
+        return {
+          ...q,
+          audio: audioPath
+        };
+      });
+
+      const total = processedQuestions.length;
 
       return {
         quiz_type: 'personal',
@@ -341,7 +445,7 @@ class QuizQueries {
           total,
           percentage: 0
         },
-        questions
+        questions: processedQuestions
       };
     } catch (error) {
       console.error('getWrongAnswersQuiz query error:', error);
@@ -370,19 +474,52 @@ class QuizQueries {
           q.english_a,
           q.korean_b,
           q.english_b,
-          q.audio,
+          u.voice_gender,
+          CASE u.voice_gender
+            WHEN 'us_male' THEN q.audio_us_male
+            WHEN 'us_female' THEN q.audio_us_female
+            WHEN 'uk_male' THEN q.audio_uk_male
+            WHEN 'uk_female' THEN q.audio_uk_female
+            ELSE q.audio_us_male
+          END as audio,
           q.keywords,
           true as is_favorite,
           EXISTS(SELECT 1 FROM wrong_answers WHERE question_id = q.question_id AND user_id = $1) as is_wrong_answer,
           f.added_at
         FROM favorites f
         JOIN questions q ON q.question_id = f.question_id
+        JOIN users u ON u.uid = $1
         WHERE f.user_id = $1
         ORDER BY f.added_at ASC`,
         [userId]
       );
 
-      const total = questions.length;
+      // voice_gender에 따라 audio 경로 가공 (프론트엔드 getAudioUrl이 /audio/ 추가)
+      const processedQuestions = questions.map(q => {
+        let audioPath = '';
+        switch (q.voice_gender) {
+          case 'us_male':
+            audioPath = `US_Andrew/${q.audio}`;
+            break;
+          case 'us_female':
+            audioPath = `US_Ava/${q.audio}`;
+            break;
+          case 'uk_male':
+            audioPath = `UK_Ryan/${q.audio}`;
+            break;
+          case 'uk_female':
+            audioPath = `UK_Sonia/${q.audio}`;
+            break;
+          default:
+            audioPath = `US_Andrew/${q.audio}`;
+        }
+        return {
+          ...q,
+          audio: audioPath
+        };
+      });
+
+      const total = processedQuestions.length;
 
       return {
         quiz_type: 'personal',
@@ -392,7 +529,7 @@ class QuizQueries {
           total,
           percentage: 0
         },
-        questions
+        questions: processedQuestions
       };
     } catch (error) {
       console.error('getFavoritesQuiz query error:', error);

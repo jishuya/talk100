@@ -57,6 +57,8 @@ const MyPage = () => {
   const [showGoalEditModal, setShowGoalEditModal] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [showVoiceSpeedModal, setShowVoiceSpeedModal] = useState(false);
 
   // 앱 설정 로컬 상태
   const [localAppSettings, setLocalAppSettings] = useState([]);
@@ -70,16 +72,9 @@ const MyPage = () => {
           id: 'notifications',
           icon: 'IoNotifications',
           title: '알림',
-          type: 'toggle',
-          value: apiSettings.notifications?.learningReminder || false,
-          bgColor: 'bg-gray-light',
-          description: apiSettings.notifications?.reminderTime
-            ? `매일 ${apiSettings.notifications.reminderTime.hour >= 12 ? '오후' : '오전'} ${
-                apiSettings.notifications.reminderTime.hour > 12
-                  ? apiSettings.notifications.reminderTime.hour - 12
-                  : (apiSettings.notifications.reminderTime.hour === 0 ? 12 : apiSettings.notifications.reminderTime.hour)
-              }:${String(apiSettings.notifications.reminderTime.minute).padStart(2, '0')}`
-            : '매일 오후 8:00'
+          description: '학습 알림 설정',
+          type: 'button',
+          bgColor: 'bg-gray-light'
         },
         {
           id: 'theme',
@@ -93,13 +88,8 @@ const MyPage = () => {
           id: 'voiceSpeed',
           icon: 'IoSpeedometer',
           title: '음성 속도',
-          type: 'slider',
-          value: apiSettings.learning?.voiceSpeed || 1.0,
-          displayValue: `${apiSettings.learning?.voiceSpeed || 1.0}x`,
-          min: 0.5,
-          max: 2,
-          step: 0.25,
-          sliderLabels: ['0.5x', '1.0x', '1.5x', '2.0x'],
+          description: '재생 속도 설정',
+          type: 'button',
           bgColor: 'bg-gray-light'
         },
         {
@@ -208,9 +198,7 @@ const MyPage = () => {
       // 백엔드 업데이트
       const updateData = {};
 
-      if (settingId === 'notifications') {
-        updateData.notifications = { learningReminder: value };
-      } else if (settingId === 'theme') {
+      if (settingId === 'theme') {
         // 테마 변경 (HomePage의 달 이모지 클릭과 동일한 로직)
         const newTheme = value ? 'dark' : 'light';
         changeTheme(newTheme);
@@ -234,16 +222,9 @@ const MyPage = () => {
             id: 'notifications',
             icon: 'IoNotifications',
             title: '알림',
-            type: 'toggle',
-            value: apiSettings.notifications?.learningReminder || false,
-            bgColor: 'bg-gray-light',
-            description: apiSettings.notifications?.reminderTime
-              ? `매일 ${apiSettings.notifications.reminderTime.hour >= 12 ? '오후' : '오전'} ${
-                  apiSettings.notifications.reminderTime.hour > 12
-                    ? apiSettings.notifications.reminderTime.hour - 12
-                    : (apiSettings.notifications.reminderTime.hour === 0 ? 12 : apiSettings.notifications.reminderTime.hour)
-                }:${String(apiSettings.notifications.reminderTime.minute).padStart(2, '0')}`
-              : '매일 오후 8:00'
+            description: '학습 알림 설정',
+            type: 'button',
+            bgColor: 'bg-gray-light'
           },
           {
             id: 'theme',
@@ -257,13 +238,8 @@ const MyPage = () => {
             id: 'voiceSpeed',
             icon: 'IoSpeedometer',
             title: '음성 속도',
-            type: 'slider',
-            value: apiSettings.learning?.voiceSpeed || 1.0,
-            displayValue: `${apiSettings.learning?.voiceSpeed || 1.0}x`,
-            min: 0.5,
-            max: 2,
-            step: 0.25,
-            sliderLabels: ['0.5x', '1.0x', '1.5x', '2.0x'],
+            description: '재생 속도 설정',
+            type: 'button',
             bgColor: 'bg-gray-light'
           },
           {
@@ -287,87 +263,6 @@ const MyPage = () => {
     }
   };
 
-  // 앱 설정 슬라이더 변경
-  const handleAppSettingSlider = async (settingId, value) => {
-    try {
-      // 로컬 상태 즉시 업데이트 (Optimistic UI)
-      setLocalAppSettings(prev =>
-        prev.map(setting =>
-          setting.id === settingId
-            ? { ...setting, value, displayValue: `${value}x` }
-            : setting
-        )
-      );
-
-      // 백엔드 업데이트
-      if (settingId === 'voiceSpeed') {
-        await updateSettingsMutation.mutateAsync({
-          learning: { voiceSpeed: value }
-        });
-      }
-    } catch (error) {
-      console.error('Setting slider error:', error);
-      alert('설정 변경에 실패했습니다.');
-
-      // 에러 발생시 이전 상태로 롤백
-      if (apiSettings) {
-        const settingsArray = [
-          {
-            id: 'notifications',
-            icon: 'IoNotifications',
-            title: '알림',
-            type: 'toggle',
-            value: apiSettings.notifications?.learningReminder || false,
-            bgColor: 'bg-gray-light',
-            description: apiSettings.notifications?.reminderTime
-              ? `매일 ${apiSettings.notifications.reminderTime.hour >= 12 ? '오후' : '오전'} ${
-                  apiSettings.notifications.reminderTime.hour > 12
-                    ? apiSettings.notifications.reminderTime.hour - 12
-                    : (apiSettings.notifications.reminderTime.hour === 0 ? 12 : apiSettings.notifications.reminderTime.hour)
-                }:${String(apiSettings.notifications.reminderTime.minute).padStart(2, '0')}`
-              : '매일 오후 8:00'
-          },
-          {
-            id: 'theme',
-            icon: 'IoMoon',
-            title: '다크 모드',
-            type: 'toggle',
-            value: apiSettings.display?.theme === 'dark',
-            bgColor: 'bg-gray-light'
-          },
-          {
-            id: 'voiceSpeed',
-            icon: 'IoSpeedometer',
-            title: '음성 속도',
-            type: 'slider',
-            value: apiSettings.learning?.voiceSpeed || 1.0,
-            displayValue: `${apiSettings.learning?.voiceSpeed || 1.0}x`,
-            min: 0.5,
-            max: 2,
-            step: 0.25,
-            sliderLabels: ['0.5x', '1.0x', '1.5x', '2.0x'],
-            bgColor: 'bg-gray-light'
-          },
-          {
-            id: 'feedback',
-            icon: 'noto:speech-balloon',
-            title: '피드백 보내기',
-            type: 'button',
-            bgColor: 'bg-gray-light'
-          },
-          {
-            id: 'help',
-            icon: 'noto:information',
-            title: '도움말',
-            type: 'button',
-            borderBottom: false,
-            bgColor: 'bg-gray-light'
-          }
-        ];
-        setLocalAppSettings(settingsArray);
-      }
-    }
-  };
 
   // 앱 설정 라디오 변경 (음성 선택)
   const handleAppSettingRadio = async (settingId, value) => {
@@ -449,6 +344,12 @@ const MyPage = () => {
   // 앱 설정 항목 클릭 처리
   const handleAppSettingClick = (item) => {
     switch (item.id) {
+      case 'notifications':
+        setShowNotificationModal(true);
+        break;
+      case 'voiceSpeed':
+        setShowVoiceSpeedModal(true);
+        break;
       case 'feedback':
         handleFeedback();
         break;
@@ -497,7 +398,6 @@ const MyPage = () => {
           items={localAppSettings}
           onItemClick={handleAppSettingClick}
           onToggleChange={handleAppSettingToggle}
-          onSliderChange={handleAppSettingSlider}
           onRadioChange={handleAppSettingRadio}
         />
 
@@ -544,6 +444,18 @@ const MyPage = () => {
       <HelpModal
         isOpen={showHelpModal}
         onClose={() => setShowHelpModal(false)}
+      />
+
+      {/* 알림 모달 */}
+      <HelpModal
+        isOpen={showNotificationModal}
+        onClose={() => setShowNotificationModal(false)}
+      />
+
+      {/* 음성 속도 모달 */}
+      <HelpModal
+        isOpen={showVoiceSpeedModal}
+        onClose={() => setShowVoiceSpeedModal(false)}
       />
       </div>
     </div>
