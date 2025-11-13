@@ -1,38 +1,27 @@
 const pgp = require('pg-promise')({
   capSQL: true,
-
-  // 쿼리 로그 (개발 환경에서만)
   query: (e) => {
     if (process.env.NODE_ENV === 'development') {
       console.log('🔒QUERY:', e.query);
-      if (e.params) {
-        console.log('🔑PARAMS:', e.params);
-      }
+      if (e.params) console.log('🔑PARAMS:', e.params);
     }
   },
-
-  // 에러 로그
   error: (err, e) => {
-    if (e.cn) {
-      console.error('Database connection error:', err.message || err);
-    }
+    if (e.cn) console.error('Database connection error:', err.message || err);
     if (e.query) {
       console.error('Query error:', e.query);
-      if (e.params) {
-        console.error('Params:', e.params);
-      }
+      if (e.params) console.error('Params:', e.params);
     }
   }
 });
 
-// 🔹 개발 환경에서만 .env 사용 (운영에서는 Railway env만 사용)
+// 🔹 개발에서만 .env 사용
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 }
 
 const isProduction = process.env.NODE_ENV === 'production';
 
-// 공통 풀 설정
 const baseConfig = {
   max: 20,
   idleTimeoutMillis: 30000,
@@ -42,7 +31,7 @@ const baseConfig = {
 
 let dbConfig;
 
-// 🔹 운영(Railway)에서는 DATABASE_URL 우선 사용
+// 🔹 Railway(운영)에서는 DATABASE_URL 사용
 if (isProduction && process.env.DATABASE_URL) {
   dbConfig = {
     ...baseConfig,
@@ -50,7 +39,7 @@ if (isProduction && process.env.DATABASE_URL) {
   };
   console.log('📦 Using DATABASE_URL for PostgreSQL (production).');
 } else {
-  // 🔹 로컬 개발 환경
+  // 🔹 로컬 개발용
   dbConfig = {
     ...baseConfig,
     host: process.env.DB_HOST || 'localhost',
@@ -64,19 +53,15 @@ if (isProduction && process.env.DATABASE_URL) {
   );
 }
 
-// DB 인스턴스 생성
 const db = pgp(dbConfig);
 
-// 연결 테스트 함수
 async function testConnection() {
   try {
     await db.any('SELECT version()');
-
-    const connLabel = dbConfig.connectionString
+    const label = dbConfig.connectionString
       ? 'DATABASE_URL (production)'
       : `${dbConfig.database}@${dbConfig.host}:${dbConfig.port}`;
-
-    console.log(`✅ Database connected successfully: ${connLabel}`);
+    console.log(`✅ Database connected successfully: ${label}`);
     return true;
   } catch (error) {
     console.error('❌ Database connection failed:', error.message);
