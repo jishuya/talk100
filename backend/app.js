@@ -6,7 +6,12 @@ const morgan = require('morgan');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 const cookieParser = require('cookie-parser');
-require('dotenv').config();
+
+// require('dotenv').config();
+// ▶ 운영에서 dotenv가 값을 덮어쓰지 않도록 (개발일 때만 로드)
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
 
 // 데이터베이스 연결
 const { db, testConnection } = require('./config/database');
@@ -25,6 +30,8 @@ const mypageRoutes = require('./routes/mypage');
 const backupRoutes = require('./routes/backup');
 
 const app = express();
+
+
 
 // 보안 미들웨어
 app.use(helmet({

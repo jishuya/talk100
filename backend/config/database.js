@@ -1,5 +1,4 @@
 const pgp = require('pg-promise')({
-  // PostgreSQL 최적화 설정
   capSQL: true,
 
   // 쿼리 로그 (개발 환경에서만)
@@ -26,33 +25,58 @@ const pgp = require('pg-promise')({
   }
 });
 
-require('dotenv').config();
+// 🔹 개발 환경에서만 .env 사용 (운영에서는 Railway env만 사용)
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
 
-// 데이터베이스 연결 설정
-const dbConfig = {
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT) || 5432,
-  database: process.env.DB_NAME || 'talk100',
-  user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || 'postgres',
+const isProduction = process.env.NODE_ENV === 'production';
 
-  // 연결 풀 설정
-  max: 20, // 최대 연결 수
-  idleTimeoutMillis: 30000, // 유휴 연결 타임아웃
-  connectionTimeoutMillis: 2000, // 연결 타임아웃
-
-  // SSL 설정 (프로덕션에서는 true로 변경)
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+// 공통 풀 설정
+const baseConfig = {
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
+  ssl: isProduction ? { rejectUnauthorized: false } : false
 };
 
-// 데이터베이스 연결 생성
+let dbConfig;
+
+// 🔹 운영(Railway)에서는 DATABASE_URL 우선 사용
+if (isProduction && process.env.DATABASE_URL) {
+  dbConfig = {
+    ...baseConfig,
+    connectionString: process.env.DATABASE_URL
+  };
+  console.log('📦 Using DATABASE_URL for PostgreSQL (production).');
+} else {
+  // 🔹 로컬 개발 환경
+  dbConfig = {
+    ...baseConfig,
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT, 10) || 5432,
+    database: process.env.DB_NAME || 'talk100',
+    user: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASSWORD || 'postgres'
+  };
+  console.log(
+    `📦 Using local DB config: ${dbConfig.database}@${dbConfig.host}:${dbConfig.port}`
+  );
+}
+
+// DB 인스턴스 생성
 const db = pgp(dbConfig);
 
 // 연결 테스트 함수
 async function testConnection() {
   try {
     await db.any('SELECT version()');
-    console.log(`✅ Database connected successfully: ${dbConfig.database}@${dbConfig.host}:${dbConfig.port}`);
+
+    const connLabel = dbConfig.connectionString
+      ? 'DATABASE_URL (production)'
+      : `${dbConfig.database}@${dbConfig.host}:${dbConfig.port}`;
+
+    console.log(`✅ Database connected successfully: ${connLabel}`);
     return true;
   } catch (error) {
     console.error('❌ Database connection failed:', error.message);
@@ -60,14 +84,13 @@ async function testConnection() {
   }
 }
 
-// 트랜잭션 헬퍼 함수
+// 트랜잭션/헬퍼는 기존 그대로 유지
 async function withTransaction(callback) {
   return db.tx(async (t) => {
     return await callback(t);
   });
 }
 
-// 배치 처리 헬퍼 함수
 async function batchInsert(table, columns, data, options = {}) {
   if (!data || data.length === 0) {
     return { success: true, rowsAffected: 0 };
@@ -75,7 +98,7 @@ async function batchInsert(table, columns, data, options = {}) {
 
   try {
     const cs = new pgp.helpers.ColumnSet(columns, { table });
-    const query = pgp.helpers.insert(data, cs);
+    let query = pgp.helpers.insert(data, cs);
 
     if (options.onConflict) {
       query += ` ON CONFLICT ${options.onConflict}`;
@@ -89,7 +112,6 @@ async function batchInsert(table, columns, data, options = {}) {
   }
 }
 
-// 안전한 쿼리 실행 함수
 async function safeQuery(query, params = null) {
   try {
     return await db.any(query, params);
@@ -99,7 +121,6 @@ async function safeQuery(query, params = null) {
   }
 }
 
-// 선택적 단일 결과 조회 함수
 async function safeQueryOneOrNone(query, params = null) {
   try {
     return await db.oneOrNone(query, params);
@@ -120,8 +141,6 @@ module.exports = {
   batchInsert,
   safeQuery,
   safeQueryOneOrNone,
-
-  // 유틸리티 함수들
   helpers: pgp.helpers,
   as: pgp.as
 };

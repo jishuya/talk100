@@ -279,7 +279,7 @@ SELECT * FROM users ORDER BY last_login_at DESC LIMIT 5;
 
 ```env
 # Backend API URL (Railway에서 생성된 URL)
-VITE_API_BASE_URL=https://talk100-backend-production.up.railway.app
+VITE_API_BASE_URL=https://talk100-production.up.railway.app
 
 # Mock 데이터 사용 여부
 VITE_USE_MOCK_DATA=false
