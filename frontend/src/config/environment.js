@@ -1,10 +1,29 @@
 // 환경 설정
+// Runtime 환경 변수 지원 (Vercel 배포용)
+// window._env_ 객체가 있으면 우선 사용, 없으면 빌드 타임 환경 변수 사용
+const getApiBaseUrl = () => {
+  // 1순위: Runtime injection (Vercel 배포 시)
+  if (typeof window !== 'undefined' && window._env_?.VITE_API_BASE_URL) {
+    return window._env_.VITE_API_BASE_URL;
+  }
+
+  // 2순위: 빌드 타임 환경 변수
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+
+  // 3순위: Railway 프로덕션 URL (fallback)
+  return 'https://talk100-production.up.railway.app';
+};
+
 export const ENV = {
   // 환경 변수에서 Mock 데이터 사용 여부 설정
   USE_MOCK_DATA: import.meta.env.VITE_USE_MOCK_DATA === 'true',
 
-  // API 기본 URL
-  API_BASE_URL: import.meta.env.VITE_API_BASE_URL || 'https://talk100-production.up.railway.app',
+  // API 기본 URL - Runtime에서도 동적으로 가져올 수 있도록 getter 사용
+  get API_BASE_URL() {
+    return getApiBaseUrl();
+  },
 
   // 캐시 설정 (밀리초)
   CACHE_TIMES: {
