@@ -14,8 +14,8 @@ import { useUserData, useBadgesData, useTodayProgress, usePersonalQuizzesData, u
 // 세션 관리 유틸리티
 import { createSession } from '../utils/sessionStorage';
 
-// 환경 설정
-import { ENV } from '../config/environment';
+// API 서비스
+import { api } from '../services/apiService';
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -102,20 +102,7 @@ const HomePage = () => {
     try {
       if (isAdditionalLearning) {
         // 추가 학습 시작: solved_count 리셋
-        const token = localStorage.getItem('jwt_token');
-        const resetResponse = await fetch(`${ENV.API_BASE_URL}/api/progress/reset-solved-count`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include'
-        });
-
-        if (!resetResponse.ok) {
-          alert('진행률 리셋에 실패했습니다. 다시 시도해주세요.');
-          return;
-        }
+        await api.apiCall('/api/progress/reset-solved-count', { method: 'POST' });
 
         // 진행률 캐시를 즉시 0으로 업데이트
         queryClient.setQueryData(['progress', 'today'], {
@@ -125,24 +112,11 @@ const HomePage = () => {
         });
       }
 
-      const token = localStorage.getItem('jwt_token');
-      const response = await fetch('/api/quiz/daily', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      });
+      // api.apiCall()을 사용하여 ENV.API_BASE_URL을 runtime에 가져옴
+      const result = await api.apiCall('/api/quiz/daily', { method: 'GET' });
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch today\'s quiz');
-      }
-
-      const result = await response.json();
-
-      if (result.success && result.data) {
-        const { start_question_id, daily_goal, progress, questions } = result.data;
+      if (result) {
+        const { start_question_id, daily_goal, progress, questions } = result;
 
         // 문제가 없으면 (모두 풀었음)
         if (!questions || questions.length === 0) {
@@ -175,24 +149,11 @@ const HomePage = () => {
 
   const handleCategoryClick = async (category) => {
     try {
-      const token = localStorage.getItem('jwt_token');
-      const response = await fetch(`/api/quiz/category/${category.id}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      });
+      // api.apiCall()을 사용하여 ENV.API_BASE_URL을 runtime에 가져옴
+      const result = await api.apiCall(`/api/quiz/category/${category.id}`, { method: 'GET' });
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch category quiz');
-      }
-
-      const result = await response.json();
-
-      if (result.success && result.data) {
-        const { category_id, day, questions } = result.data;
+      if (result) {
+        const { category_id, day, questions } = result;
         const question_ids = questions.map(q => q.question_id);
 
         // 세션 생성 및 데이터 저장
@@ -219,22 +180,11 @@ const HomePage = () => {
         ? '/api/quiz/wrong-answers'
         : '/api/quiz/favorites';
 
-      const response = await fetch(endpoint, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`,
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      });
+      // api.apiCall()을 사용하여 ENV.API_BASE_URL을 runtime에 가져옴
+      const result = await api.apiCall(endpoint, { method: 'GET' });
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch personal quiz');
-      }
-
-      const result = await response.json();
-      if (result.success && result.data) {
-        const { category_id, questions } = result.data;
+      if (result) {
+        const { category_id, questions } = result;
 
         // 문제가 없는 경우
         if (!questions || questions.length === 0) {

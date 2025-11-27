@@ -13,8 +13,8 @@ import LevelUpModal from '../components/quiz/LevelUpModal';
 import Button from '../components/ui/Button';
 import { getIcon } from '../utils/iconMap';
 
-// 환경 설정
-import { ENV } from '../config/environment';
+// API 서비스
+import { api } from '../services/apiService';
 
 // 세션 관리 유틸리티
 import {
@@ -787,18 +787,7 @@ const QuizPage = () => {
   const handleContinueAdditionalLearning = async () => {
     try {
       // 1. solved_count 리셋
-      const resetResponse = await fetch(`${ENV.API_BASE_URL}/api/progress/reset-solved-count`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`,
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include'
-      });
-
-      if (!resetResponse.ok) {
-        throw new Error('Failed to reset solved count');
-      }
+      await api.apiCall('/api/progress/reset-solved-count', { method: 'POST' });
 
       // 2. 진행률 캐시를 즉시 0으로 업데이트
       queryClient.setQueryData(['progress', 'today'], {
@@ -808,23 +797,9 @@ const QuizPage = () => {
       });
 
       // 3. 새로운 문제 불러오기
-      const token = localStorage.getItem('jwt_token');
-      const quizResponse = await fetch(`${ENV.API_BASE_URL}/api/quiz/daily`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      });
+      const result = await api.apiCall('/api/quiz/daily', { method: 'GET' });
 
-      if (!quizResponse.ok) {
-        throw new Error('Failed to fetch new quiz');
-      }
-
-      const result = await quizResponse.json();
-
-      if (result.success && result.data && result.data.questions && result.data.questions.length > 0) {
+      if (result && result.questions && result.questions.length > 0) {
         // 4. 기존 세션 삭제
         deleteSession(sessionId);
 
