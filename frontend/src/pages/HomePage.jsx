@@ -14,6 +14,9 @@ import { useUserData, useBadgesData, useTodayProgress, usePersonalQuizzesData, u
 // 세션 관리 유틸리티
 import { createSession } from '../utils/sessionStorage';
 
+// 환경 설정
+import { ENV } from '../config/environment';
+
 const HomePage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -100,7 +103,7 @@ const HomePage = () => {
       if (isAdditionalLearning) {
         // 추가 학습 시작: solved_count 리셋
         const token = localStorage.getItem('jwt_token');
-        const resetResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/progress/reset-solved-count`, {
+        const resetResponse = await fetch(`${ENV.API_BASE_URL}/api/progress/reset-solved-count`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,

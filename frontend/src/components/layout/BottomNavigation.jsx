@@ -1,5 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getIcon } from '../../utils/iconMap';
+import { ENV } from '../../config/environment';
 
 const BottomNavigation = () => {
   const location = useLocation();
@@ -40,7 +41,7 @@ const BottomNavigation = () => {
   const startTodayQuiz = async () => {
     try {
       const token = localStorage.getItem('jwt_token');
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/quiz/daily`, {
+      const response = await fetch(`${ENV.API_BASE_URL}/api/quiz/daily`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

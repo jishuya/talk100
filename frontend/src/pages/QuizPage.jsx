@@ -13,6 +13,9 @@ import LevelUpModal from '../components/quiz/LevelUpModal';
 import Button from '../components/ui/Button';
 import { getIcon } from '../utils/iconMap';
 
+// 환경 설정
+import { ENV } from '../config/environment';
+
 // 세션 관리 유틸리티
 import {
   getSession,
@@ -784,7 +787,7 @@ const QuizPage = () => {
   const handleContinueAdditionalLearning = async () => {
     try {
       // 1. solved_count 리셋
-      const resetResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/progress/reset-solved-count`, {
+      const resetResponse = await fetch(`${ENV.API_BASE_URL}/api/progress/reset-solved-count`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`,
@@ -806,7 +809,7 @@ const QuizPage = () => {
 
       // 3. 새로운 문제 불러오기
       const token = localStorage.getItem('jwt_token');
-      const quizResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/quiz/daily`, {
+      const quizResponse = await fetch(`${ENV.API_BASE_URL}/api/quiz/daily`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
