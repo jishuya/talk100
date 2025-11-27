@@ -96,6 +96,13 @@ class ApiService {
     const url = `${ENV.API_BASE_URL}${endpoint}`;
     const token = localStorage.getItem('jwt_token');
 
+    // 🔍 [DEBUG] API 요청 정보 출력
+    console.group(`🌐 [API Call] ${options.method || 'GET'} ${endpoint}`);
+    console.log('📍 Full URL:', url);
+    console.log('🔑 Token:', token ? `${token.substring(0, 20)}...` : 'No token');
+    console.log('⚙️ Options:', options);
+    console.groupEnd();
+
     const config = {
       method: 'GET',
       headers: {
@@ -133,6 +140,8 @@ class ApiService {
 
     // HTTP 상태 코드별 에러 처리
     if (!response.ok) {
+      console.error(`❌ [API Error] ${response.status} ${response.statusText} - ${url}`);
+
       if (response.status === 401) {
         // 토큰 만료 또는 인증 오류
         localStorage.removeItem('jwt_token');
@@ -156,6 +165,9 @@ class ApiService {
       throw new Error('서버 응답을 처리할 수 없습니다.');
     }
 
+    // 🔍 [DEBUG] 응답 데이터 출력
+    console.log(`✅ [API Response] ${endpoint}:`, jsonResponse);
+
     // 백엔드 응답이 { success: true, data: {...} } 구조인 경우 data만 추출
     if (jsonResponse.success && jsonResponse.data) {
       return jsonResponse.data;
@@ -163,6 +175,7 @@ class ApiService {
 
     // 백엔드에서 에러를 반환한 경우
     if (jsonResponse.success === false) {
+      console.error(`❌ [API Error] ${endpoint}:`, jsonResponse.message);
       throw new Error(jsonResponse.message || '서버에서 오류가 발생했습니다.');
     }
 
