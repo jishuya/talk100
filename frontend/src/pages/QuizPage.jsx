@@ -36,7 +36,6 @@ import { useVoiceInput } from '../hooks/useVoiceInput';
 
 // API 훅 및 서비스
 import { useToggleWrongAnswer, useToggleFavorite, useUpdateProgress, useQuizMode, useUpdateQuizMode, useHistoryData } from '../hooks/useApi';
-import { api } from '../services/apiService';
 
 // 음원 유틸리티
 import { getAudioUrl } from '../utils/audioUtils';
