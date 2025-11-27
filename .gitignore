@@ -45,9 +45,3 @@ Thumbs.db
 
 # PostgreSQL
 *.sql.backup
-
-# Audio files (음원 파일은 별도 관리)
-backend/public/audio/
-backend/public/audio/**/*
-
-
