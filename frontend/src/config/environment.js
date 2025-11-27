@@ -4,7 +4,7 @@ export const ENV = {
   USE_MOCK_DATA: import.meta.env.VITE_USE_MOCK_DATA === 'true',
 
   // API 기본 URL
-  API_BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000',
+  API_BASE_URL: import.meta.env.VITE_API_BASE_URL || 'https://talk100-production.up.railway.app',
 
   // 캐시 설정 (밀리초)
   CACHE_TIMES: {
