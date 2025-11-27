@@ -49,7 +49,7 @@ passport.use(new GoogleStrategy({
       uid: `google_${profile.id}`,
       name: profile.displayName || 'Google User',
       email: profile.emails[0].value,
-      profile_image: profile.photos?.[0]?.value || '🦊',
+      profile_image: '🦊',
       voice_gender: 'male',
       default_difficulty: 2
     };
@@ -86,7 +86,7 @@ passport.use(new NaverStrategy({
       uid: `naver_${profile.id}`,
       name: profile.name || profile.nickname || 'Naver User',
       email: profile.email,
-      profile_image: profile.profile_image || '🦊',
+      profile_image: '🦊',
       voice_gender: 'male',
       default_difficulty: 2
     };

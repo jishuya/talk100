@@ -75,13 +75,13 @@ class UserQueries {
       );
 
       if (user) {
-        // 기존 사용자의 정보 업데이트 (이름, 이메일, 프로필 이미지, 마지막 로그인 시간)
+        // 기존 사용자의 정보 업데이트 (이름, 이메일, 마지막 로그인 시간)
         user = await db.one(
           `UPDATE users
-           SET name = $2, email = $3, profile_image = $4, last_login_at = NOW()
+           SET name = $2, email = $3, last_login_at = NOW()
            WHERE uid = $1
            RETURNING *`,
-          [userData.uid, userData.name, userData.email, userData.profile_image]
+          [userData.uid, userData.name, userData.email]
         );
       } else {
         // 새 사용자 생성
