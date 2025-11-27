@@ -2,6 +2,8 @@
  * 음원 관련 유틸리티 함수들
  */
 
+import { ENV } from '../config/environment';
+
 /**
  * 음원 파일명으로부터 전체 URL 생성
  * @param {string} audioFilename - questions.audio 컬럼 값 (예: '001_01.mp3')
@@ -10,8 +12,7 @@
 export const getAudioUrl = (audioFilename) => {
   if (!audioFilename) return null;
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
-  return `${API_BASE_URL}/audio/${audioFilename}`;
+  return `${ENV.API_BASE_URL}/audio/${audioFilename}`;
 };
 
 /**

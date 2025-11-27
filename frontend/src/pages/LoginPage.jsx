@@ -1,7 +1,8 @@
 import Logo from '../components/ui/Logo';
+import { ENV } from '../config/environment';
 
 const LoginPage = () => {
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+  const API_BASE_URL = ENV.API_BASE_URL;
 
   const handleGoogleLogin = () => {
     window.location.href = `${API_BASE_URL}/auth/google`;

@@ -40,6 +40,8 @@ const BottomNavigation = () => {
   // 오늘의 퀴즈 시작
   const startTodayQuiz = async () => {
     try {
+      console.log('🔍 [DEBUG] ENV.API_BASE_URL:', ENV.API_BASE_URL);
+      console.log('🔍 [DEBUG] Full URL:', `${ENV.API_BASE_URL}/api/quiz/daily`);
       const token = localStorage.getItem('jwt_token');
       const response = await fetch(`${ENV.API_BASE_URL}/api/quiz/daily`, {
         method: 'GET',

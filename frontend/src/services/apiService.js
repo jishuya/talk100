@@ -1,4 +1,7 @@
-// 통합 API 서비스 - Vite 환경 변수 직접 사용
+// 통합 API 서비스 - 환경 설정 사용
+
+// 환경 설정 import
+import { ENV } from '../config/environment';
 
 // Mock 데이터 import
 import { MOCK_HOME_DATA } from '../mocks/homePageData';
@@ -90,7 +93,7 @@ class ApiService {
 
   // 실제 API 호출 (JWT 토큰 자동 첨부 및 향상된 에러 처리)
   async apiCall(endpoint, options = {}) {
-    const url = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}${endpoint}`;
+    const url = `${ENV.API_BASE_URL}${endpoint}`;
     const token = localStorage.getItem('jwt_token');
 
     const config = {
@@ -258,7 +261,7 @@ class ApiService {
     // ⚠️ 특별 처리: goalAchieved와 streak도 함께 반환해야 하므로
     // apiCall 대신 raw fetch를 사용하여 전체 응답 객체를 받아옴
     const endpoint = '/api/progress/update';
-    const url = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}${endpoint}`;
+    const url = `${ENV.API_BASE_URL}${endpoint}`;
     const token = localStorage.getItem('jwt_token');
 
     try {
