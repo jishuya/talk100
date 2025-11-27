@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getIcon } from '../../utils/iconMap';
-import { ENV } from '../../config/environment';
+import { api } from '../../services/apiService';
 
 const BottomNavigation = () => {
   const location = useLocation();
@@ -40,26 +40,11 @@ const BottomNavigation = () => {
   // 오늘의 퀴즈 시작
   const startTodayQuiz = async () => {
     try {
-      console.log('🔍 [DEBUG] ENV.API_BASE_URL:', ENV.API_BASE_URL);
-      console.log('🔍 [DEBUG] Full URL:', `${ENV.API_BASE_URL}/api/quiz/daily`);
-      const token = localStorage.getItem('jwt_token');
-      const response = await fetch(`${ENV.API_BASE_URL}/api/quiz/daily`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      });
+      // api.apiCall()을 사용하여 ENV.API_BASE_URL을 runtime에 가져옴
+      const result = await api.apiCall('/api/quiz/daily', { method: 'GET' });
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch quiz');
-      }
-
-      const result = await response.json();
-
-      if (result.success && result.data && result.data.questions) {
-        const { questions } = result.data;
+      if (result && result.questions) {
+        const { questions } = result;
 
         if (questions.length > 0) {
           // 세션 생성 (HomePage와 동일한 방식)
