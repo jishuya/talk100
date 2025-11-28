@@ -25,6 +25,7 @@ export const QuizContent = ({
   onInputModeChange,
   onFavoriteToggle,
   onStarToggle,
+  onClearHintAnswer,  // 힌트/정답 해제 콜백
   isFavorite = false,
   isStarred = false,
   gradingResult = null,
@@ -75,23 +76,48 @@ export const QuizContent = ({
               const punctuation = word.match(/[.,!?]+$/)?.[0] || '';
               if (isKeyword && inputMode === 'keyboard' && quizMode === 'solving') {
                 // 키보드 모드의 문제풀이 모드에서는 input field 표시
+                const keywordKey = cleanWord.toLowerCase();
+                const userInput = keywordInputs[keywordKey] || '';
+                const hasUserInput = userInput.length > 0;
+
+                // 힌트/정답 표시 값 계산
+                const getDisplayValue = () => {
+                  if (hasUserInput) return userInput;  // 사용자 입력이 있으면 그대로
+                  if (showAnswer) return cleanWord;     // 정답보기: 전체 단어
+                  if (showHint) return cleanWord.charAt(0) + '_'.repeat(cleanWord.length - 1);  // 힌트보기: 첫 글자 + 언더스코어
+                  return '';
+                };
+
+                const displayValue = getDisplayValue();
+                const isShowingHintOrAnswer = !hasUserInput && (showHint || showAnswer);
+
                 return (
                   <span key={index} className="inline-flex items-center">
                     <input
                       type="text"
-                      value={keywordInputs[cleanWord.toLowerCase()] || ''}
-                      onChange={(e) => onKeywordInputChange?.(cleanWord.toLowerCase(), e.target.value)}
-                      onKeyDown={(e) => onKeywordKeyDown?.(cleanWord.toLowerCase(), keywordInputs[cleanWord.toLowerCase()] || '', e)}
-                      className="bg-yellow-200 px-2 py-1 rounded font-semibold text-center border-2 border-yellow-300 focus:border-primary focus:outline-none min-w-[70px] max-w-[130px] placeholder:text-transparent"
+                      value={displayValue}
+                      onChange={(e) => onKeywordInputChange?.(keywordKey, e.target.value)}
+                      onKeyDown={(e) => onKeywordKeyDown?.(keywordKey, userInput, e)}
+                      onFocus={() => {
+                        // 포커스 시 힌트/정답 해제
+                        if (isShowingHintOrAnswer && onClearHintAnswer) {
+                          onClearHintAnswer();
+                        }
+                      }}
+                      className={`px-2 py-1 rounded font-semibold border-2 focus:border-primary focus:outline-none min-w-[70px] max-w-[130px] placeholder:text-transparent ${
+                        isShowingHintOrAnswer
+                          ? 'bg-yellow-100 border-yellow-200 text-gray-500 text-left'  // 힌트/정답 표시 중 (왼쪽 정렬)
+                          : 'bg-yellow-200 border-yellow-300 text-center'  // 일반 입력 상태 (가운데 정렬)
+                      }`}
                       style={{
-                        width: `${Math.max(cleanWord.length * 8 + 8, 70)}px`,
-                        backgroundImage: 'linear-gradient(to right, #9ca3af 0%, #9ca3af 100%)',
+                        width: `${Math.max(cleanWord.length * 10 + 16, 70)}px`,
+                        backgroundImage: isShowingHintOrAnswer ? 'none' : 'linear-gradient(to right, #9ca3af 0%, #9ca3af 100%)',
                         backgroundSize: 'calc(100% - 12px) 2px',
                         backgroundPosition: 'center bottom 6px',
                         backgroundRepeat: 'no-repeat'
                       }}
                       placeholder=""
-                      data-keyword={cleanWord.toLowerCase()}
+                      data-keyword={keywordKey}
                     />
                     {punctuation && <span className="ml-0.5">{punctuation}</span>}
                   </span>
@@ -101,6 +127,17 @@ export const QuizContent = ({
                 const hasInput = keywordInputs[cleanWord.toLowerCase()];
                 const isCorrect = gradingResult?.keywordResults?.[cleanWord.toLowerCase()]?.isCorrect;
 
+                // 힌트/정답 표시 값 계산 (음성 모드)
+                const getVoiceDisplayValue = () => {
+                  if (hasInput) return cleanWord;  // 사용자 입력이 있으면 정답 표시
+                  if (showAnswer) return cleanWord;  // 정답보기: 전체 단어
+                  if (showHint) return cleanWord.charAt(0) + '_'.repeat(cleanWord.length - 1);  // 힌트보기: 첫 글자 + 언더스코어
+                  return '_'.repeat(cleanWord.length);  // 기본: 언더스코어
+                };
+
+                const voiceDisplayValue = getVoiceDisplayValue();
+                const isShowingHintOrAnswerVoice = !hasInput && (showHint || showAnswer);
+
                 return (
                   <span
                     key={index}
@@ -109,10 +146,12 @@ export const QuizContent = ({
                         ? isCorrect
                           ? 'bg-green-200 text-green-800'  // 정답이면 초록색
                           : 'bg-yellow-200 text-gray-800'   // 입력됐지만 채점 전이면 노란색
-                        : 'bg-yellow-100 text-gray-400'      // 아직 입력 안 됐으면 연한 노란색
+                        : isShowingHintOrAnswerVoice
+                          ? 'bg-yellow-100 text-gray-500'  // 힌트/정답 표시 중
+                          : 'bg-yellow-100 text-gray-400'      // 아직 입력 안 됐으면 연한 노란색
                     }`}
                   >
-                    {hasInput ? cleanWord : '_'.repeat(cleanWord.length)}
+                    {voiceDisplayValue}
                     {punctuation}
                   </span>
                 );
@@ -140,60 +179,7 @@ export const QuizContent = ({
             }, [])}
           </div>
         </div>
-        {/* 힌트정답 영역 */}
-        {(showHint || showAnswer) && (
-          <div className="pt-4 border-t border-dashed border-gray-border">
-            <div className="text-xs text-text-secondary mb-2">
-              {showAnswer ? '정답' : '힌트'}
-            </div>
-            <div className="text-base leading-relaxed text-gray-500">
-              {showAnswer
-                ? question.english?.split(' ').map((word, index) => {
-                    const isKeyword = question.keywords?.some(keyword =>
-                      word.toLowerCase().replace(/[.,!?]/g, '') === keyword.toLowerCase()
-                    );
-                    return (
-                      <span
-                        key={index}
-                        className={isKeyword ? 'bg-gray-200 px-1 py-0.5 rounded font-semibold' : ''}
-                      >
-                        {word}{index < question.english.split(' ').length - 1 ? ' ' : ''}
-                      </span>
-                    );
-                  })
-                : question.english?.split(' ').map((word, index) => {
-                    // 힌트: 키워드만 첫 글자로 변경, 나머지는 그대로 표시
-                    const cleanWord = word.replace(/[.,!?]/g, '');
-                    const isKeyword = question.keywords?.some(keyword =>
-                      cleanWord.toLowerCase() === keyword.toLowerCase()
-                    );
-                    const punctuation = word.match(/[.,!?]+$/)?.[0] || '';
-                    if (isKeyword) {
-                      // 키워드는 첫 글자만 표시
-                      const firstLetter = cleanWord.charAt(0);
-                      const restLength = cleanWord.length - 1;
-                      const hint = firstLetter + '_'.repeat(restLength);
-                      return (
-                        <span key={index} className="bg-gray-200 px-1 py-0.5 rounded font-semibold">
-                          {hint}{punctuation}
-                        </span>
-                      );
-                    } else {
-                      // 키워드가 아니면 그대로 표시
-                      return (
-                        <span key={index}>
-                          {word}
-                        </span>
-                      );
-                    }
-                  }).reduce((acc, curr, index) => {
-                    if (index === 0) return [curr];
-                    return [...acc, ' ', curr];
-                  }, [])
-              }
-            </div>
-          </div>
-        )}
+        {/* 힌트/정답은 이제 노란색 blank 안에 직접 표시됨 */}
 
         {/* 즐겨찾기/별표 버튼 */}
         <div className="absolute top-4 right-4 flex gap-2">
@@ -260,7 +246,7 @@ export const QuizContent = ({
           ) : (
             <span className="text-text-secondary italic">
               {inputMode === 'keyboard'
-                ? '위의 키워드 박스를 클릭해서 답변을 작성하세요'
+                ? '노란 박스를 클릭해서 답변을 작성하세요'
                 : '아래 버튼을 눌러 음성으로 답변하세요'
               }
             </span>

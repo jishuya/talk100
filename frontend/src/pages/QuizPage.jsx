@@ -934,6 +934,10 @@ const QuizPage = () => {
         onInputModeChange={handleInputModeChange}
         onFavoriteToggle={handleToggleFavorite}
         onStarToggle={handleToggleStar}
+        onClearHintAnswer={() => {
+          setShowHint(false);
+          setShowAnswer(false);
+        }}
       />
 
       {/* 하단 컨트롤 */}
