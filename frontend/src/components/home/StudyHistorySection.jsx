@@ -45,16 +45,17 @@ const StudyHistorySection = ({ historyItems }) => {
   });
 
   return (
-    <div className="px-4 pb-5">
-      <h2 className="text-base font-bold mb-3 text-text-primary">최근 학습</h2>
-      <div className="history-card">
+    <div className="px-4 pb-2 md:pb-5">
+       <h2 className="text-sm font-bold mb-1.5 text-text-primary md:text-base md:mb-3">최근 학습</h2>
+
+      <div className="history-card p-2 md:p-4">
         {history.map((item) => (
           <div
             key={item.id}
-            className="py-3 border-b border-gray-border last:border-b-0"
+            className="py-2 md:py-3 border-b border-gray-border last:border-b-0"
           >
-            <div className="flex items-center mb-2">
-              <div className="w-10 h-10 bg-accent-pale rounded-full flex items-center justify-center mr-3">
+            <div className="flex items-center mb-1.5 md:mb-2">
+              <div className="w-9 h-9 md:w-10 md:h-10 bg-accent-pale rounded-full flex items-center justify-center mr-3">
                 {typeof item.icon === 'string' ? getIcon(item.icon, {
                   size: 'xl',
                   className: item.category === 1 ? 'text-green-400' :
@@ -63,11 +64,14 @@ const StudyHistorySection = ({ historyItems }) => {
                 }) : item.icon}
               </div>
               <div className="flex-1">
-                <div className="text-sm font-semibold text-text-primary mb-0.5">
+                <div className="text-sm font-semibold text-text-primary mb-0.5 md:mb-0.5">
                   {item.title}
-                  {item.lastDay && item.lastQuestionNumber &&
-                    ` Day ${item.lastDay}, Question ${item.lastQuestionNumber}`
-                  }
+                  {item.lastDay && item.lastQuestionNumber && (
+                    <span className="font-normal text-xs text-text-secondary ml-1.5 md:text-sm md:font-semibold md:text-text-primary md:ml-0">
+                      <span className="md:hidden">D{item.lastDay} Q{item.lastQuestionNumber}</span>
+                      <span className="hidden md:inline"> Day {item.lastDay}, Question {item.lastQuestionNumber}</span>
+                    </span>
+                  )}
                 </div>
                 <div className="text-xs text-text-secondary">{item.time}</div>
               </div>
@@ -77,7 +81,7 @@ const StudyHistorySection = ({ historyItems }) => {
             </div>
 
             {/* 진행률 바 */}
-            <div className="h-2 bg-accent-mint rounded overflow-hidden ml-[52px]">
+            <div className="h-1.5 md:h-2 bg-accent-mint rounded overflow-hidden ml-[48px] md:ml-[52px]">
               <div
                 className="h-full bg-primary rounded transition-all duration-500 ease-out"
                 style={{ width: `${item.progress}%` }}

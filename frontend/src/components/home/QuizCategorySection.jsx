@@ -33,9 +33,39 @@ const QuizCategorySection = ({ onCategoryClick }) => {
   };
 
   return (
-    <div className="px-4 pb-5">
-      <h2 className="text-base font-bold mb-3 text-text-primary">카테고리</h2>
-      <div className="grid grid-cols-3 gap-3">
+    <div className="px-4 pb-2 md:pb-4">
+      <h2 className="text-sm font-bold mb-1.5 text-text-primary md:text-base md:mb-3">카테고리</h2>
+
+      {/* ===== 모바일: 리스트 형태 (최근 학습과 동일) ===== */}
+      <div className="card p-2 md:hidden">
+        {quizCategories.map((category) => (
+          <div
+            key={category.id}
+            className="flex items-center py-2 border-b border-gray-border last:border-b-0 cursor-pointer touchable"
+            onClick={() => handleCardClick(category)}
+          >
+            <div className="w-9 h-9 bg-accent-pale rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+              {typeof category.icon === 'string' ? getIcon(category.icon, {
+                size: 'lg',
+                className: category.id === 1 ? 'text-green-400' :
+                          category.id === 2 ? 'text-purple-400' :
+                          category.id === 3 ? 'text-blue-400' : ''
+              }) : category.icon}
+            </div>
+            <div className="flex-1">
+              <div className="text-sm font-semibold text-text-primary">
+                {category.title}
+              </div>
+            </div>
+            <div className="text-xs text-text-secondary">
+              {category.count}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* ===== 태블릿/데스크톱: 그리드 형태 (기존) ===== */}
+      <div className="hidden md:grid grid-cols-3 gap-3">
         {quizCategories.map((category, index) => (
           <div
             key={category.id}

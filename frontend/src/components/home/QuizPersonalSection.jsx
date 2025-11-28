@@ -37,9 +37,35 @@ const QuizPersonalSection = ({ personalQuizzes, onPersonalQuizClick }) => {
   };
 
   return (
-    <div className="px-4 pb-5">
-      <h2 className="text-base font-bold mb-3 text-text-primary">나만의 퀴즈</h2>
-      <div className="grid grid-cols-2 gap-3">
+    <div className="px-4 pb-5 md:pb-5">
+      <h2 className="text-sm font-bold mb-2 text-text-primary md:text-base md:mb-3">나만의 퀴즈</h2>
+
+      {/* ===== 모바일: 가로 2열, 컴팩트 버튼 (색상 배경) ===== */}
+      <div className="grid grid-cols-2 gap-2 md:hidden">
+        {quizzes.map((quiz) => (
+          <div
+            key={quiz.id}
+            className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl cursor-pointer touchable shadow-sm ${
+              quiz.id === 'wrong-answers'
+                ? 'bg-yellow-50 border border-yellow-200'
+                : 'bg-red-50 border border-red-200'
+            }`}
+            data-category-id={quiz.category_id}
+            onClick={() => handleQuizClick(quiz)}
+          >
+            {typeof quiz.icon === 'string' ? getIcon(quiz.icon, {
+              size: 'lg',
+              className: quiz.id === 'wrong-answers' ? 'text-yellow-400' :
+                        quiz.id === 'favorites' ? 'text-red-400' : ''
+            }) : quiz.icon}
+            <span className="text-sm font-semibold text-text-primary">{quiz.title}</span>
+            <span className="text-xs text-text-secondary">({quiz.count})</span>
+          </div>
+        ))}
+      </div>
+
+      {/* ===== 태블릿/데스크톱: 기존 그리드 형태 ===== */}
+      <div className="hidden md:grid grid-cols-2 gap-3">
         {quizzes.map((quiz, index) => (
           <div
             key={quiz.id}
