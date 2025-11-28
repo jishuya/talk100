@@ -33,7 +33,7 @@ const AppLayout = ({ children }) => {
 
       {/* Main Content */}
       <main className={`
-        flex-1 overflow-y-auto pt-header min-h-[calc(100vh-theme(spacing.header))]
+        flex-1 overflow-y-auto pt-[calc(theme(spacing.header)+12px)] min-h-[calc(100vh-theme(spacing.header))]
         ${shouldHideBottomNav ? 'pb-5' : 'pb-[calc(theme(spacing.bottom-nav)+theme(spacing.safe))]'}
       `}>
         {children}
