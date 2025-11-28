@@ -33,8 +33,8 @@ const QuizCategorySection = ({ onCategoryClick }) => {
   };
 
   return (
-    <div className="px-4 pb-2 md:pb-4">
-      <h2 className="text-sm font-bold mb-1.5 text-text-primary md:text-base md:mb-3">카테고리</h2>
+    <div className="px-4 pb-3 md:pb-4">
+      <h2 className="text-sm font-bold mb-2 text-text-primary md:text-base md:mb-3">카테고리</h2>
 
       {/* ===== 모바일: 리스트 형태 (최근 학습과 동일) ===== */}
       <div className="card p-2 md:hidden">

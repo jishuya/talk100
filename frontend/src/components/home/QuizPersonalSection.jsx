@@ -37,7 +37,7 @@ const QuizPersonalSection = ({ personalQuizzes, onPersonalQuizClick }) => {
   };
 
   return (
-    <div className="px-4 pb-5 md:pb-5">
+    <div className="px-4 pb-3 md:pb-4">
       <h2 className="text-sm font-bold mb-2 text-text-primary md:text-base md:mb-3">나만의 퀴즈</h2>
 
       {/* ===== 모바일: 가로 2열, 컴팩트 버튼 (색상 배경) ===== */}

@@ -31,14 +31,14 @@ export const QuizControls = ({
 
   return (
     <div className="fixed bottom-0 left-0 right-0 md:left-1/2 md:-translate-x-1/2 md:w-[768px] lg:w-[900px] bg-white shadow-[0_-2px_8px_rgba(0,0,0,0.08)] z-100">
-      <div className="p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+      <div className="p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] md:p-4 md:pb-[calc(1rem+env(safe-area-inset-bottom))]">
 
         {/* 힌트/정답 보기 버튼들 (문제풀이 모드에서만) */}
         {quizMode === 'solving' && (
           <div className="flex gap-2 mb-3">
             <button
               onClick={onShowFirstLetters}
-              className={`flex-1 p-3 border border-gray-border rounded-brand-sm transition-all duration-200 active:scale-[0.97] flex flex-col items-center gap-1 ${showHint ? 'bg-primary-light border-primary' : 'bg-white active:bg-primary-light active:border-primary'}`}
+              className={`flex-1 px-3 py-2 md:p-3 border border-gray-border rounded-brand-sm transition-all duration-200 active:scale-[0.97] flex flex-row md:flex-col items-center justify-center gap-1.5 md:gap-1 ${showHint ? 'bg-primary-light border-primary' : 'bg-white active:bg-primary-light active:border-primary'}`}
             >
               {getIcon('AiOutlineQuestionCircle', {
                 size: 'xl',
@@ -48,7 +48,7 @@ export const QuizControls = ({
             </button>
             <button
               onClick={onShowFullAnswer}
-              className={`flex-1 p-3 border border-gray-border rounded-brand-sm transition-all duration-200 active:scale-[0.97] flex flex-col items-center gap-1 ${showAnswer ? 'bg-primary-light border-primary' : 'bg-white active:bg-primary-light active:border-primary'}`}
+              className={`flex-1 px-3 py-2 md:p-3 border border-gray-border rounded-brand-sm transition-all duration-200 active:scale-[0.97] flex flex-row md:flex-col items-center justify-center gap-1.5 md:gap-1 ${showAnswer ? 'bg-primary-light border-primary' : 'bg-white active:bg-primary-light active:border-primary'}`}
             >
               {getIcon('AiOutlineCheckCircle', {
                 size: 'xl',
@@ -112,7 +112,7 @@ export const QuizControls = ({
             onClick={onMainAction}
             size="lg"
             shape="pill"
-            className={`w-full py-6 text-lg font-bold flex items-center justify-center gap-2 transition-all duration-300 ${
+            className={`w-full py-3 md:py-6 text-base md:text-lg font-bold flex items-center justify-center gap-2 transition-all duration-300 ${
               isRecording
                 ? 'bg-error hover:bg-red-600 animate-pulse'
                 : 'btn-primary'

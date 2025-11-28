@@ -42,17 +42,41 @@ export const QuizContent = ({
     );
   }
   return (
-    <main className="flex-1 overflow-y-auto p-4 pb-32 -webkit-overflow-scrolling-touch">
+    <main className="flex-1 overflow-y-auto p-3 pb-32 md:p-4 -webkit-overflow-scrolling-touch">
       {/* 퀴즈 박스 */}
-      <div className="bg-white rounded-brand shadow-soft p-5 mb-4 relative">
-        {/* Day & 카테고리 표시 */}
-        <div className="flex gap-2 mb-4">
-          <span className="px-3 py-1.5 bg-primary text-white rounded-full text-sm font-bold shadow-soft">
-            Day {question.day}
-          </span>
-          <span className="px-3 py-1.5 bg-primary text-white rounded-full text-sm font-bold shadow-soft">
-            {getCategoryName(question.categoryId)}
-          </span>
+      <div className="bg-white rounded-brand shadow-soft p-4 mb-3 md:p-5 md:mb-4">
+        {/* Day & 카테고리 + 즐겨찾기/별표 버튼 (한 줄) */}
+        <div className="flex items-center justify-between mb-3 md:mb-4">
+          {/* 왼쪽: Day & 카테고리 */}
+          <div className="flex gap-1.5 md:gap-2">
+            <span className="px-2.5 py-1 md:px-3 md:py-1.5 bg-primary text-white rounded-full text-sm md:text-sm font-bold shadow-soft">
+              Day {question.day}
+            </span>
+            <span className="px-2.5 py-1 md:px-3 md:py-1.5 bg-primary text-white rounded-full text-sm md:text-sm font-bold shadow-soft">
+              {getCategoryName(question.categoryId)}
+            </span>
+          </div>
+          {/* 오른쪽: 즐겨찾기/별표 버튼 */}
+          <div className="flex gap-1 -mr-1">
+            <IconButton
+              icon={getIcon(isFavorite ? 'fluent:heart-24-filled' : 'fluent:heart-24-regular', {
+                size: 'lg',
+                className: 'text-red-400'
+              })}
+              onClick={onFavoriteToggle}
+              variant="ghost"
+              className="!p-1"
+            />
+            <IconButton
+              icon={getIcon(isStarred ? 'fluent:star-24-filled' : 'fluent:star-24-regular', {
+                size: 'lg',
+                className: 'text-yellow-400'
+              })}
+              onClick={onStarToggle}
+              variant="ghost"
+              className="!p-1"
+            />
+          </div>
         </div>
         {/* 문제 영역 */}
         <div className="mb-5">
@@ -180,29 +204,9 @@ export const QuizContent = ({
           </div>
         </div>
         {/* 힌트/정답은 이제 노란색 blank 안에 직접 표시됨 */}
-
-        {/* 즐겨찾기/별표 버튼 */}
-        <div className="absolute top-4 right-4 flex gap-2">
-          <IconButton
-            icon={getIcon(isFavorite ? 'fluent:heart-24-filled' : 'fluent:heart-24-regular', {
-              size: 'lg',
-              className: 'text-red-400'
-            })}
-            onClick={onFavoriteToggle}
-            variant="ghost"
-          />
-          <IconButton
-            icon={getIcon(isStarred ? 'fluent:star-24-filled' : 'fluent:star-24-regular', {
-              size: 'lg',
-              className: 'text-yellow-400'
-            })}
-            onClick={onStarToggle}
-            variant="ghost"
-          />
-        </div>
       </div>
       {/* 사용자 답변 박스 */}
-      <div className="bg-white rounded-brand shadow-soft p-4 relative min-h-[80px]">
+      <div className="bg-white rounded-brand shadow-soft p-3 md:p-4 relative min-h-[80px]">
         {/* 입력 모드 토글 */}
         <div className="absolute top-3 right-3 flex bg-background rounded-brand-full p-0.5">
           <button

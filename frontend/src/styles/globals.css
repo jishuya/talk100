@@ -148,7 +148,7 @@ body {
 
   /* 캐릭터 카드 */
   .character-card {
-    @apply card-elevated p-5 text-center mx-4 mb-4;
+    @apply card-elevated p-5 text-center mx-4 mb-3;
   }
 
   /* 히스토리 카드 */

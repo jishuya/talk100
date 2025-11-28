@@ -45,8 +45,8 @@ const StudyHistorySection = ({ historyItems }) => {
   });
 
   return (
-    <div className="px-4 pb-2 md:pb-5">
-       <h2 className="text-sm font-bold mb-1.5 text-text-primary md:text-base md:mb-3">최근 학습</h2>
+    <div className="px-4 pb-3 md:pb-5">
+       <h2 className="text-sm font-bold mb-2 text-text-primary md:text-base md:mb-3">최근 학습</h2>
 
       <div className="history-card p-2 md:p-4">
         {history.map((item) => (
