@@ -57,10 +57,11 @@ export default {
       },
       fontFamily: {
         sans: [
+          'Noto Sans',
+          'Noto Sans KR',
           '-apple-system',
           'BlinkMacSystemFont',
           'Segoe UI',
-          'Noto Sans KR',
           'sans-serif'
         ],
       },

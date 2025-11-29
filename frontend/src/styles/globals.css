@@ -3,6 +3,28 @@
 @tailwind utilities;
 
 /* =================================================================
+   Font Face - Noto Sans
+   ================================================================= */
+
+/* Noto Sans (영문) */
+@font-face {
+  font-family: 'Noto Sans';
+  src: url('/fonts/Noto_Sans/NotoSans-VariableFont_wdth,wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Noto Sans KR (한글) */
+@font-face {
+  font-family: 'Noto Sans KR';
+  src: url('/fonts/Noto_Sans_KR/NotoSansKR-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* =================================================================
    talk100 Design System - Clean Version
    ================================================================= */
 
