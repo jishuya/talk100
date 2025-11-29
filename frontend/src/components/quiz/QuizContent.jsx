@@ -44,15 +44,15 @@ export const QuizContent = ({
   return (
     <main className="flex-1 overflow-y-auto p-3 pb-32 md:p-4 -webkit-overflow-scrolling-touch">
       {/* 퀴즈 박스 */}
-      <div className="bg-white rounded-brand shadow-soft p-4 mb-3 md:p-5 md:mb-4">
+      <div className="bg-white rounded-brand shadow-soft p-3 mb-3 md:p-4 md:mb-4">
         {/* Day & 카테고리 + 즐겨찾기/별표 버튼 (한 줄) */}
         <div className="flex items-center justify-between mb-3 md:mb-4">
           {/* 왼쪽: Day & 카테고리 */}
           <div className="flex gap-1.5 md:gap-2">
-            <span className="px-2.5 py-1 md:px-3 md:py-1.5 bg-primary text-white rounded-full text-sm md:text-sm font-bold shadow-soft">
+            <span className="px-2 py-1 md:px-3 md:py-1.5 bg-primary text-white rounded-full text-xs md:text-sm font-bold shadow-soft">
               Day {question.day}
             </span>
-            <span className="px-2.5 py-1 md:px-3 md:py-1.5 bg-primary text-white rounded-full text-sm md:text-sm font-bold shadow-soft">
+            <span className="px-2 py-1 md:px-3 md:py-1.5 bg-primary text-white rounded-full text-xs md:text-sm font-bold shadow-soft">
               {getCategoryName(question.categoryId)}
             </span>
           </div>
@@ -206,40 +206,44 @@ export const QuizContent = ({
         {/* 힌트/정답은 이제 노란색 blank 안에 직접 표시됨 */}
       </div>
       {/* 사용자 답변 박스 */}
-      <div className="bg-white rounded-brand shadow-soft p-3 md:p-4 relative min-h-[80px]">
-        {/* 입력 모드 토글 */}
-        <div className="absolute top-3 right-3 flex bg-background rounded-brand-full p-0.5">
-          <button
-            onClick={() => onInputModeChange('voice')}
-            className={`px-3 py-1.5 rounded-[18px] text-xs transition-all duration-200 flex items-center gap-1 ${
-              inputMode === 'voice'
-                ? 'bg-white text-primary font-semibold shadow-sm'
-                : 'text-text-secondary'
-            }`}
-          >
-            <span>🎤</span>
-            <span>음성</span>
-          </button>
-          <button
-            onClick={() => onInputModeChange('keyboard')}
-            className={`px-3 py-1.5 rounded-[18px] text-xs transition-all duration-200 flex items-center gap-1 ${
-              inputMode === 'keyboard'
-                ? 'bg-white text-primary font-semibold shadow-sm'
-                : 'text-text-secondary'
-            }`}
-          >
-{getIcon('noto:keyboard', { size: 'sm' })}
-            <span>키보드</span>
-          </button>
+      <div className="bg-white rounded-brand shadow-soft p-3 md:p-4 md:relative min-h-[80px]">
+        {/* 모바일: 첫째 줄 - 내 답변 + 입력 모드 토글 */}
+        <div className="flex items-center justify-between mb-2 md:block">
+          <div className="text-xs text-text-secondary flex items-center gap-2">
+            {gradingResult?.isAllCorrect && (
+              <span className="inline-flex items-center">
+                {getIcon('noto:check-mark', { size: 'sm' })}
+              </span>
+            )}
+            <span>내 답변</span>
+          </div>
+          {/* 입력 모드 토글 - 모바일: inline, 데스크탑: absolute */}
+          <div className="flex bg-background rounded-brand-full p-0.5 md:absolute md:top-3 md:right-3">
+            <button
+              onClick={() => onInputModeChange('voice')}
+              className={`px-3 py-1.5 rounded-[18px] text-xs transition-all duration-200 flex items-center gap-1 ${
+                inputMode === 'voice'
+                  ? 'bg-white text-primary font-semibold shadow-sm'
+                  : 'text-text-secondary'
+              }`}
+            >
+              <span>🎤</span>
+              <span>음성</span>
+            </button>
+            <button
+              onClick={() => onInputModeChange('keyboard')}
+              className={`px-3 py-1.5 rounded-[18px] text-xs transition-all duration-200 flex items-center gap-1 ${
+                inputMode === 'keyboard'
+                  ? 'bg-white text-primary font-semibold shadow-sm'
+                  : 'text-text-secondary'
+              }`}
+            >
+              {getIcon('noto:keyboard', { size: 'sm' })}
+              <span>키보드</span>
+            </button>
+          </div>
         </div>
-        <div className="text-xs text-text-secondary mb-2 flex items-center gap-2">
-          {gradingResult?.isAllCorrect && (
-            <span className="inline-flex items-center">
-              {getIcon('noto:check-mark', { size: 'sm' })}
-            </span>
-          )}
-          <span>내 답변</span>
-        </div>
+        {/* 둘째 줄: 안내 텍스트 또는 사용자 답변 */}
         <div className="text-base leading-relaxed text-text-primary min-h-[24px]">
           {isVoiceListening ? (
             <span className="text-primary italic animate-pulse">
@@ -248,7 +252,7 @@ export const QuizContent = ({
           ) : userAnswer ? (
             userAnswer
           ) : (
-            <span className="text-text-secondary italic">
+            <span className="text-text-secondary italic text-sm">
               {inputMode === 'keyboard'
                 ? '노란 박스를 클릭해서 답변을 작성하세요'
                 : '아래 버튼을 눌러 음성으로 답변하세요'
