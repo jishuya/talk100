@@ -20,7 +20,7 @@ export const QuizProgressBar = ({
   if (category === 4) {
     const progress = todayProgress || { current: 0, total: 10, percentage: 0 };
     return (
-      <div className="bg-white shadow-soft rounded-brand mx-4 mt-2 p-3 md:mb-4 md:mt-4 md:p-4">
+      <div className="bg-white shadow-soft rounded-brand mx-4 p-3 md:p-4">
         <div className="flex items-center gap-3">
           <div className="flex-1 h-2 bg-accent-mint rounded-full overflow-hidden">
             <div
@@ -43,7 +43,7 @@ export const QuizProgressBar = ({
     const percentage = Math.round((completed / total) * 100);
 
     return (
-      <div className="bg-white shadow-soft rounded-brand mx-4 mt-2 p-3 md:mb-4 md:mt-4 md:p-4">
+      <div className="bg-white shadow-soft rounded-brand mx-4 p-3 md:p-4">
         <div className="flex items-center gap-3">
           <div className="flex-1 h-2 bg-accent-mint rounded-full overflow-hidden">
             <div
@@ -66,7 +66,7 @@ export const QuizProgressBar = ({
     const percentage = Math.round((current / total) * 100);
 
     return (
-      <div className="bg-white shadow-soft rounded-brand mx-4 mt-2 p-3 md:mb-4 md:mt-4 md:p-4">
+      <div className="bg-white shadow-soft rounded-brand mx-4 p-3 md:p-4">
         <div className="flex items-center gap-3">
           <div className="flex-1 h-2 bg-accent-mint rounded-full overflow-hidden">
             <div
@@ -84,7 +84,7 @@ export const QuizProgressBar = ({
 
   // 기본값 (fallback)
   return (
-    <div className="bg-white shadow-soft rounded-brand mx-4 mt-2 p-3 md:mb-4 md:mt-4 md:p-4">
+    <div className="bg-white shadow-soft rounded-brand mx-4 p-3 md:p-4">
       <div className="flex items-center gap-3">
         <div className="flex-1 h-2 bg-accent-mint rounded-full overflow-hidden">
           <div
