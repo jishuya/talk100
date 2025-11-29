@@ -51,7 +51,7 @@ function checkLevelUp(previousQuestions, currentQuestions) {
       avatar: levelInfo.emoji,
       avatarName: levelInfo.name,
       requiredQuestions: levelInfo.requiredQuestions,
-      message: `축하합니다! ${levelInfo.requiredQuestions}문제 달성! 레벨업하였습니다.`
+      message: `${levelInfo.requiredQuestions}문제 달성! 레벨업하였습니다.`
     };
   }
 

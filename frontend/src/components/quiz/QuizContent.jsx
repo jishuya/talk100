@@ -57,7 +57,7 @@ export const QuizContent = ({
             </span>
           </div>
           {/* 오른쪽: 즐겨찾기/별표 버튼 */}
-          <div className="flex gap-1 -mr-1">
+          <div className="flex gap-1">
             <IconButton
               icon={getIcon(isFavorite ? 'fluent:heart-24-filled' : 'fluent:heart-24-regular', {
                 size: 'lg',
@@ -65,7 +65,7 @@ export const QuizContent = ({
               })}
               onClick={onFavoriteToggle}
               variant="ghost"
-              className="!p-1"
+              className="!px-1 !py-1 md:!px-2"
             />
             <IconButton
               icon={getIcon(isStarred ? 'fluent:star-24-filled' : 'fluent:star-24-regular', {
@@ -74,7 +74,7 @@ export const QuizContent = ({
               })}
               onClick={onStarToggle}
               variant="ghost"
-              className="!p-1"
+              className="!px-1 !py-1 md:!px-2"
             />
           </div>
         </div>
@@ -128,13 +128,13 @@ export const QuizContent = ({
                           onClearHintAnswer();
                         }
                       }}
-                      className={`px-2 py-1 rounded font-semibold border-2 focus:border-primary focus:outline-none min-w-[70px] max-w-[130px] placeholder:text-transparent ${
+                      className={`px-1 py-1 rounded font-semibold border-2 focus:border-primary focus:outline-none min-w-[60px] max-w-[140px] placeholder:text-transparent text-center ${
                         isShowingHintOrAnswer
-                          ? 'bg-yellow-100 border-yellow-200 text-gray-500 text-left'  // 힌트/정답 표시 중 (왼쪽 정렬)
-                          : 'bg-yellow-200 border-yellow-300 text-center'  // 일반 입력 상태 (가운데 정렬)
+                          ? 'bg-yellow-100 border-yellow-200 text-gray-500'  // 힌트/정답 표시 중
+                          : 'bg-yellow-200 border-yellow-300'  // 일반 입력 상태
                       }`}
                       style={{
-                        width: `${Math.max(cleanWord.length * 10 + 16, 70)}px`,
+                        width: `${Math.max(cleanWord.length * 10 + 12, 70)}px`,  // 항상 동일한 크기
                         backgroundImage: isShowingHintOrAnswer ? 'none' : 'linear-gradient(to right, #9ca3af 0%, #9ca3af 100%)',
                         backgroundSize: 'calc(100% - 12px) 2px',
                         backgroundPosition: 'center bottom 6px',
@@ -255,7 +255,7 @@ export const QuizContent = ({
             <span className="text-text-secondary italic text-sm">
               {inputMode === 'keyboard'
                 ? '노란 박스를 클릭해서 답변을 작성하세요'
-                : '아래 버튼을 눌러 음성으로 답변하세요'
+                : '아래 정답말하기 버튼을 눌러주세요'
               }
             </span>
           )}

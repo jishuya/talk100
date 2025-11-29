@@ -10,6 +10,7 @@ import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import Modal, { ModalBody } from '../components/ui/Modal';
 import BadgeModal from '../components/ui/BadgeModal';
 import LevelUpModal from '../components/quiz/LevelUpModal';
+import { WrongAnswerModal } from '../components/quiz/WrongAnswerModal';
 import Button from '../components/ui/Button';
 import { getIcon } from '../utils/iconMap';
 
@@ -38,7 +39,7 @@ import { useVoiceInput } from '../hooks/useVoiceInput';
 import { useToggleWrongAnswer, useToggleFavorite, useUpdateProgress, useQuizMode, useUpdateQuizMode, useHistoryData } from '../hooks/useApi';
 
 // 음원 유틸리티
-import { getAudioUrl } from '../utils/audioUtils';
+import { getAudioUrl, playEffectSound } from '../utils/audioUtils';
 
 const QuizPage = () => {
   const [searchParams] = useSearchParams();
@@ -54,6 +55,12 @@ const QuizPage = () => {
   useEffect(() => {
     if (sessionId) {
       const sessionData = getSession(sessionId);
+      console.log('🔍 [QuizPage] Session loaded:', sessionId, sessionData);
+      console.log('🔍 [QuizPage] Questions:', sessionData?.questions);
+      if (sessionData?.questions?.[0]) {
+        console.log('🔍 [QuizPage] First question question_type:', sessionData.questions[0].question_type, 'typeof:', typeof sessionData.questions[0].question_type);
+        console.log('🔍 [QuizPage] First question keys:', Object.keys(sessionData.questions[0]));
+      }
       if (sessionData) {
         setSession(sessionData);
       } else {
@@ -86,10 +93,8 @@ const QuizPage = () => {
     // 백엔드 데이터 형식을 QuizPage가 기대하는 형식으로 변환
     let korean, english;
 
-    if (currentQuestion.question_type === 'short' || currentQuestion.question_type === 'long') {
-      korean = currentQuestion.korean;
-      english = currentQuestion.english;
-    } else if (currentQuestion.question_type === 'dialogue') {
+    if (currentQuestion.question_type === 'dialogue') {
+      // dialogue 타입: korean_a/english_a 또는 korean_b/english_b 사용
       if (currentQuestion.korean_a !== "" && currentQuestion.korean_a !== null) {
         korean = currentQuestion.korean_a;
         english = currentQuestion.english_a;
@@ -97,6 +102,10 @@ const QuizPage = () => {
         korean = currentQuestion.korean_b;
         english = currentQuestion.english_b;
       }
+    } else {
+      // short, long, null 또는 기타 타입: 기본 korean/english 필드 사용
+      korean = currentQuestion.korean;
+      english = currentQuestion.english;
     }
 
     return {
@@ -142,6 +151,7 @@ const QuizPage = () => {
   const [streakInfo, setStreakInfo] = useState(null);
   const [newBadges, setNewBadges] = useState([]);
   const [levelUpInfo, setLevelUpInfo] = useState(null);
+  const [wrongAnswerFeedback, setWrongAnswerFeedback] = useState(null); // { correctCount, totalCount }
 
   // 모달 버튼 ref
   const continueButtonRef = useRef(null);
@@ -338,6 +348,8 @@ const QuizPage = () => {
       if (checkAllKeywords(keywordInputs)) {
         // 채점 결과 설정 (체크마크 표시를 위해)
         submitAnswer(keywordInputs, userAnswer);
+        // 정답 효과음 재생
+        playEffectSound('success');
         // grading 모드로 전환 (자동으로 다음 문제로 이동하지 않음)
         setQuizMode('grading');
       }
@@ -373,12 +385,15 @@ const QuizPage = () => {
 
     if (result.isAllCorrect) {
       // 정답: grading 모드로 전환 (자동 이동 X)
+      playEffectSound('success');
       setQuizMode('grading');
     } else {
-      // 오답: 피드백 표시
-      alert(
-        `${result.correctCount}/${result.totalCount} 개 정답입니다.\n다시 시도해보세요!`
-      );
+      // 오답: 피드백 모달 표시
+      playEffectSound('error');
+      setWrongAnswerFeedback({
+        correctCount: result.correctCount,
+        totalCount: result.totalCount
+      });
     }
   }, [keywordInputs, userAnswer, submitAnswer]);
 
@@ -416,6 +431,8 @@ const QuizPage = () => {
           if (isVoiceListening) {
             stopVoiceListening();
           }
+          // 정답 효과음 재생
+          playEffectSound('success');
           setQuizMode('grading');
         }
 
@@ -527,6 +544,9 @@ const QuizPage = () => {
       setKeywordInputs({});
       resetGrading();
       resetVoiceTranscript();
+
+      // 스크롤을 맨 위로 이동
+      window.scrollTo({ top: 0, behavior: 'smooth' });
 
       // 첫 번째 키워드 input에 포커스
       setTimeout(() => {
@@ -803,7 +823,7 @@ const QuizPage = () => {
         deleteSession(sessionId);
 
         // 5. 새 세션 생성 (사용자의 quiz_mode 설정 유지)
-        const { questions } = result.data;
+        const { questions } = result;
         const questionIds = questions.map(q => q.question_id);
 
         const newSessionId = `session_${Date.now()}`;
@@ -1049,6 +1069,18 @@ const QuizPage = () => {
           onClose={handleBadgeModalClose}
         />
       )}
+
+      {/* ❌ 오답 피드백 모달 */}
+      <WrongAnswerModal
+        isOpen={!!wrongAnswerFeedback}
+        correctCount={wrongAnswerFeedback?.correctCount || 0}
+        totalCount={wrongAnswerFeedback?.totalCount || 0}
+        onRetry={() => setWrongAnswerFeedback(null)}
+        onShowAnswer={() => {
+          setWrongAnswerFeedback(null);
+          handleShowFullAnswer();
+        }}
+      />
 
     </div>
   );

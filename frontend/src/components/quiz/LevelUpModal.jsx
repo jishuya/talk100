@@ -14,7 +14,7 @@ const LevelUpModal = ({ isOpen, onClose, levelUpInfo }) => {
   } = levelUpInfo;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="sm">
+    <Modal isOpen={isOpen} onClose={onClose} size="sm" className="rounded-2xl shadow-xl overflow-hidden">
       <div className="p-6 text-center">
         {/* 축하 아이콘 */}
         <div className="text-6xl mb-4 animate-bounce">
