@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 
 // UI 컴포넌트들
 import { QuizProgressBar } from '../components/quiz/QuizProgressBar';
+import { CategoryQuizProgressBar } from '../components/quiz/CategoryQuizProgressBar';
 import { QuizContent } from '../components/quiz/QuizContent';
 import { QuizControls } from '../components/quiz/QuizControls';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
@@ -36,7 +37,7 @@ import { useQuizGrading } from '../hooks/useQuizGrading';
 import { useVoiceInput } from '../hooks/useVoiceInput';
 
 // API 훅 및 서비스
-import { useToggleWrongAnswer, useToggleFavorite, useUpdateProgress, useQuizMode, useUpdateQuizMode, useHistoryData } from '../hooks/useApi';
+import { useToggleWrongAnswer, useToggleFavorite, useUpdateProgress, useQuizMode, useUpdateQuizMode, useHistoryData, useMarkDayCompleted } from '../hooks/useApi';
 
 // 음원 유틸리티
 import { getAudioUrl, playEffectSound } from '../utils/audioUtils';
@@ -198,6 +199,9 @@ const QuizPage = () => {
 
   // 진행률 업데이트 mutation
   const updateProgressMutation = useUpdateProgress();
+
+  // Day 완료 기록 mutation (카테고리 퀴즈용)
+  const markDayCompletedMutation = useMarkDayCompleted();
 
   // inputMode 초기화 및 동기화 (우선순위: 세션 > DB > 기본값)
   useEffect(() => {
@@ -526,8 +530,30 @@ const QuizPage = () => {
       if (!success) {
         // 퀴즈 완료 - 바로 홈으로 이동
         if (isQuizCompleted(sessionId)) {
+          // 📅 카테고리 퀴즈(1,2,3)가 완료되면 Day 완료 기록
+          const isCategoryQuiz = session?.category >= 1 && session?.category <= 3 && session?.day;
+
+          if (isCategoryQuiz) {
+            try {
+              await markDayCompletedMutation.mutateAsync({
+                categoryId: session.category,
+                day: session.day
+              });
+              console.log(`✅ Day ${session.day} completed for category ${session.category}`);
+            } catch (error) {
+              console.error('Failed to mark day as completed:', error);
+              // Day 완료 기록 실패해도 퀴즈 종료는 진행
+            }
+          }
+
           deleteSession(sessionId);
-          navigate('/');
+
+          // 카테고리 퀴즈 완료 시 완료 정보와 함께 홈으로 이동
+          if (isCategoryQuiz) {
+            navigate(`/?completed=true&category=${session.category}&day=${session.day}`);
+          } else {
+            navigate('/');
+          }
           return;
         }
       }
@@ -560,7 +586,7 @@ const QuizPage = () => {
       console.error('Move to next question error:', error);
       alert('다음 문제 로드에 실패했습니다.');
     }
-  }, [sessionId, question?.id, question?.day, session?.category, quizMode, navigate, resetGrading, resetVoiceTranscript, updateProgressMutation]);
+  }, [sessionId, question?.id, question?.day, session?.category, session?.day, quizMode, navigate, resetGrading, resetVoiceTranscript, updateProgressMutation, markDayCompletedMutation]);
 
   // 다음 문제로 이동 (뱃지 체크 포함)
   const handleNextQuestion = useCallback(async () => {
@@ -909,14 +935,22 @@ const QuizPage = () => {
         />
       )}
 
-      {/* 프로그레스 바 */}
-      <QuizProgressBar
-        category={session?.category}
-        currentIndex={currentQuestionIndex}
-        totalQuestions={questionsData?.length || 0}
-        categoryCompleted={categoryProgress?.category_completed || 0}
-        categoryTotal={categoryProgress?.category_total || 0}
-      />
+      {/* 프로그레스 바 - 카테고리별 퀴즈(1,2,3)는 전용 프로그레스바 사용 */}
+      {session?.category >= 1 && session?.category <= 3 ? (
+        <CategoryQuizProgressBar
+          completedCount={session?.completedQuestionIds?.length || 0}
+          totalQuestions={questionsData?.length || 0}
+          day={session?.day}
+        />
+      ) : (
+        <QuizProgressBar
+          category={session?.category}
+          currentIndex={currentQuestionIndex}
+          totalQuestions={questionsData?.length || 0}
+          categoryCompleted={categoryProgress?.category_completed || 0}
+          categoryTotal={categoryProgress?.category_total || 0}
+        />
+      )}
 
       {/* 🎵 음원 상태 표시 */}
       {audioUrl && (

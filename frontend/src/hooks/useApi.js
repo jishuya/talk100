@@ -94,6 +94,35 @@ export const useUpdateProgress = () => {
   });
 };
 
+/**
+ * 카테고리별 완료된 Day 목록 조회
+ * @param {number} categoryId - 카테고리 ID (1~3)
+ */
+export const useCompletedDays = (categoryId) => {
+  return useQuery({
+    queryKey: ['progress', 'completedDays', categoryId],
+    queryFn: () => api.getCompletedDays(categoryId),
+    staleTime: ENV.CACHE_TIMES.PROGRESS,
+    enabled: !!categoryId && categoryId >= 1 && categoryId <= 3,
+    retry: 2,
+  });
+};
+
+/**
+ * Day 완료 기록
+ */
+export const useMarkDayCompleted = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ categoryId, day }) => api.markDayCompleted(categoryId, day),
+    onSuccess: (_, variables) => {
+      // 해당 카테고리의 completedDays 캐시 무효화
+      queryClient.invalidateQueries(['progress', 'completedDays', variables.categoryId]);
+    },
+  });
+};
+
 // ==============================================
 // 퀴즈 관련 훅
 // ==============================================

@@ -109,6 +109,51 @@ class ProgressQueries {
   }
 
   /**
+   * 완료된 Day 목록 조회
+   * @param {string} userId - 사용자 ID
+   * @param {number} categoryId - 카테고리 ID
+   * @returns {Array} 완료된 Day 번호 배열 [1, 2, 3, ...]
+   */
+  async getCompletedDays(userId, categoryId) {
+    try {
+      const result = await db.any(
+        `SELECT day FROM completed_days
+         WHERE user_id = $1 AND category_id = $2
+         ORDER BY day`,
+        [userId, categoryId]
+      );
+
+      return result.map(row => row.day);
+    } catch (error) {
+      console.error('❌ [Completed Days] Query failed:', error);
+      throw new Error('Failed to get completed days');
+    }
+  }
+
+  /**
+   * Day 완료 기록 추가
+   * @param {string} userId - 사용자 ID
+   * @param {number} categoryId - 카테고리 ID
+   * @param {number} day - 완료한 Day 번호
+   * @returns {Object} { success: boolean }
+   */
+  async markDayCompleted(userId, categoryId, day) {
+    try {
+      await db.none(
+        `INSERT INTO completed_days (user_id, category_id, day)
+         VALUES ($1, $2, $3)
+         ON CONFLICT (user_id, category_id, day) DO NOTHING`,
+        [userId, categoryId, day]
+      );
+
+      return { success: true, message: 'Day marked as completed' };
+    } catch (error) {
+      console.error('❌ [Mark Day Completed] Failed:', error);
+      throw new Error('Failed to mark day as completed');
+    }
+  }
+
+  /**
    * solved_count 리셋 - 추가 학습 시작 시 호출
    * @param {string} userId - 사용자 ID
    * @returns {Object} { success: boolean }

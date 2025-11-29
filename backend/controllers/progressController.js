@@ -54,6 +54,98 @@ class ProgressController {
   }
 
   /**
+   * GET /api/progress/completed-days/:categoryId
+   * 특정 카테고리의 완료된 Day 목록 조회
+   */
+  async getCompletedDays(req, res) {
+    try {
+      const uid = req.user?.uid;
+      const categoryId = parseInt(req.params.categoryId);
+
+      if (!uid) {
+        return res.status(401).json({
+          success: false,
+          message: 'Authentication required'
+        });
+      }
+
+      // categoryId 유효성 검증 (1~3: 카테고리별 퀴즈)
+      if (!categoryId || categoryId < 1 || categoryId > 3) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid category ID. Must be between 1 and 3'
+        });
+      }
+
+      const completedDays = await progressQueries.getCompletedDays(uid, categoryId);
+
+      res.json({
+        success: true,
+        data: {
+          categoryId,
+          completedDays
+        }
+      });
+
+    } catch (error) {
+      console.error('getCompletedDays controller error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to get completed days'
+      });
+    }
+  }
+
+  /**
+   * POST /api/progress/complete-day
+   * Day 완료 기록
+   * Body: { categoryId: number, day: number }
+   */
+  async markDayCompleted(req, res) {
+    try {
+      const uid = req.user?.uid;
+      const { categoryId, day } = req.body;
+
+      if (!uid) {
+        return res.status(401).json({
+          success: false,
+          message: 'Authentication required'
+        });
+      }
+
+      // 유효성 검증
+      if (!categoryId || !day) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid request: categoryId and day are required'
+        });
+      }
+
+      // categoryId 유효성 검증 (1~3: 카테고리별 퀴즈)
+      if (categoryId < 1 || categoryId > 3) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid category ID. Must be between 1 and 3'
+        });
+      }
+
+      const result = await progressQueries.markDayCompleted(uid, categoryId, day);
+
+      res.json({
+        success: true,
+        data: result
+      });
+
+    } catch (error) {
+      console.error('markDayCompleted controller error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to mark day as completed'
+      });
+    }
+  }
+
+  /**
    * POST /api/progress/reset-solved-count
    * 추가 학습 시작 시 solved_count 리셋
    */

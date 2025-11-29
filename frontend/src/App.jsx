@@ -1,5 +1,5 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -18,6 +18,17 @@ import GoalModalSamples from './samples/GoalModalSamples';
 
 // 스타일 import
 import './styles/globals.css';
+
+// 페이지 이동 시 스크롤 상단으로 이동
+const ScrollToTop = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
+  return null;
+};
 
 // React Query 클라이언트 생성
 const queryClient = new QueryClient({
@@ -45,6 +56,7 @@ function App() {
         <AppProvider>
           <ThemeProvider>
             <Router>
+              <ScrollToTop />
               <div className="app-container min-h-screen bg-background">
                 <AppLayout>
                   <Routes>

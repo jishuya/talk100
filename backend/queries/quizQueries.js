@@ -287,9 +287,10 @@ class QuizQueries {
    * 카테고리별 퀴즈 - 진행률 + 남은 문제들 조회
    * @param {string} userId - 사용자 ID
    * @param {number} categoryId - 카테고리 ID (1: Model Example, 2: Small Talk, 3: Cases in Point)
+   * @param {number|null} day - 특정 Day 번호 (null이면 진행 상황에 따라 자동 결정)
    * @returns {Object} { quiz_type, category_id, day, progress, questions }
    */
-  async getCategoryQuizQuestions(userId, categoryId) {
+  async getCategoryQuizQuestions(userId, categoryId, day = null) {
     try {
       const result = await db.task(async t => {
         // 1. 진행 상황 조회 (헬퍼 함수 사용)
@@ -300,7 +301,12 @@ class QuizQueries {
         let startQuestionNumber = 1; // 기본값: 1번 문제부터
         let completed = 0; // 기본값: 완료한 문제 수 0
 
-        if (progressInfo && progressInfo.last_studied_day) {
+        // day 파라미터가 있으면 해당 Day의 문제를 처음부터 조회
+        if (day !== null) {
+          targetDay = day;
+          startQuestionNumber = 1;
+          completed = 0;
+        } else if (progressInfo && progressInfo.last_studied_day) {
           const lastDay = progressInfo.last_studied_day;
           const lastQuestionNumber = progressInfo.completed || 0;
           const totalQuestionsInDay = progressInfo.total || 0;

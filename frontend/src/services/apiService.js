@@ -318,6 +318,19 @@ class ApiService {
     });
   }
 
+  // 📅 카테고리별 완료된 Day 목록 조회
+  getCompletedDays(categoryId) {
+    return this.request(`/api/progress/completed-days/${categoryId}`, null);
+  }
+
+  // 📅 Day 완료 기록
+  markDayCompleted(categoryId, day) {
+    return this.request('/api/progress/complete-day', null, {
+      method: 'POST',
+      body: { categoryId, day }
+    });
+  }
+
   // 🧩 QuizPage.jsx에서 사용 - 틀린 문제 토글 (별 아이콘)
   toggleWrongAnswer(questionId, isStarred) {
     return this.request('/api/quiz/wrong-answers/toggle', null, {

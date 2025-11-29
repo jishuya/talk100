@@ -35,11 +35,13 @@ class QuizController {
   /**
    * GET /api/quiz/category/:categoryId
    * 카테고리별 퀴즈 조회 (인증 필수)
+   * Query params: day (optional) - 특정 Day 문제 조회
    */
   async getCategoryQuiz(req, res) {
     try {
       const uid = req.user?.uid;
       const categoryId = parseInt(req.params.categoryId);
+      const day = req.query.day ? parseInt(req.query.day) : null;
 
       if (!uid) {
         return res.status(401).json({
@@ -56,7 +58,15 @@ class QuizController {
         });
       }
 
-      const result = await quizQueries.getCategoryQuizQuestions(uid, categoryId);
+      // day 유효성 검증 (1~100)
+      if (day !== null && (day < 1 || day > 100)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid day. Must be between 1 and 100'
+        });
+      }
+
+      const result = await quizQueries.getCategoryQuizQuestions(uid, categoryId, day);
 
       res.json({
         success: true,

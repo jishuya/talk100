@@ -281,3 +281,27 @@ body {
 .logo-animated .wave3 { animation-delay: 0.2s; }
 .logo-animated .wave4 { animation-delay: 0.3s; }
 .logo-animated .wave5 { animation-delay: 0.4s; }
+
+/* 🎉 Day 완료 축하 애니메이션 */
+@keyframes celebrate {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.7);
+  }
+  25% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 8px rgba(250, 204, 21, 0);
+  }
+  50% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.7);
+  }
+  75% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 8px rgba(250, 204, 21, 0);
+  }
+}
+
+.animate-celebrate {
+  animation: celebrate 1.5s ease-in-out infinite;
+}

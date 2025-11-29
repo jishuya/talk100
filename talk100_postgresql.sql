@@ -273,6 +273,33 @@ CREATE TABLE user_settings (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- ================================================
+-- 12. COMPLETED_DAYS 테이블
+-- 목적: 사용자별 카테고리별 완료한 Day 기록
+-- ================================================
+CREATE TABLE completed_days (
+    user_id VARCHAR(255) NOT NULL,
+    category_id INTEGER NOT NULL,
+    day INTEGER NOT NULL,
+    completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    -- 기본키
+    PRIMARY KEY (user_id, category_id, day),
+    
+    -- 외래키
+    CONSTRAINT fk_cd_user FOREIGN KEY (user_id) 
+        REFERENCES users(uid) ON DELETE CASCADE,
+    CONSTRAINT fk_cd_category FOREIGN KEY (category_id) 
+        REFERENCES category(category_id) ON DELETE CASCADE
+);
+
+-- 인덱스: 사용자+카테고리별 완료 Day 조회 최적화
+CREATE INDEX idx_completed_days_user_category ON completed_days(user_id, category_id);
+
+COMMENT ON TABLE completed_days IS '사용자별 카테고리별 완료한 Day 기록';
+COMMENT ON COLUMN completed_days.day IS '완료한 Day 번호 (1~100)';
+COMMENT ON COLUMN completed_days.completed_at IS 'Day 완료 시점';
+
 
 -- ================================================
 -- 인덱스 생성
@@ -289,6 +316,35 @@ CREATE INDEX idx_question_attempts_user_date ON question_attempts(user_id, date)
 -- ================================================
 -- 샘플 데이터 입력
 -- ================================================
+
+--completed_days 데이터
+-- user001 (김재우) - Model Example (category 1) 완료 Day
+INSERT INTO completed_days (user_id, category_id, day, completed_at) VALUES
+('user001', 1, 1, CURRENT_TIMESTAMP - INTERVAL '10 days'),
+('user001', 1, 2, CURRENT_TIMESTAMP - INTERVAL '8 days'),
+('user001', 1, 3, CURRENT_TIMESTAMP - INTERVAL '5 days');
+
+-- user001 (김재우) - Small Talk (category 2) 완료 Day
+INSERT INTO completed_days (user_id, category_id, day, completed_at) VALUES
+('user001', 2, 1, CURRENT_TIMESTAMP - INTERVAL '7 days'),
+('user001', 2, 2, CURRENT_TIMESTAMP - INTERVAL '3 days');
+
+-- user001 (김재우) - Cases in Point (category 3) 완료 Day
+INSERT INTO completed_days (user_id, category_id, day, completed_at) VALUES
+('user001', 3, 1, CURRENT_TIMESTAMP - INTERVAL '6 days');
+
+-- user002 (이민지) - Model Example (category 1) 완료 Day
+INSERT INTO completed_days (user_id, category_id, day, completed_at) VALUES
+('user002', 1, 1, CURRENT_TIMESTAMP - INTERVAL '4 days'),
+('user002', 1, 2, CURRENT_TIMESTAMP - INTERVAL '2 days');
+
+-- user002 (이민지) - Small Talk (category 2) 완료 Day
+INSERT INTO completed_days (user_id, category_id, day, completed_at) VALUES
+('user002', 2, 1, CURRENT_TIMESTAMP - INTERVAL '1 day');
+
+-- user003 (박준호) - Model Example (category 1) 완료 Day
+INSERT INTO completed_days (user_id, category_id, day, completed_at) VALUES
+('user003', 1, 1, CURRENT_TIMESTAMP - INTERVAL '9 days');
 
 --daily_summary 데이터
 -- 오늘: 6문제 시도, 1 Day 완료, 목표 달성

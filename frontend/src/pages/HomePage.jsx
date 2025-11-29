@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import CharacterSection from '../components/home/CharacterSection';
 import QuizCategorySection from '../components/home/QuizCategorySection';
@@ -7,9 +7,10 @@ import QuizPersonalSection from '../components/home/QuizPersonalSection';
 import StudyHistorySection from '../components/home/StudyHistorySection';
 import Modal, { ModalBody } from '../components/ui/Modal';
 import Button from '../components/ui/Button';
+import DaySelectModal from '../components/quiz/DaySelectModal';
 
 // 데이터 훅들
-import { useUserData, useBadgesData, useTodayProgress, usePersonalQuizzesData, useHistoryData, useQuizMode } from '../hooks/useApi';
+import { useUserData, useBadgesData, useTodayProgress, usePersonalQuizzesData, useHistoryData, useQuizMode, useCompletedDays } from '../hooks/useApi';
 
 // 세션 관리 유틸리티
 import { createSession } from '../utils/sessionStorage';
@@ -17,13 +18,28 @@ import { createSession } from '../utils/sessionStorage';
 // API 서비스
 import { api } from '../services/apiService';
 
+// 카테고리 ID → 카테고리 정보 매핑
+const CATEGORY_MAP = {
+  1: { id: 1, name: 'Model Example' },
+  2: { id: 2, name: 'Small Talk' },
+  3: { id: 3, name: 'Cases in Point' }
+};
+
 const HomePage = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
 
   // 추가 학습 확인 모달 상태
   const [showAdditionalLearningModal, setShowAdditionalLearningModal] = useState(false);
   const continueButtonRef = useRef(null);
+
+  // Day 선택 모달 상태
+  const [showDaySelectModal, setShowDaySelectModal] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
+  // 🎉 퀴즈 완료 후 축하 효과용 상태
+  const [celebrateDay, setCelebrateDay] = useState(null);
 
   // 데이터 훅들 (ApiService가 자동으로 fallback 처리)
   const { data: userData, isLoading: userLoading } = useUserData();
@@ -33,9 +49,31 @@ const HomePage = () => {
   const { data: historyData } = useHistoryData();
   const { data: quizModeData } = useQuizMode();
 
+  // 선택된 카테고리의 완료된 Day 목록 조회
+  const { data: completedDaysData } = useCompletedDays(selectedCategory?.id);
 
   // 통합 로딩 상태
   const isLoading = userLoading || progressLoading || personalQuizzesLoading;
+
+  // 🎉 퀴즈 완료 후 DaySelectModal 자동 열기 (1단계: URL 파라미터 감지)
+  useEffect(() => {
+    const completed = searchParams.get('completed');
+    const categoryId = parseInt(searchParams.get('category'));
+    const day = parseInt(searchParams.get('day'));
+
+    if (completed === 'true' && categoryId && day) {
+      // 카테고리 정보 설정
+      const category = CATEGORY_MAP[categoryId];
+      if (category) {
+        setSelectedCategory(category);
+        setCelebrateDay(day);
+        setShowDaySelectModal(true);
+
+        // URL 파라미터 제거 (뒤로가기 시 다시 열리지 않도록)
+        setSearchParams({}, { replace: true });
+      }
+    }
+  }, [searchParams, setSearchParams]);
 
   // 모달이 열릴 때 "계속하기" 버튼에 자동 포커스
   useEffect(() => {
@@ -147,13 +185,29 @@ const HomePage = () => {
     }
   };
 
-  const handleCategoryClick = async (category) => {
+  // 카테고리 클릭 시 Day 선택 모달 표시
+  const handleCategoryClick = (category) => {
+    setSelectedCategory(category);
+    setShowDaySelectModal(true);
+  };
+
+  // Day 선택 후 퀴즈 시작
+  const handleDaySelect = async (day) => {
+    if (!selectedCategory) return;
+
     try {
       // api.apiCall()을 사용하여 ENV.API_BASE_URL을 runtime에 가져옴
-      const result = await api.apiCall(`/api/quiz/category/${category.id}`, { method: 'GET' });
+      const result = await api.apiCall(`/api/quiz/category/${selectedCategory.id}?day=${day}`, { method: 'GET' });
 
       if (result) {
-        const { category_id, day, questions } = result;
+        const { category_id, questions } = result;
+
+        // 문제가 없는 경우
+        if (!questions || questions.length === 0) {
+          alert(`Day ${day}에 문제가 없습니다.`);
+          return;
+        }
+
         const question_ids = questions.map(q => q.question_id);
 
         // 세션 생성 및 데이터 저장
@@ -234,8 +288,21 @@ const HomePage = () => {
       />
 
       {/* Study History Section */}
-      <StudyHistorySection
+      {/* <StudyHistorySection
         historyItems={historyData}
+      /> */}
+
+      {/* Day 선택 모달 */}
+      <DaySelectModal
+        isOpen={showDaySelectModal}
+        onClose={() => {
+          setShowDaySelectModal(false);
+          setCelebrateDay(null); // 축하 효과 초기화
+        }}
+        category={selectedCategory}
+        onDaySelect={handleDaySelect}
+        completedDays={completedDaysData?.completedDays || []}
+        celebrateDay={celebrateDay}
       />
 
       {/* 추가 학습 확인 모달 */}
