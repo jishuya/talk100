@@ -57,7 +57,7 @@ export const DaySelectModal = ({
         <div className="bg-gradient-to-r from-primary to-primary-dark px-5 py-4">
           <div className="text-center">
             <h2 className="text-lg font-bold text-white">{category.name || category.title}</h2>
-            <p className="text-sm text-white font-medium mt-0.5">학습할 Day를 선택하세요</p>
+            {/* <p className="text-sm text-white font-medium mt-0.5">학습할 Day를 선택하세요</p> */}
           </div>
         </div>
 
