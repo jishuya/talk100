@@ -99,19 +99,19 @@ class QuizQueries {
       let audioPath = '';
       switch (q.voice_gender) {
         case 'us_male':
-          audioPath = `US_Andrew/${q.audio}`;
+          audioPath = `US_male/${q.audio}`;
           break;
         case 'us_female':
-          audioPath = `US_Ava/${q.audio}`;
+          audioPath = `US_female/${q.audio}`;
           break;
         case 'uk_male':
-          audioPath = `UK_Ryan/${q.audio}`;
+          audioPath = `UK_male/${q.audio}`;
           break;
         case 'uk_female':
-          audioPath = `UK_Sonia/${q.audio}`;
+          audioPath = `UK_female/${q.audio}`;
           break;
         default:
-          audioPath = `US_Andrew/${q.audio}`;
+          audioPath = `US_male/${q.audio}`;
       }
       return {
         ...q,
@@ -239,19 +239,19 @@ class QuizQueries {
           let audioPath = '';
           switch (q.voice_gender) {
             case 'us_male':
-              audioPath = `US_Andrew/${q.audio}`;
+              audioPath = `US_male/${q.audio}`;
               break;
             case 'us_female':
-              audioPath = `US_Ava/${q.audio}`;
+              audioPath = `US_female/${q.audio}`;
               break;
             case 'uk_male':
-              audioPath = `UK_Ryan/${q.audio}`;
+              audioPath = `UK_male/${q.audio}`;
               break;
             case 'uk_female':
-              audioPath = `UK_Sonia/${q.audio}`;
+              audioPath = `UK_female/${q.audio}`;
               break;
             default:
-              audioPath = `US_Andrew/${q.audio}`;
+              audioPath = `US_male/${q.audio}`;
           }
           return {
             ...q,
@@ -406,19 +406,19 @@ class QuizQueries {
         let audioPath = '';
         switch (q.voice_gender) {
           case 'us_male':
-            audioPath = `US_Andrew/${q.audio}`;
+            audioPath = `US_male/${q.audio}`;
             break;
           case 'us_female':
-            audioPath = `US_Ava/${q.audio}`;
+            audioPath = `US_female/${q.audio}`;
             break;
           case 'uk_male':
-            audioPath = `UK_Ryan/${q.audio}`;
+            audioPath = `UK_male/${q.audio}`;
             break;
           case 'uk_female':
-            audioPath = `UK_Sonia/${q.audio}`;
+            audioPath = `UK_female/${q.audio}`;
             break;
           default:
-            audioPath = `US_Andrew/${q.audio}`;
+            audioPath = `US_male/${q.audio}`;
         }
         return {
           ...q,
@@ -490,19 +490,19 @@ class QuizQueries {
         let audioPath = '';
         switch (q.voice_gender) {
           case 'us_male':
-            audioPath = `US_Andrew/${q.audio}`;
+            audioPath = `US_male/${q.audio}`;
             break;
           case 'us_female':
-            audioPath = `US_Ava/${q.audio}`;
+            audioPath = `US_female/${q.audio}`;
             break;
           case 'uk_male':
-            audioPath = `UK_Ryan/${q.audio}`;
+            audioPath = `UK_male/${q.audio}`;
             break;
           case 'uk_female':
-            audioPath = `UK_Sonia/${q.audio}`;
+            audioPath = `UK_female/${q.audio}`;
             break;
           default:
-            audioPath = `US_Andrew/${q.audio}`;
+            audioPath = `US_male/${q.audio}`;
         }
         return {
           ...q,

@@ -256,7 +256,9 @@ const QuizPage = () => {
       }
     };
 
-    playAudio();
+    // 효과음(0.7초) 재생 후 영문 음원 재생
+    const timer = setTimeout(playAudio, 700);
+    return () => clearTimeout(timer);
   }, [quizMode, audioUrl]); // grading 모드로 전환될 때마다 재생
 
   // 음원 로딩 완료 처리
