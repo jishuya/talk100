@@ -57,7 +57,7 @@ export const QuizContent = ({
             </span>
           </div>
           {/* 오른쪽: 즐겨찾기/별표 버튼 */}
-          <div className="flex gap-1">
+          <div className="flex gap-1" data-onboarding="favorite-star">
             <IconButton
               icon={getIcon(isFavorite ? 'fluent:heart-24-filled' : 'fluent:heart-24-regular', {
                 size: 'lg',
@@ -218,7 +218,7 @@ export const QuizContent = ({
             <span>내 답변</span>
           </div>
           {/* 입력 모드 토글 - 모바일: inline, 데스크탑: absolute */}
-          <div className="flex bg-background rounded-brand-full p-0.5 md:absolute md:top-3 md:right-3">
+          <div className="flex bg-background rounded-brand-full p-0.5 md:absolute md:top-3 md:right-3" data-onboarding="input-mode">
             <button
               onClick={() => onInputModeChange('voice')}
               className={`px-3 py-1.5 rounded-[18px] text-xs transition-all duration-200 flex items-center gap-1 ${

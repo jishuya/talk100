@@ -12,6 +12,7 @@ import Modal, { ModalBody } from '../components/ui/Modal';
 import BadgeModal from '../components/ui/BadgeModal';
 import LevelUpModal from '../components/quiz/LevelUpModal';
 import { WrongAnswerModal } from '../components/quiz/WrongAnswerModal';
+import QuizOnboarding from '../components/quiz/QuizOnboarding';
 import Button from '../components/ui/Button';
 import { getIcon } from '../utils/iconMap';
 
@@ -906,6 +907,9 @@ const QuizPage = () => {
 
   return (
     <div className="quiz-container min-h-screen bg-background flex flex-col">
+      {/* 퀴즈 온보딩 튜토리얼 (첫 사용자용) */}
+      <QuizOnboarding />
+
       {/* 🎵 숨겨진 Audio 엘리먼트 (자동재생용) */}
       {audioUrl && (
         <audio

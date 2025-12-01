@@ -35,7 +35,7 @@ export const QuizControls = ({
 
         {/* 힌트/정답 보기 버튼들 (문제풀이 모드에서만) */}
         {quizMode === 'solving' && (
-          <div className="flex gap-2 mb-3">
+          <div className="flex gap-2 mb-3" data-onboarding="hint-answer">
             <button
               onClick={onShowFirstLetters}
               className={`flex-1 px-3 py-2 md:p-3 border border-gray-border rounded-brand-sm transition-all duration-200 active:scale-[0.97] flex flex-row md:flex-col items-center justify-center gap-1.5 md:gap-1 ${showHint ? 'bg-primary-light border-primary' : 'bg-white active:bg-primary-light active:border-primary'}`}
