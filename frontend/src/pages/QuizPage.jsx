@@ -261,8 +261,7 @@ const QuizPage = () => {
   // 음원 에러 처리
   const handleAudioError = useCallback(() => {
     setAudioError(true);
-    console.error('❌ Audio loading failed:', audioUrl);
-  }, [audioUrl]);
+  }, []);
 
   // 첫 문제 로드 시 첫 번째 키워드 input에 자동 포커스
   useEffect(() => {
@@ -507,8 +506,7 @@ const QuizPage = () => {
             setShowGoalAchievedModal(true);
             return; // 모달 응답을 기다림
           }
-        } catch (error) {
-          console.error('Failed to update progress:', error);
+        } catch {
           // 진행률 업데이트 실패해도 퀴즈는 계속 진행
         }
       }
@@ -574,8 +572,7 @@ const QuizPage = () => {
         }
       }, 100);
 
-    } catch (error) {
-      console.error('Move to next question error:', error);
+    } catch {
       alert('다음 문제 로드에 실패했습니다.');
     }
   }, [sessionId, question?.id, question?.day, session?.category, session?.day, quizMode, navigate, resetGrading, resetVoiceTranscript, updateProgressMutation, markDayCompletedMutation]);
@@ -601,8 +598,7 @@ const QuizPage = () => {
             setNewBadges(result.newBadges);
             return; // 뱃지 모달이 닫힐 때까지 대기
           }
-        } catch (error) {
-          console.error('Failed to record question attempt:', error);
+        } catch {
           // 기록 실패해도 퀴즈는 계속 진행
         }
       }
@@ -610,8 +606,7 @@ const QuizPage = () => {
       // 뱃지가 없으면 바로 다음 문제로 이동
       await moveToNext();
 
-    } catch (error) {
-      console.error('handleNextQuestion error:', error);
+    } catch {
       alert('다음 문제 로드에 실패했습니다.');
     }
   }, [sessionId, question?.id, moveToNext]);
@@ -754,8 +749,7 @@ const QuizPage = () => {
             // 3. 세션 상태 갱신
             setSession(getSession(sessionId));
           }
-        } catch (error) {
-          console.error('Failed to add to wrong answers:', error);
+        } catch {
           // 에러가 발생해도 정답은 계속 보여줌
         }
       }
@@ -785,8 +779,7 @@ const QuizPage = () => {
         setSession(getSession(sessionId));
       }
 
-    } catch (error) {
-      console.error('Toggle favorite error:', error);
+    } catch {
       alert('즐겨찾기 변경에 실패했습니다.');
     }
   };
@@ -814,8 +807,7 @@ const QuizPage = () => {
         setSession(getSession(sessionId));
       }
 
-    } catch (error) {
-      console.error('Toggle star error:', error);
+    } catch {
       alert('별표 변경에 실패했습니다.');
     }
   };
@@ -879,8 +871,7 @@ const QuizPage = () => {
         handleGoToHome();
       }
 
-    } catch (error) {
-      console.error('Failed to start additional learning:', error);
+    } catch {
       alert('추가 학습 시작에 실패했습니다. 다시 시도해주세요.');
     }
   };

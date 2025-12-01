@@ -179,8 +179,7 @@ const HomePage = () => {
       } else {
         alert('퀴즈 데이터를 가져올 수 없습니다.');
       }
-    } catch (error) {
-      console.error('Error fetching today\'s quiz:', error);
+    } catch {
       alert('퀴즈를 시작할 수 없습니다. 다시 시도해주세요.');
     }
   };
@@ -221,8 +220,7 @@ const HomePage = () => {
       } else {
         alert('퀴즈 데이터를 가져올 수 없습니다.');
       }
-    } catch (error) {
-      console.error('Error fetching category quiz:', error);
+    } catch {
       alert('퀴즈를 시작할 수 없습니다. 다시 시도해주세요.');
     }
   };
@@ -260,8 +258,7 @@ const HomePage = () => {
       } else {
         alert('퀴즈 데이터를 가져올 수 없습니다.');
       }
-    } catch (error) {
-      console.error('Error fetching personal quiz:', error);
+    } catch {
       alert('퀴즈를 시작할 수 없습니다. 다시 시도해주세요.');
     }
   };

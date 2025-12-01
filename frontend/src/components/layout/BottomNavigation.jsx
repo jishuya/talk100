@@ -68,8 +68,7 @@ const BottomNavigation = () => {
           alert('더 이상 풀 문제가 없습니다.');
         }
       }
-    } catch (error) {
-      console.error('Failed to start quiz:', error);
+    } catch {
       alert('퀴즈를 불러오는데 실패했습니다.');
     }
   };

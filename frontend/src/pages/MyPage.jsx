@@ -108,8 +108,7 @@ const MyPage = () => {
           onChange: async (value) => {
             try {
               await updateVoiceGenderMutation.mutateAsync(value);
-            } catch (error) {
-              console.error('Voice gender update error:', error);
+            } catch {
               alert('음성 선택 변경에 실패했습니다.');
             }
           },
@@ -205,8 +204,7 @@ const MyPage = () => {
       }
 
       await updateSettingsMutation.mutateAsync(updateData);
-    } catch (error) {
-      console.error('Setting toggle error:', error);
+    } catch {
       alert('설정 변경에 실패했습니다.');
 
       // 에러 발생시 이전 상태로 롤백
@@ -277,8 +275,7 @@ const MyPage = () => {
       if (settingId === 'voiceGender') {
         await updateVoiceGenderMutation.mutateAsync(value);
       }
-    } catch (error) {
-      console.error('Setting radio error:', error);
+    } catch {
       alert('음성 선택 변경에 실패했습니다.');
 
       // 에러 발생시 이전 상태로 롤백
@@ -299,8 +296,7 @@ const MyPage = () => {
     try {
       await updateAvatarMutation.mutateAsync(avatar);
       alert('아바타가 변경되었습니다!');
-    } catch (error) {
-      console.error('Avatar update error:', error);
+    } catch {
       alert('아바타 변경에 실패했습니다.');
     }
   };
@@ -310,8 +306,7 @@ const MyPage = () => {
     try {
       await updateGoalsMutation.mutateAsync(newGoals);
       alert('학습 목표가 수정되었습니다!');
-    } catch (error) {
-      console.error('Goals update error:', error);
+    } catch {
       alert('목표 수정에 실패했습니다.');
     }
   };
@@ -322,8 +317,7 @@ const MyPage = () => {
       try {
         await logoutMutation.mutateAsync();
         navigate('/login');
-      } catch (error) {
-        console.error('Logout error:', error);
+      } catch {
         alert('로그아웃에 실패했습니다.');
       }
     }

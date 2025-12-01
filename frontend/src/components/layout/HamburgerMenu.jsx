@@ -97,8 +97,8 @@ const HamburgerMenu = ({ isOpen, onClose }) => {
       await logout();
       navigate('/login');
       onClose();
-    } catch (error) {
-      console.error('Logout error:', error);
+    } catch {
+      // Logout failed
     }
   };
 

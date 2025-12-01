@@ -226,8 +226,8 @@ export const AppProvider = ({ children }) => {
           type: ACTION_TYPES.UPDATE_SETTINGS,
           payload: settings,
         });
-      } catch (error) {
-        console.error('Failed to load settings:', error);
+      } catch {
+        // Failed to load settings
       }
     }
   }, []);

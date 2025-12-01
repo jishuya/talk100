@@ -66,8 +66,7 @@ const SettingsPage = () => {
       // 바이트를 MB로 변환 (대략적인 계산: 1 char = 2 bytes)
       const sizeInMB = (totalSize * 2 / (1024 * 1024)).toFixed(2);
       return sizeInMB;
-    } catch (error) {
-      console.error('Cache size calculation error:', error);
+    } catch {
       return '0.00';
     }
   };
@@ -107,8 +106,7 @@ const SettingsPage = () => {
       URL.revokeObjectURL(url);
 
       alert('백업 파일이 다운로드되었습니다.');
-    } catch (error) {
-      console.error('Backup error:', error);
+    } catch {
       alert('백업에 실패했습니다.');
     }
   };
@@ -178,8 +176,7 @@ const SettingsPage = () => {
       URL.revokeObjectURL(url);
 
       alert('CSV 파일이 다운로드되었습니다.');
-    } catch (error) {
-      console.error('Export error:', error);
+    } catch {
       alert('내보내기에 실패했습니다.');
     }
   };
@@ -212,8 +209,7 @@ const SettingsPage = () => {
         setCacheSize(calculateCacheSize());
 
         alert('캐시가 삭제되었습니다.');
-      } catch (error) {
-        console.error('Cache clear error:', error);
+      } catch {
         alert('캐시 삭제에 실패했습니다.');
       }
     }
@@ -252,8 +248,7 @@ const SettingsPage = () => {
 
       // 홈으로 리다이렉트
       window.location.href = '/';
-    } catch (error) {
-      console.error('Reset progress error:', error);
+    } catch {
       alert('❌ 학습 기록 초기화에 실패했습니다.\n잠시 후 다시 시도해주세요.');
     }
   };
@@ -282,8 +277,7 @@ const SettingsPage = () => {
 
       // 로그인 페이지로 리다이렉트
       window.location.href = '/login';
-    } catch (error) {
-      console.error('Delete account error:', error);
+    } catch {
       alert('❌ 계정 삭제에 실패했습니다.\n잠시 후 다시 시도해주세요.');
     }
   };
@@ -293,8 +287,7 @@ const SettingsPage = () => {
     try {
       await updateProfileMutation.mutateAsync(profileData);
       alert('프로필이 저장되었습니다.');
-    } catch (error) {
-      console.error('Profile save error:', error);
+    } catch {
       alert('프로필 저장에 실패했습니다.');
     }
   };

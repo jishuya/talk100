@@ -59,7 +59,6 @@ class ApiService {
       if (mockData) {
         return this.simulateNetworkDelay(mockData, options.delay || 500);
       } else {
-        console.warn(`⚠️ [Mock Mode] Mock 데이터를 찾을 수 없습니다: ${mockKey}`);
         throw new Error(`Mock 데이터를 찾을 수 없습니다: ${mockKey}`);
       }
     }
@@ -76,7 +75,6 @@ class ApiService {
       }
 
       // 4. Mock 데이터도 없으면 에러 발생
-      console.error(`💥 [Error] No fallback data available for ${mockKey}`);
       throw this.handleError(error);
     }
   }
@@ -133,8 +131,6 @@ class ApiService {
 
     // HTTP 상태 코드별 에러 처리
     if (!response.ok) {
-      console.error(`❌ [API Error] ${response.status} ${response.statusText} - ${url}`);
-
       if (response.status === 401) {
         // 토큰 만료 또는 인증 오류
         localStorage.removeItem('jwt_token');
@@ -165,7 +161,6 @@ class ApiService {
 
     // 백엔드에서 에러를 반환한 경우
     if (jsonResponse.success === false) {
-      console.error(`❌ [API Error] ${endpoint}:`, jsonResponse.message);
       throw new Error(jsonResponse.message || '서버에서 오류가 발생했습니다.');
     }
 
@@ -175,8 +170,6 @@ class ApiService {
 
   // 에러 처리
   handleError(error) {
-    console.error('🚨 [API Error]', error);
-
     // 인증 오류 - 로그인 페이지로 리다이렉트
     if (error.message?.includes('인증이 만료') || error.message?.includes('401')) {
       setTimeout(() => {
@@ -296,7 +289,6 @@ class ApiService {
 
       throw new Error(jsonResponse.message || '진행률 업데이트 실패');
     } catch (error) {
-      console.error('Failed to update progress:', error.message);
       throw this.handleError(error);
     }
   }

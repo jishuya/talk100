@@ -78,8 +78,7 @@ export const getSession = (sessionId) => {
 
   try {
     return JSON.parse(sessionData);
-  } catch (error) {
-    console.error('Failed to parse session data:', error);
+  } catch {
     return null;
   }
 };
@@ -94,7 +93,6 @@ export const updateSession = (sessionId, updates) => {
   const session = getSession(sessionId);
 
   if (!session) {
-    console.error('Session not found:', sessionId);
     return false;
   }
 

@@ -27,8 +27,7 @@ export const AuthProvider = ({ children }) => {
       } else {
         setUser(null);
       }
-    } catch (error) {
-      console.error('Auth status check failed:', error);
+    } catch {
       setUser(null);
       localStorage.removeItem('jwt_token');
       localStorage.removeItem('user_info');
@@ -62,8 +61,8 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem('user_info');
       setUser(null);
       window.location.href = '/login';
-    } catch (error) {
-      console.error('Logout failed:', error);
+    } catch {
+      // Logout failed
     }
   };
 
@@ -85,8 +84,7 @@ export const AuthProvider = ({ children }) => {
 
         // URL에서 파라미터 제거
         window.history.replaceState({}, document.title, window.location.pathname);
-      } catch (error) {
-        console.error('Failed to process auth callback:', error);
+      } catch {
         setError('로그인 처리 중 오류가 발생했습니다.');
       }
     }

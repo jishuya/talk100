@@ -120,8 +120,7 @@ const MobileHeader = () => {
       await updateSettingsMutation.mutateAsync({
         display: { theme: newTheme }
       });
-    } catch (error) {
-      console.error('Theme toggle error:', error);
+    } catch {
       // 에러 발생 시 원래 테마로 롤백
       changeTheme(theme);
     }

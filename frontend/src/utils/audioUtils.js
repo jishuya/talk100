@@ -41,8 +41,7 @@ export const checkAudioAvailable = async (audioFilename) => {
     const audioUrl = getAudioUrl(audioFilename);
     const response = await fetch(audioUrl, { method: 'HEAD' });
     return response.ok;
-  } catch (error) {
-    console.error('Audio availability check failed:', error);
+  } catch {
     return false;
   }
 };
@@ -63,7 +62,5 @@ export const playEffectSound = (type) => {
   const audioUrl = `${ENV.API_BASE_URL}/audio/${filename}`;
   const audio = new Audio(audioUrl);
   audio.volume = 0.5; // 볼륨 50%
-  audio.play().catch((error) => {
-    console.error('Effect sound play failed:', error);
-  });
+  audio.play().catch(() => {});
 };

@@ -74,8 +74,8 @@ export const useVoiceInput = () => {
           if (recognitionRef.current) {
             try {
               recognitionRef.current.stop();
-            } catch (err) {
-              console.error('자동 중지 실패:', err);
+            } catch {
+              // 자동 중지 실패
             }
           }
         }, SILENCE_DURATION);
@@ -84,8 +84,6 @@ export const useVoiceInput = () => {
 
     // 음성인식 에러 처리
     recognitionInstance.onerror = (event) => {
-      console.error('🚨 음성인식 에러:', event.error);
-
       let errorMessage = '음성 인식에 실패했습니다.';
 
       switch (event.error) {
@@ -149,7 +147,6 @@ export const useVoiceInput = () => {
     }
 
     if (isListening) {
-      console.warn('⚠️ 이미 녹음 중입니다.');
       return;
     }
 
@@ -165,8 +162,7 @@ export const useVoiceInput = () => {
       setTranscript('');
       setError(null);
       recognitionRef.current.start();
-    } catch (err) {
-      console.error('❌ 녹음 시작 실패:', err);
+    } catch {
       setError('음성 인식을 시작할 수 없습니다. 다시 시도해주세요.');
     }
   }, [isListening]);
@@ -178,7 +174,6 @@ export const useVoiceInput = () => {
     }
 
     if (!isListening) {
-      console.warn('⚠️ 녹음 중이 아닙니다.');
       return;
     }
 
@@ -190,8 +185,8 @@ export const useVoiceInput = () => {
       }
 
       recognitionRef.current.stop();
-    } catch (err) {
-      console.error('❌ 녹음 중지 실패:', err);
+    } catch {
+      // 녹음 중지 실패
     }
   }, [isListening]);
 
