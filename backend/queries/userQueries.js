@@ -431,7 +431,14 @@ class UserQueries {
             SELECT COUNT(*)
             FROM questions q2
             WHERE q2.category_id = c.category_id
-          ) as total_questions
+          ) as total_questions,
+          -- 완료한 Day 수 (completed_days 테이블에서)
+          (
+            SELECT COUNT(*)
+            FROM completed_days cd
+            WHERE cd.user_id = $1
+              AND cd.category_id = c.category_id
+          ) as completed_days
         FROM category c
         -- 전체 문제 수를 구하기 위해 questions와 LEFT JOIN
         LEFT JOIN questions q ON c.category_id = q.category_id
@@ -450,7 +457,9 @@ class UserQueries {
         categoryId: parseInt(row.category_id),
         name: row.name,
         completed: parseInt(row.completed_questions) || 0,
-        total: parseInt(row.total_questions) || 0
+        total: parseInt(row.total_questions) || 0,
+        completedDays: parseInt(row.completed_days) || 0,
+        totalDays: 100  // 각 카테고리는 100 Day로 구성
       }));
 
 

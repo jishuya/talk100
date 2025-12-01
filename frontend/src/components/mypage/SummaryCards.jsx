@@ -6,17 +6,23 @@ const SummaryCards = ({ summary }) => {
   const cards = [
     {
       value: summary.todayQuestions || 0,
-      label: '오늘 학습한 문제',
+      label: '오늘 푼 문제',
+      labelMobile: '오늘 푼 문제',
+      labelDesktop: '오늘 학습한 문제',
       suffix: ''
     },
     {
       value: summary.weeklyAttendance || 0,
       label: '주간 출석일',
+      labelMobile: '주간 출석일',
+      labelDesktop: '주간 출석일',
       suffix: ''
     },
     {
       value: summary.weeklyQuestions || 0,
-      label: '주간 학습한 문제',
+      label: '주간 푼 문제',
+      labelMobile: '주간 푼 문제',
+      labelDesktop: '주간 학습한 문제',
       suffix: ''
     }
   ];
@@ -28,7 +34,8 @@ const SummaryCards = ({ summary }) => {
           <span className="block text-2xl font-bold text-primary mb-1">
             {card.value}{card.suffix}
           </span>
-          <span className="text-xs text-text-secondary">{card.label}</span>
+          <span className="text-xs text-text-secondary md:hidden">{card.labelMobile}</span>
+          <span className="text-xs text-text-secondary hidden md:inline">{card.labelDesktop}</span>
         </div>
       ))}
     </div>

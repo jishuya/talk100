@@ -77,7 +77,7 @@ const MenuSection = ({
                 <span className="text-sm font-semibold text-primary">{item.displayValue}</span>
               ) : item.type === 'select' ? (
                 <select
-                  className="px-3 py-1.5 bg-accent-pale border border-gray-border rounded-lg text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="px-1 py-1.5 bg-accent-pale border border-gray-border rounded-lg text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent max-w-[160px] md:max-w-none md:px-3"
                   value={item.value}
                   onChange={(e) => handleSelectChange(item, e)}
                   onClick={(e) => e.stopPropagation()}

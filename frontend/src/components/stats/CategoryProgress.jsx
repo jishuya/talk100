@@ -11,14 +11,13 @@ const CategoryProgress = ({ data }) => {
           <span>카테고리별 진행률</span>
         </h2>
       </div>
-      <div className="space-y-3">
+      <div className="space-y-4">
         {data.map((category) => {
-          // 백엔드 응답 형식: { categoryId, name, completed, total }
-          // 또는 레거시 형식: { id, name, completedQuestions, totalQuestions, progress }
+          // 백엔드 응답 형식: { categoryId, name, completed, total, completedDays, totalDays }
           const id = category.categoryId || category.id;
-          const completed = category.completed ?? category.completedQuestions ?? 0;
-          const total = category.total ?? category.totalQuestions ?? 1;
-          const progress = category.progress ?? Math.round((completed / total) * 100);
+          const completedDays = category.completedDays ?? 0;
+          const totalDays = category.totalDays ?? 100;
+          const dayProgress = Math.round((completedDays / totalDays) * 100);
 
           return (
             <div key={id}>
@@ -27,14 +26,14 @@ const CategoryProgress = ({ data }) => {
                   {category.name}
                 </span>
                 <div className="flex gap-3 text-xs text-text-secondary">
-                  <span>{progress}%</span>
-                  <span>{completed}/{total} 문제</span>
+                  <span>{dayProgress}%</span>
+                  <span>{completedDays}/{totalDays} Day</span>
                 </div>
               </div>
               <div className="h-2 bg-accent-mint rounded overflow-hidden">
                 <div
                   className="h-full bg-primary rounded transition-all duration-500 ease-out"
-                  style={{ width: `${progress}%` }}
+                  style={{ width: `${dayProgress}%` }}
                 />
               </div>
             </div>
