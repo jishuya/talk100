@@ -5,6 +5,7 @@ import CharacterSection from '../components/home/CharacterSection';
 import QuizCategorySection from '../components/home/QuizCategorySection';
 import QuizPersonalSection from '../components/home/QuizPersonalSection';
 import StudyHistorySection from '../components/home/StudyHistorySection';
+import OnboardingTutorial from '../components/home/OnboardingTutorial';
 import Modal, { ModalBody } from '../components/ui/Modal';
 import Button from '../components/ui/Button';
 import DaySelectModal from '../components/quiz/DaySelectModal';
@@ -265,6 +266,9 @@ const HomePage = () => {
 
   return (
     <div>
+      {/* 온보딩 튜토리얼 (첫 사용자용) */}
+      <OnboardingTutorial />
+
       {/* Character Section */}
       <CharacterSection
         user={userData}

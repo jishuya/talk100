@@ -54,7 +54,7 @@ const CharacterSection = ({
       </div>
 
       {/* 3줄: 학습 시작 버튼 (모바일) */}
-      <button className="btn-start-learning md:hidden" onClick={onStartLearning}>
+      <button className="btn-start-learning md:hidden" onClick={onStartLearning} data-onboarding="today-quiz">
         {getIcon('noto:sparkles', { size: 'xl', className: 'text-yellow-400' })}
         <span>오늘의 퀴즈</span>
       </button>
@@ -84,7 +84,7 @@ const CharacterSection = ({
       </div>
 
       {/* 학습 시작 버튼 */}
-      <button className="btn-start-learning hidden md:flex" onClick={onStartLearning}>
+      <button className="btn-start-learning hidden md:flex" onClick={onStartLearning} data-onboarding="today-quiz">
         {getIcon('noto:sparkles', { size: 'xl', className: 'text-yellow-400' })}
         <span>오늘의 퀴즈</span>
       </button>
