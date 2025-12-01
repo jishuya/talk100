@@ -60,7 +60,7 @@ export const QuizContent = ({
           <div className="flex gap-1" data-onboarding="favorite-star">
             <IconButton
               icon={getIcon(isFavorite ? 'fluent:heart-24-filled' : 'fluent:heart-24-regular', {
-                size: 'lg',
+                size: 'md',
                 className: 'text-red-400'
               })}
               onClick={onFavoriteToggle}
@@ -69,7 +69,7 @@ export const QuizContent = ({
             />
             <IconButton
               icon={getIcon(isStarred ? 'fluent:star-24-filled' : 'fluent:star-24-regular', {
-                size: 'lg',
+                size: 'md',
                 className: 'text-yellow-400'
               })}
               onClick={onStarToggle}

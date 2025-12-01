@@ -131,18 +131,14 @@ const MobileHeader = () => {
       case 'profile':
         return (
           <div className="flex items-center gap-2">
-            {/* 알림 벨 */}
-            <button className="w-8 h-8 flex items-center justify-center text-lg touchable">
-              {getIcon('tabler:bell-filled', { size: 'xl', className: 'text-yellow-500' })}
-            </button>
             {/* 테마 토글 */}
             <button
               onClick={handleThemeToggle}
-              className="w-8 h-8 flex items-center justify-center text-lg touchable"
+              className="w-7 h-7 flex items-center justify-center touchable"
             >
               {theme === 'light' ?
-                getIcon('tabler:moon-filled', { size: 'xl', className: 'text-yellow-500' }) :
-                getIcon('tabler:sun-filled', { size: 'xl', className: 'text-yellow-500' })
+                getIcon('tabler:moon-filled', { size: 'lg', className: 'text-yellow-500' }) :
+                getIcon('tabler:sun-filled', { size: 'lg', className: 'text-yellow-500' })
               }
             </button>
           </div>
@@ -209,7 +205,15 @@ const MobileHeader = () => {
         )}
 
         {config.showLogo ? (
-          <span className="text-lg font-bold text-primary">talk100</span>
+          <div className="flex items-center gap-0.5">
+            <img src="/logo.png" alt="Talk100 Logo" className="w-8 h-8" />
+            <span
+              className="text-xl font-semibold text-primary"
+              style={{ fontFamily: 'Fredoka, sans-serif' }}
+            >
+              talk100
+            </span>
+          </div>
         ) : (
           <span className="text-base font-semibold text-text-primary">{config.title}</span>
         )}

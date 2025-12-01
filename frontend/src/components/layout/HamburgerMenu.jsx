@@ -5,7 +5,7 @@ import { getIcon } from '../../utils/iconMap';
 
 const HamburgerMenu = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
 
   const menuItems = [
     {
@@ -113,23 +113,23 @@ const HamburgerMenu = ({ isOpen, onClose }) => {
       />
 
       {/* Menu Panel */}
-      <div className="fixed top-0 left-0 md:left-1/2 md:-translate-x-1/2 md:ml-[-240px] lg:ml-[-280px] h-full w-80 max-w-[85vw] bg-white z-[210] shadow-2xl">
+      <div className="fixed top-0 left-0 md:left-1/2 md:-translate-x-1/2 md:ml-[-240px] lg:ml-[-280px] h-full w-64 md:w-80 max-w-[75vw] md:max-w-[85vw] bg-white z-[210] shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-border bg-primary text-white">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-2xl">
-              {user?.avatar || '👤'}
-            </div>
-            <div>
-              <div className="font-semibold text-sm">{user?.nickname || '사용자'}</div>
-              <div className="text-xs opacity-90">talk100</div>
-            </div>
+        <div className="flex items-center justify-between p-4 border-b border-gray-border bg-white">
+          <div className="flex items-center gap-1">
+            <img src="/logo.png" alt="Talk100 Logo" className="w-10 h-10" />
+            <span
+              className="text-2xl font-semibold text-primary"
+              style={{ fontFamily: 'Fredoka, sans-serif' }}
+            >
+              talk100
+            </span>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center text-white/80 hover:text-white transition-colors"
+            className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors"
           >
-            {getIcon('IoCloseOutline', { size: '2xl', color: 'text-white/80 hover:text-white' })}
+            {getIcon('IoCloseOutline', { size: '2xl' })}
           </button>
         </div>
 
@@ -140,7 +140,8 @@ const HamburgerMenu = ({ isOpen, onClose }) => {
               <button
                 key={item.id}
                 onClick={() => handleMenuClick(item)}
-                className="w-full flex items-center gap-4 px-4 py-3 text-left hover:bg-accent-pale transition-colors group"
+                onTouchStart={() => {}}
+                className="w-full flex items-center gap-4 px-4 py-3 text-left hover:bg-primary/10 active:bg-primary/30 active:scale-[0.98] transition-all duration-150 group"
               >
                 <div className="w-10 h-10 flex items-center justify-center bg-gray-light rounded-full group-hover:bg-primary group-hover:text-white transition-colors">
                   {getIcon(item.icon, { size: 'lg', className: 'group-hover:text-white' })}

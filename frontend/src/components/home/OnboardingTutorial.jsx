@@ -157,6 +157,8 @@ const OnboardingTutorial = ({ onComplete }) => {
 
   const step = steps[currentStep];
   const padding = 8;
+  // 카테고리 스텝일 때 하단 패딩을 줄여서 '나만의 퀴즈' 글씨가 안 보이게
+  const bottomPadding = step.id === 'category' ? 0 : padding;
 
   // 말풍선 위치 계산
   const tooltipWidth = 320;
@@ -182,7 +184,7 @@ const OnboardingTutorial = ({ onComplete }) => {
       {/* 하단 */}
       <div
         className="absolute bg-black/70 left-0 right-0 bottom-0"
-        style={{ top: targetRect.bottom + padding }}
+        style={{ top: targetRect.bottom + bottomPadding }}
       />
       {/* 좌측 */}
       <div
@@ -191,7 +193,7 @@ const OnboardingTutorial = ({ onComplete }) => {
           top: targetRect.top - padding,
           left: 0,
           width: Math.max(0, targetRect.left - padding),
-          height: targetRect.height + padding * 2
+          height: targetRect.height + padding + bottomPadding
         }}
       />
       {/* 우측 */}
@@ -201,7 +203,7 @@ const OnboardingTutorial = ({ onComplete }) => {
           top: targetRect.top - padding,
           left: targetRect.left + targetRect.width + padding,
           right: 0,
-          height: targetRect.height + padding * 2
+          height: targetRect.height + padding + bottomPadding
         }}
       />
 
@@ -212,7 +214,7 @@ const OnboardingTutorial = ({ onComplete }) => {
           top: targetRect.top - padding,
           left: targetRect.left - padding,
           width: targetRect.width + padding * 2,
-          height: targetRect.height + padding * 2,
+          height: targetRect.height + padding + bottomPadding,
           boxShadow: '0 0 0 4px rgba(85, 173, 155, 0.3)'
         }}
       />
