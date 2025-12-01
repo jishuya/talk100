@@ -1,28 +1,38 @@
 import React from 'react';
 import { getIcon } from '../../utils/iconMap';
+import { useCategoryProgress } from '../../hooks/useApi';
 
 const QuizCategorySection = ({ onCategoryClick }) => {
+  const { data: categoryProgressData } = useCategoryProgress();
+
+  // 카테고리별 completedDays를 매핑
+  const getCompletedDays = (categoryId) => {
+    if (!categoryProgressData) return 0;
+    const category = categoryProgressData.find(c => c.categoryId === categoryId);
+    return category?.completedDays || 0;
+  };
+
   const quizCategories = [
     {
       id: 1,
       icon: 'tabler:bulb',
       title: 'Model Example',
       path: '/quiz/1',
-      count: '1-100'
+      totalDays: 100
     },
     {
       id: 2,
       icon: 'tabler:message-circle',
       title: 'Small Talk',
       path: '/quiz/2',
-      count: '1-100'
+      totalDays: 100
     },
     {
       id: 3,
       icon: 'tabler:file-text',
       title: 'Cases in Point',
       path: '/quiz/3',
-      count: '1-100'
+      totalDays: 100
     }
   ];
 
@@ -58,7 +68,7 @@ const QuizCategorySection = ({ onCategoryClick }) => {
               </div>
             </div>
             <div className="text-xs text-text-secondary">
-              {category.count}
+              {getCompletedDays(category.id)}/{category.totalDays} Day
             </div>
           </div>
         ))}
@@ -85,7 +95,7 @@ const QuizCategorySection = ({ onCategoryClick }) => {
               {category.title}
             </div>
             <div className="text-xs text-text-secondary">
-              {category.count}
+              {getCompletedDays(category.id)}/{category.totalDays} Day
             </div>
           </div>
         ))}

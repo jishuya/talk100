@@ -1,4 +1,3 @@
-import Logo from '../components/ui/Logo';
 import { ENV } from '../config/environment';
 
 const LoginPage = () => {
@@ -21,12 +20,15 @@ const LoginPage = () => {
       <div className="bg-white p-10 rounded-3xl shadow-[0_8px_30px_rgba(85,173,155,0.2)] w-full max-w-md backdrop-blur-sm">
         {/* 로고 영역 */}
         <div className="text-center mb-10">
-          <div className="flex justify-center">
-            <Logo width={270} height={95} animated={true} />
+          <div className="flex items-center justify-center gap-1">
+            <img src="/logo.png" alt="Talk100 Logo" className="w-14 h-14" />
+            <span
+              className="text-4xl font-semibold text-primary"
+              style={{ fontFamily: 'Fredoka, sans-serif' }}
+            >
+              talk100
+            </span>
           </div>
-          <p className="text-text-secondary text-sm">
-            영어문장 암기 학습 어플리케이션
-          </p>
         </div>
 
         {/* 로그인 버튼들 */}

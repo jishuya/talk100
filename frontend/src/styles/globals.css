@@ -24,6 +24,15 @@
   font-display: swap;
 }
 
+/* Fredoka (로고용) */
+@font-face {
+  font-family: 'Fredoka';
+  src: url('/fonts/Fredoka/Fredoka-VariableFont_wdth,wght.ttf') format('truetype');
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* =================================================================
    talk100 Design System - Clean Version
    ================================================================= */
