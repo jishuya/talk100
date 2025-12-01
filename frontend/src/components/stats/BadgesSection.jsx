@@ -13,14 +13,14 @@ const BadgesSection = ({ data }) => {
   };
 
   return (
-    <div className="bg-white rounded-2xl p-5 shadow-lg">
-      <div className="flex justify-between items-center mb-4">
+    <div className="bg-white rounded-2xl p-4 shadow-lg">
+      <div className="flex justify-between items-center mb-3">
         <h2 className="text-base font-semibold text-text-primary flex items-center gap-2">
           {getIcon('IoTrophy', { size: 'xl' })}
           <span>성취 뱃지</span>
         </h2>
       </div>
-      <div className="grid grid-cols-3 gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-3 gap-2 md:grid-cols-4">
         {data.map((badge) => {
           const iconName = getBadgeIconName(badge.id);
 
@@ -29,7 +29,7 @@ const BadgesSection = ({ data }) => {
               key={badge.id}
               onClick={() => handleBadgeClick(badge)}
               className={`
-                p-4 rounded-xl text-center cursor-pointer transition-all duration-300 active:scale-95
+                p-3 rounded-xl text-center cursor-pointer transition-all duration-300 active:scale-95
                 ${badge.earned
                   ? 'bg-gradient-badge'
                   : 'bg-accent-pale opacity-60'

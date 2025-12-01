@@ -56,9 +56,9 @@ const StatusPage = () => {
 
   return (
     <div className="min-h-screen bg-accent-pale">
-      <main className="p-4 pb-20 md:p-6">
+      <main className="px-3 pb-20 md:px-4">
         {/* 기간 선택 */}
-        <div className="mb-5">
+        <div className="mb-3">
           <PeriodSelector
             selectedPeriod={selectedPeriod}
             onPeriodChange={handlePeriodChange}

@@ -376,7 +376,7 @@ const MyPage = () => {
         <SummaryCards summary={summary} />
 
         {/* 메인 콘텐츠 */}
-        <main className="flex-1 p-4 pb-20 md:p-6">
+        <div className="flex-1 px-3 pb-20 md:px-4">
         {/* 학습 목표 설정 */}
         <GoalsSection
           goals={goals}
@@ -414,7 +414,7 @@ const MyPage = () => {
           talk100 v1.0.0<br />
           © 2025 talk100. All rights reserved.
         </div>
-      </main>
+      </div>
 
       {/* 아바타 선택 모달 */}
       <AvatarModal

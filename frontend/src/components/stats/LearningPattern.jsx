@@ -23,16 +23,16 @@ const LearningPattern = ({ data }) => {
   ];
 
   return (
-    <div className="bg-white rounded-2xl p-5 mb-4 shadow-lg">
-      <div className="flex justify-between items-center mb-4">
+    <div className="bg-white rounded-2xl p-4 mb-3 shadow-lg">
+      <div className="flex justify-between items-center mb-3">
         <h2 className="text-base font-semibold text-text-primary flex items-center gap-2">
 {getIcon('IoBulb', { size: 'xl', color: 'text-amber-500' })}
           <span>학습 패턴 분석</span>
         </h2>
       </div>
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
         {patternItems.map((item, index) => (
-          <div key={index} className="p-4 bg-accent-pale rounded-xl text-center">
+          <div key={index} className="p-3 bg-accent-pale rounded-xl text-center">
             <span className="block text-2xl font-bold text-primary mb-1">
               {item.value}
             </span>

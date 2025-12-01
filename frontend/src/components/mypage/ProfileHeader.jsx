@@ -1,5 +1,3 @@
-import React from 'react';
-import { Button } from '../ui/Button';
 import { getIcon } from '../../utils/iconMap';
 
 const ProfileHeader = ({
@@ -9,17 +7,9 @@ const ProfileHeader = ({
   if (!profile) return null;
 
   return (
-    <header className="bg-gradient-primary pt-safe-t px-4 pb-8 text-white relative">
+    <header className="bg-gradient-primary pt-3 px-4 pb-8 text-white relative">
       <div className="flex justify-between items-center mb-6">
-        {/* <h1 className="text-xl font-semibold">마이페이지</h1>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-8 h-8 bg-white/20 text-lg rounded-full hover:bg-white/30"
-          onClick={onSettingsClick}
-        >
-          ⚙️
-        </Button> */}
+        {/* 설정 버튼 영역 (필요시 활성화) */}
       </div>
 
       <div className="flex items-center gap-4">

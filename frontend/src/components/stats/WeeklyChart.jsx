@@ -15,21 +15,21 @@ const WeeklyChart = ({ data, period = 'week' }) => {
   };
 
   return (
-    <div className="bg-white rounded-2xl p-5 mb-4 shadow-lg">
-      <div className="flex justify-between items-center mb-10">
+    <div className="bg-white rounded-2xl p-4 mb-3 shadow-lg">
+      <div className="flex justify-between items-center mb-6">
         <h2 className="text-base font-semibold text-text-primary flex items-center gap-2">
 {getIcon('noto:bar-chart', { size: 'xl' })}
           <span>{getTitle()}</span>
         </h2>
       </div>
-      <div className="flex justify-between items-end h-[120px] mb-3">
+      <div className="flex justify-between items-end h-[100px] mb-2">
         {data.map((item, index) => {
           const height = maxCount > 0 ? (item.count / maxCount) * 100 : 0;
           const isHighActivity = height >= 80;
 
           return (
-            <div key={index} className="flex-1 flex flex-col items-center gap-2">
-              <div className="w-full h-[100px] flex items-end justify-center">
+            <div key={index} className="flex-1 flex flex-col items-center gap-1">
+              <div className="w-full h-[80px] flex items-end justify-center">
                 <div
                   className={`
                     w-[70%] rounded-t relative transition-all duration-500 ease-out

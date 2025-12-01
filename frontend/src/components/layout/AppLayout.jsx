@@ -18,6 +18,10 @@ const AppLayout = ({ children }) => {
     location.pathname.startsWith(path)
   ) || !ui.bottomNavVisible;
 
+  // 상단 패딩을 제거할 페이지들 (자체 헤더가 있는 페이지)
+  const noTopPaddingPages = ['/mypage'];
+  const shouldRemoveTopPadding = noTopPaddingPages.includes(location.pathname);
+
   if (shouldHideLayout) {
     return (
       <div className="w-full min-h-screen">
@@ -33,7 +37,8 @@ const AppLayout = ({ children }) => {
 
       {/* Main Content */}
       <main className={`
-        flex-1 overflow-y-auto pt-[calc(theme(spacing.header)+12px)] min-h-[calc(100vh-theme(spacing.header))]
+        flex-1 overflow-y-auto min-h-[calc(100vh-theme(spacing.header))]
+        ${shouldRemoveTopPadding ? 'pt-header' : 'pt-[calc(theme(spacing.header)+12px)]'}
         ${shouldHideBottomNav ? 'pb-5' : 'pb-[calc(theme(spacing.bottom-nav)+theme(spacing.safe))]'}
       `}>
         {children}

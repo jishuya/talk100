@@ -373,7 +373,7 @@ const SettingsPage = () => {
   return (
     <div className="min-h-screen bg-accent-pale">
       {/* 메인 콘텐츠 */}
-      <main className="flex-1 p-4 pb-10 md:p-6">
+      <main className="flex-1 px-3 pb-10 md:px-4">
         {/* 계정 관리 */}
         <SettingsSection
           title="계정 관리"

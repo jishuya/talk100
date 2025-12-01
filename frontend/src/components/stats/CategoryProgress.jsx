@@ -4,14 +4,14 @@ const CategoryProgress = ({ data }) => {
   if (!data || !Array.isArray(data)) return null;
 
   return (
-    <div className="bg-white rounded-2xl p-5 mb-4 shadow-lg">
-      <div className="flex justify-between items-center mb-4">
+    <div className="bg-white rounded-2xl p-4 mb-3 shadow-lg">
+      <div className="flex justify-between items-center mb-3">
         <h2 className="text-base font-semibold text-text-primary flex items-center gap-2">
           {getIcon('flat-color-icons:folder', { size: 'xl' })}
           <span>카테고리별 진행률</span>
         </h2>
       </div>
-      <div className="space-y-4">
+      <div className="space-y-3">
         {data.map((category) => {
           // 백엔드 응답 형식: { categoryId, name, completed, total }
           // 또는 레거시 형식: { id, name, completedQuestions, totalQuestions, progress }
