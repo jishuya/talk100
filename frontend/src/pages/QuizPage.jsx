@@ -56,22 +56,14 @@ const QuizPage = () => {
   useEffect(() => {
     if (sessionId) {
       const sessionData = getSession(sessionId);
-      console.log('🔍 [QuizPage] Session loaded:', sessionId, sessionData);
-      console.log('🔍 [QuizPage] Questions:', sessionData?.questions);
-      if (sessionData?.questions?.[0]) {
-        console.log('🔍 [QuizPage] First question question_type:', sessionData.questions[0].question_type, 'typeof:', typeof sessionData.questions[0].question_type);
-        console.log('🔍 [QuizPage] First question keys:', Object.keys(sessionData.questions[0]));
-      }
       if (sessionData) {
         setSession(sessionData);
       } else {
         // 세션이 없으면 홈으로
-        console.error('Session not found:', sessionId);
         navigate('/');
       }
     } else {
       // sessionId가 없으면 홈으로
-      console.error('No session ID in URL');
       navigate('/');
     }
   }, [sessionId, navigate]);
@@ -541,9 +533,7 @@ const QuizPage = () => {
                 categoryId: session.category,
                 day: session.day
               });
-              console.log(`✅ Day ${session.day} completed for category ${session.category}`);
-            } catch (error) {
-              console.error('Failed to mark day as completed:', error);
+            } catch {
               // Day 완료 기록 실패해도 퀴즈 종료는 진행
             }
           }

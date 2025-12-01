@@ -96,13 +96,6 @@ class ApiService {
     const url = `${ENV.API_BASE_URL}${endpoint}`;
     const token = localStorage.getItem('jwt_token');
 
-    // 🔍 [DEBUG] API 요청 정보 출력
-    console.group(`🌐 [API Call] ${options.method || 'GET'} ${endpoint}`);
-    console.log('📍 Full URL:', url);
-    console.log('🔑 Token:', token ? `${token.substring(0, 20)}...` : 'No token');
-    console.log('⚙️ Options:', options);
-    console.groupEnd();
-
     const config = {
       method: 'GET',
       headers: {
@@ -164,9 +157,6 @@ class ApiService {
     } catch {
       throw new Error('서버 응답을 처리할 수 없습니다.');
     }
-
-    // 🔍 [DEBUG] 응답 데이터 출력
-    console.log(`✅ [API Response] ${endpoint}:`, jsonResponse);
 
     // 백엔드 응답이 { success: true, data: {...} } 구조인 경우 data만 추출
     if (jsonResponse.success && jsonResponse.data) {

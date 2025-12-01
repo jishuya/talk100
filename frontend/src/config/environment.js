@@ -4,18 +4,15 @@
 const getApiBaseUrl = () => {
   // 1순위: Runtime injection (Vercel 배포 시)
   if (typeof window !== 'undefined' && window._env_?.VITE_API_BASE_URL) {
-    console.log('🔧 [ENV] Using runtime injection (window._env_):', window._env_.VITE_API_BASE_URL);
     return window._env_.VITE_API_BASE_URL;
   }
 
   // 2순위: 빌드 타임 환경 변수
   if (import.meta.env.VITE_API_BASE_URL) {
-    console.log('🔧 [ENV] Using build-time env var:', import.meta.env.VITE_API_BASE_URL);
     return import.meta.env.VITE_API_BASE_URL;
   }
 
   // 3순위: Railway 프로덕션 URL (fallback)
-  console.log('🔧 [ENV] Using fallback URL: https://talk100-production.up.railway.app');
   return 'https://talk100-production.up.railway.app';
 };
 
