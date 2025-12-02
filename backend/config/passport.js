@@ -50,7 +50,7 @@ passport.use(new GoogleStrategy({
       name: profile.displayName || 'Google User',
       email: profile.emails[0].value,
       profile_image: '🦊',
-      voice_gender: 'male',
+      voice_gender: 'us_female',
       default_difficulty: 2
     };
 
@@ -87,7 +87,7 @@ passport.use(new NaverStrategy({
       name: profile.name || profile.nickname || 'Naver User',
       email: profile.email,
       profile_image: '🦊',
-      voice_gender: 'male',
+      voice_gender: 'us_female',
       default_difficulty: 2
     };
 
@@ -141,7 +141,7 @@ passport.use(new KakaoStrategy({
       name: nickname,
       email: finalEmail,
       profile_image: '🦊',  // 카카오 프로필 이미지 미수집, 기본값 사용
-      voice_gender: 'male',
+      voice_gender: 'us_female',
       default_difficulty: 2
     };
 
