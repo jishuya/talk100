@@ -529,6 +529,88 @@ class QuizQueries {
   }
 
   /**
+   * 랜덤 복습 퀴즈 조회 (Category ID: 7)
+   * DB에서 무작위로 20개 문제를 선택
+   * @param {string} userId - 사용자 ID
+   * @param {number} limit - 문제 개수 (기본 20)
+   * @returns {Object} { quiz_type, category_id, progress, questions }
+   */
+  async getRandomReviewQuiz(userId, limit = 20) {
+    try {
+      // questions 테이블에서 무작위로 limit개 문제 조회
+      const questions = await db.manyOrNone(
+        `SELECT
+          q.question_id,
+          q.category_id,
+          q.day,
+          q.question_number,
+          q.question_type,
+          q.korean,
+          q.english,
+          q.korean_a,
+          q.english_a,
+          q.korean_b,
+          q.english_b,
+          u.voice_gender,
+          CASE u.voice_gender
+            WHEN 'us_male' THEN q.audio_us_male
+            WHEN 'us_female' THEN q.audio_us_female
+            WHEN 'uk_male' THEN q.audio_uk_male
+            WHEN 'uk_female' THEN q.audio_uk_female
+            ELSE q.audio_us_male
+          END as audio,
+          q.keywords,
+          EXISTS(SELECT 1 FROM favorites WHERE question_id = q.question_id AND user_id = $1) as is_favorite,
+          EXISTS(SELECT 1 FROM wrong_answers WHERE question_id = q.question_id AND user_id = $1) as is_wrong_answer
+        FROM questions q
+        JOIN users u ON u.uid = $1
+        ORDER BY RANDOM()
+        LIMIT $2`,
+        [userId, limit]
+      );
+
+      // voice_gender에 따라 audio 경로 가공
+      const processedQuestions = questions.map(q => {
+        let audioPath = '';
+        switch (q.voice_gender) {
+          case 'us_male':
+            audioPath = `US_male/${q.audio}`;
+            break;
+          case 'us_female':
+            audioPath = `US_female/${q.audio}`;
+            break;
+          case 'uk_male':
+            audioPath = `UK_male/${q.audio}`;
+            break;
+          case 'uk_female':
+            audioPath = `UK_female/${q.audio}`;
+            break;
+          default:
+            audioPath = `US_male/${q.audio}`;
+        }
+        return {
+          ...q,
+          audio: audioPath
+        };
+      });
+
+      return {
+        quiz_type: 'random',
+        category_id: 7, // Random Review
+        progress: {
+          completed: 0,
+          total: processedQuestions.length,
+          percentage: 0
+        },
+        questions: processedQuestions
+      };
+    } catch (error) {
+      console.error('getRandomReviewQuiz query error:', error);
+      throw new Error('Failed to get random review quiz');
+    }
+  }
+
+  /**
    * 틀린 문제 토글 (추가 또는 삭제)
    * @param {string} userId - 사용자 ID
    * @param {number} questionId - 문제 ID

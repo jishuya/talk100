@@ -145,6 +145,47 @@ class QuizController {
   }
 
   /**
+   * GET /api/quiz/random
+   * 랜덤 복습 퀴즈 조회 (인증 필수)
+   * Query params: limit (optional) - 문제 개수 (기본 20)
+   */
+  async getRandomReviewQuiz(req, res) {
+    try {
+      const uid = req.user?.uid;
+      const limit = req.query.limit ? parseInt(req.query.limit) : 20;
+
+      if (!uid) {
+        return res.status(401).json({
+          success: false,
+          message: 'Authentication required for random review quiz'
+        });
+      }
+
+      // limit 유효성 검증 (1~100)
+      if (limit < 1 || limit > 100) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid limit. Must be between 1 and 100'
+        });
+      }
+
+      const result = await quizQueries.getRandomReviewQuiz(uid, limit);
+
+      res.json({
+        success: true,
+        data: result
+      });
+
+    } catch (error) {
+      console.error('getRandomReviewQuiz controller error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch random review quiz'
+      });
+    }
+  }
+
+  /**
    * POST /api/quiz/wrong-answers/toggle
    * 틀린 문제 토글 (인증 필수)
    * Body: { questionId: number, isStarred: boolean }

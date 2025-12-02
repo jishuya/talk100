@@ -520,8 +520,8 @@ const QuizPage = () => {
       // grading 모드에서 "다음 문제" 버튼 클릭 시 백엔드에 진행률 업데이트
       // (정답을 맞춰서 grading 모드가 된 경우이므로 무조건 업데이트)
       // 중요: session.category를 사용! (오늘의 퀴즈는 category=4이지만, 문제의 category_id는 1,2,3일 수 있음)
-      // 예외: 틀린문제(5), 즐겨찾기(6)는 진행률 저장 안함 (개인 복습용)
-      const shouldUpdateProgress = session?.category && ![5, 6].includes(session.category);
+      // 예외: 틀린문제(5), 즐겨찾기(6), 랜덤복습(7)은 진행률 저장 안함 (개인 복습용)
+      const shouldUpdateProgress = session?.category && ![5, 6, 7].includes(session.category);
 
       if (quizMode === 'grading' && question?.id && shouldUpdateProgress && question?.day) {
         try {
@@ -554,8 +554,14 @@ const QuizPage = () => {
       const success = moveToNextQuestion(sessionId);
 
       if (!success) {
-        // 퀴즈 완료 - 바로 홈으로 이동
+        // 퀴즈 완료
         if (isQuizCompleted(sessionId)) {
+          // 🎲 랜덤 퀴즈(7) 완료 시 목표 달성 모달 표시
+          if (session?.category === 7) {
+            setShowGoalAchievedModal(true);
+            return;
+          }
+
           // 📅 카테고리 퀴즈(1,2,3)가 완료되면 Day 완료 기록
           const isCategoryQuiz = session?.category >= 1 && session?.category <= 3 && session?.day;
 
@@ -869,18 +875,26 @@ const QuizPage = () => {
   // 🎉 목표 달성 모달: 추가 학습 계속하기
   const handleContinueAdditionalLearning = async () => {
     try {
-      // 1. solved_count 리셋
-      await api.apiCall('/api/progress/reset-solved-count', { method: 'POST' });
+      // 🎲 랜덤 퀴즈인 경우 새로운 랜덤 문제 불러오기
+      const isRandomQuiz = session?.category === 7;
 
-      // 2. 진행률 캐시를 즉시 0으로 업데이트
-      queryClient.setQueryData(['progress', 'today'], {
-        current: 0,
-        total: 20,
-        percentage: 0
-      });
+      let result;
+      if (isRandomQuiz) {
+        // 랜덤 퀴즈: 새로운 무작위 20문제 불러오기
+        result = await api.apiCall('/api/quiz/random', { method: 'GET' });
+      } else {
+        // 오늘의 퀴즈: solved_count 리셋 후 새로운 문제 불러오기
+        await api.apiCall('/api/progress/reset-solved-count', { method: 'POST' });
 
-      // 3. 새로운 문제 불러오기
-      const result = await api.apiCall('/api/quiz/daily', { method: 'GET' });
+        // 진행률 캐시를 즉시 0으로 업데이트
+        queryClient.setQueryData(['progress', 'today'], {
+          current: 0,
+          total: 20,
+          percentage: 0
+        });
+
+        result = await api.apiCall('/api/quiz/daily', { method: 'GET' });
+      }
 
       if (result && result.questions && result.questions.length > 0) {
         // 4. 기존 세션 삭제
@@ -895,13 +909,14 @@ const QuizPage = () => {
 
         const newSession = {
           sessionId: newSessionId,
-          category: 4,
+          category: isRandomQuiz ? 7 : 4, // 랜덤 퀴즈는 category 7
           questionIds,
           questions,
           progress: { completed: 0, total: questions.length, percentage: 0 },
           currentQuestionIndex: 0,
           completedQuestionIds: [],
           inputMode: userInputMode, // DB에서 가져온 사용자 설정 사용
+          quiz_type: isRandomQuiz ? 'random' : 'daily',
           createdAt: Date.now()
         };
 
@@ -985,8 +1000,8 @@ const QuizPage = () => {
       ) : (
         <QuizProgressBar
           category={session?.category}
-          currentIndex={currentQuestionIndex}
           totalQuestions={questionsData?.length || 0}
+          completedCount={session?.completedQuestionIds?.length || 0}
           categoryCompleted={categoryProgress?.category_completed || 0}
           categoryTotal={categoryProgress?.category_total || 0}
         />
@@ -1065,7 +1080,7 @@ const QuizPage = () => {
               {getIcon('IoPartyPopper', { size: '5xl' })}
             </div>
             <h2 className="text-2xl font-bold text-white drop-shadow-lg">
-              오늘의 목표 달성!
+              {session?.category === 7 ? '랜덤복습 완료!' : '오늘의 목표 달성!'}
             </h2>
           </div>
           {/* 장식 효과 */}
@@ -1075,8 +1090,8 @@ const QuizPage = () => {
 
         <ModalBody className="py-6 px-6">
           <div className="space-y-5">
-            {/* 민트 그라데이션 카드 */}
-            {streakInfo && (
+            {/* 민트 그라데이션 카드 - 랜덤 퀴즈가 아닌 경우에만 표시 */}
+            {streakInfo && session?.category !== 7 && (
               <div className="flex gap-3">
                 <div className="flex-1 bg-gradient-to-br from-primary/10 to-primary/20 rounded-xl p-4 border border-primary/30 hover:shadow-lg transition-shadow">
                   <div className="flex justify-center mb-2">
@@ -1102,7 +1117,9 @@ const QuizPage = () => {
 
             {/* 질문 */}
             <p className="text-center text-base text-gray-600 pt-2">
-              추가 학습을 하시겠습니까?
+              {session?.category === 7
+                ? '새로운 랜덤 문제로 계속하시겠습니까?'
+                : '추가 학습을 하시겠습니까?'}
             </p>
 
             {/* 버튼 */}

@@ -91,6 +91,10 @@ const ICON_MAP = {
   'flat-color-icons:folder': 'flat-color-icons:folder',
   'solar:folder-with-files-line-duotone': 'solar:folder-with-files-line-duotone',
 
+  // === Review Quiz ===
+  RandomReview: 'lucide:shuffle',
+  PowerMemory: 'lucide:target',
+
   // === Legacy & Misc ===
   IoLibraryOutline: 'noto:books',
   IoSchoolOutline: 'noto:school',

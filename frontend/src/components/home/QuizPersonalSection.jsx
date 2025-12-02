@@ -1,4 +1,3 @@
-import React from 'react';
 import { getIcon } from '../../utils/iconMap';
 
 const QuizPersonalSection = ({ personalQuizzes, onPersonalQuizClick }) => {
@@ -40,26 +39,26 @@ const QuizPersonalSection = ({ personalQuizzes, onPersonalQuizClick }) => {
     <div className="px-4 pb-3 md:pb-4" data-onboarding="personal-quiz">
       <h2 className="text-sm font-bold mb-2 text-text-primary md:text-base md:mb-3">나만의 퀴즈</h2>
 
-      {/* ===== 모바일: 가로 2열, 컴팩트 버튼 (색상 배경) ===== */}
-      <div className="grid grid-cols-2 gap-2 md:hidden">
+      {/* ===== 모바일: 리스트 형태 (카테고리와 동일) ===== */}
+      <div className="card p-2 md:hidden">
         {quizzes.map((quiz) => (
           <div
             key={quiz.id}
-            className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl cursor-pointer touchable shadow-sm ${
-              quiz.id === 'wrong-answers'
-                ? 'bg-yellow-50 border border-yellow-200'
-                : 'bg-red-50 border border-red-200'
-            }`}
+            className="flex items-center py-2 border-b border-gray-border last:border-b-0 cursor-pointer touchable"
             data-category-id={quiz.category_id}
             onClick={() => handleQuizClick(quiz)}
           >
-            {typeof quiz.icon === 'string' ? getIcon(quiz.icon, {
-              size: 'lg',
-              className: quiz.id === 'wrong-answers' ? 'text-yellow-400' :
-                        quiz.id === 'favorites' ? 'text-red-400' : ''
-            }) : quiz.icon}
-            <span className="text-sm font-semibold text-text-primary">{quiz.title}</span>
-            <span className="text-xs text-text-secondary">({quiz.count})</span>
+            <div className="w-9 h-9 bg-accent-pale rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+              {typeof quiz.icon === 'string' ? getIcon(quiz.icon, {
+                size: 'lg',
+                className: quiz.id === 'wrong-answers' ? 'text-yellow-400' :
+                          quiz.id === 'favorites' ? 'text-red-400' : ''
+              }) : quiz.icon}
+            </div>
+            <div className="flex-1">
+              <div className="text-sm font-semibold text-text-primary">{quiz.title}</div>
+            </div>
+            <div className="text-xs text-text-secondary">{quiz.count}문제</div>
           </div>
         ))}
       </div>

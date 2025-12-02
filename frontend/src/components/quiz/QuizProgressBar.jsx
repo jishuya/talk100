@@ -9,8 +9,8 @@ import { useTodayProgress } from '../../hooks/useApi';
  */
 export const QuizProgressBar = ({
   category,
-  currentIndex = 0,
   totalQuestions = 0,
+  completedCount = 0,
   categoryCompleted = 0,
   categoryTotal = 0
 }) => {
@@ -59,11 +59,11 @@ export const QuizProgressBar = ({
     );
   }
 
-  // 3. 나만의 퀴즈 (Category 5: 틀린문제, 6: 즐겨찾기)
-  if (category === 5 || category === 6) {
-    const current = currentIndex + 1; // 1-based index
+  // 3. 나만의 퀴즈 (Category 5: 틀린문제, 6: 즐겨찾기) 또는 랜덤복습 (Category 7)
+  if (category === 5 || category === 6 || category === 7) {
+    const completed = completedCount || 0;
     const total = totalQuestions || 1;
-    const percentage = Math.round((current / total) * 100);
+    const percentage = Math.round((completed / total) * 100);
 
     return (
       <div className="bg-white shadow-soft rounded-brand mx-4 p-3 md:p-4">
@@ -75,7 +75,7 @@ export const QuizProgressBar = ({
             />
           </div>
           <span className="text-sm font-semibold text-primary min-w-[60px] text-right">
-            {current}/{total}
+            {completed}/{total}
           </span>
         </div>
       </div>

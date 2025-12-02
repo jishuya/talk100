@@ -271,8 +271,6 @@ const HomePage = () => {
 
   // 복습 퀴즈 클릭 핸들러
   const handleReviewQuizClick = async (quiz) => {
-    console.log('[랜덤복습] 클릭됨, quiz:', quiz);
-
     // 랜덤복습만 구현, 파워암기모드는 준비 중
     if (quiz.id === 'power') {
       setAlertModal({ isOpen: true, message: '파워암기모드는 준비 중입니다.', icon: '🚧' });
@@ -281,13 +279,10 @@ const HomePage = () => {
 
     try {
       // 랜덤복습: /api/quiz/random 호출
-      console.log('[랜덤복습] API 호출 시작: /api/quiz/random');
       const result = await api.apiCall('/api/quiz/random', { method: 'GET' });
-      console.log('[랜덤복습] API 응답:', result);
 
       if (result) {
         const { category_id, questions } = result;
-        console.log('[랜덤복습] category_id:', category_id, 'questions:', questions?.length);
 
         // 문제가 없는 경우
         if (!questions || questions.length === 0) {
@@ -300,7 +295,6 @@ const HomePage = () => {
         // 세션 생성 및 데이터 저장
         const userInputMode = quizModeData?.quizMode || 'keyboard';
         const sessionId = createSession(category_id, 1, question_ids, userInputMode);
-        console.log('[랜덤복습] 세션 생성됨, sessionId:', sessionId);
 
         const session = JSON.parse(localStorage.getItem(`quiz_session_${sessionId}`));
         session.questions = questions;
@@ -310,11 +304,9 @@ const HomePage = () => {
 
         navigate(`/quiz?session=${sessionId}`);
       } else {
-        console.log('[랜덤복습] result가 falsy:', result);
         setAlertModal({ isOpen: true, message: '퀴즈 데이터를 가져올 수 없습니다.', icon: '❌' });
       }
-    } catch (error) {
-      console.error('[랜덤복습] 에러 발생:', error);
+    } catch {
       setAlertModal({ isOpen: true, message: '퀴즈를 시작할 수 없습니다. 다시 시도해주세요.', icon: '❌' });
     }
   };

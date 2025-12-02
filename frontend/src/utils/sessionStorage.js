@@ -16,7 +16,8 @@ const CATEGORY_MAP = {
   3: { name: 'Cases in Point', category: 3 },
   4: { name: 'Today Quiz', category: 4 },
   5: { name: 'Wrong Answers', category: 5 },
-  6: { name: 'Favorites', category: 6 }
+  6: { name: 'Favorites', category: 6 },
+  7: { name: 'Random Review', category: 7 }
 };
 
 /**

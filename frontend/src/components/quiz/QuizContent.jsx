@@ -104,16 +104,16 @@ export const QuizContent = ({
                 const userInput = keywordInputs[keywordKey] || '';
                 const hasUserInput = userInput.length > 0;
 
-                // 힌트/정답 표시 값 계산
+                // 힌트/정답 표시 값 계산 (힌트/정답이 사용자 입력보다 우선)
                 const getDisplayValue = () => {
-                  if (hasUserInput) return userInput;  // 사용자 입력이 있으면 그대로
                   if (showAnswer) return cleanWord;     // 정답보기: 전체 단어
                   if (showHint) return cleanWord.charAt(0) + '_'.repeat(cleanWord.length - 1);  // 힌트보기: 첫 글자 + 언더스코어
+                  if (hasUserInput) return userInput;  // 사용자 입력이 있으면 그대로
                   return '';
                 };
 
                 const displayValue = getDisplayValue();
-                const isShowingHintOrAnswer = !hasUserInput && (showHint || showAnswer);
+                const isShowingHintOrAnswer = showHint || showAnswer;
 
                 return (
                   <span key={index} className="inline-flex items-center">
@@ -151,16 +151,16 @@ export const QuizContent = ({
                 const hasInput = keywordInputs[cleanWord.toLowerCase()];
                 const isCorrect = gradingResult?.keywordResults?.[cleanWord.toLowerCase()]?.isCorrect;
 
-                // 힌트/정답 표시 값 계산 (음성 모드)
+                // 힌트/정답 표시 값 계산 (음성 모드) - 힌트/정답이 사용자 입력보다 우선
                 const getVoiceDisplayValue = () => {
-                  if (hasInput) return cleanWord;  // 사용자 입력이 있으면 정답 표시
                   if (showAnswer) return cleanWord;  // 정답보기: 전체 단어
                   if (showHint) return cleanWord.charAt(0) + '_'.repeat(cleanWord.length - 1);  // 힌트보기: 첫 글자 + 언더스코어
+                  if (hasInput) return cleanWord;  // 사용자 입력이 있으면 정답 표시
                   return '_'.repeat(cleanWord.length);  // 기본: 언더스코어
                 };
 
                 const voiceDisplayValue = getVoiceDisplayValue();
-                const isShowingHintOrAnswerVoice = !hasInput && (showHint || showAnswer);
+                const isShowingHintOrAnswerVoice = showHint || showAnswer;
 
                 // 빈칸 클릭 시 키보드 모드로 전환 + 해당 키워드 전달
                 const handleBlankClick = () => {
