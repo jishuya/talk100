@@ -1,14 +1,14 @@
+import Modal from '../ui/Modal';
+
 export const GoalAchievedModal = ({
   isOpen,
   daysCompleted,
   onContinue,     // 추가 학습
   onGoHome        // 그만하기
 }) => {
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-2xl p-8 max-w-md mx-4 text-center animate-fade-in">
+    <Modal isOpen={isOpen} onClose={onGoHome} showCloseButton={false} size="sm">
+      <div className="p-8 text-center">
         {/* 축하 아이콘 */}
         <div className="text-6xl mb-4">🎉</div>
 
@@ -43,6 +43,6 @@ export const GoalAchievedModal = ({
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 };

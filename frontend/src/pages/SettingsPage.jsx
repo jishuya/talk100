@@ -10,6 +10,7 @@ import SettingsSection from '../components/settings/SettingsSection';
 import DangerZone from '../components/settings/DangerZone';
 import ProfileEditModal from '../components/settings/ProfileEditModal';
 import ConfirmModal from '../components/settings/ConfirmModal';
+import AlertModal from '../components/ui/AlertModal';
 
 const SettingsPage = () => {
   const queryClient = useQueryClient();
@@ -26,6 +27,9 @@ const SettingsPage = () => {
   const [showProfileEditModal, setShowProfileEditModal] = useState(false);
   const [showResetConfirmModal, setShowResetConfirmModal] = useState(false);
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+
+  // Alert 모달 상태
+  const [alertModal, setAlertModal] = useState({ isOpen: false, message: '', icon: '', onCloseCallback: null });
 
   // 캐시 크기 상태
   const [cacheSize, setCacheSize] = useState(0);
@@ -105,9 +109,9 @@ const SettingsPage = () => {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-      alert('백업 파일이 다운로드되었습니다.');
+      setAlertModal({ isOpen: true, message: '백업 파일이 다운로드되었습니다.', icon: '✅' });
     } catch {
-      alert('백업에 실패했습니다.');
+      setAlertModal({ isOpen: true, message: '백업에 실패했습니다.', icon: '❌' });
     }
   };
 
@@ -175,9 +179,9 @@ const SettingsPage = () => {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-      alert('CSV 파일이 다운로드되었습니다.');
+      setAlertModal({ isOpen: true, message: 'CSV 파일이 다운로드되었습니다.', icon: '✅' });
     } catch {
-      alert('내보내기에 실패했습니다.');
+      setAlertModal({ isOpen: true, message: '내보내기에 실패했습니다.', icon: '❌' });
     }
   };
 
@@ -208,9 +212,9 @@ const SettingsPage = () => {
         // 4. 캐시 크기 재계산
         setCacheSize(calculateCacheSize());
 
-        alert('캐시가 삭제되었습니다.');
+        setAlertModal({ isOpen: true, message: '캐시가 삭제되었습니다.', icon: '✅' });
       } catch {
-        alert('캐시 삭제에 실패했습니다.');
+        setAlertModal({ isOpen: true, message: '캐시 삭제에 실패했습니다.', icon: '❌' });
       }
     }
   };
@@ -244,12 +248,14 @@ const SettingsPage = () => {
       // SessionStorage 전체 삭제
       sessionStorage.clear();
 
-      alert('✅ 학습 기록이 초기화되었습니다.\n홈 화면으로 이동합니다.');
-
-      // 홈으로 리다이렉트
-      window.location.href = '/';
+      setAlertModal({
+        isOpen: true,
+        message: '학습 기록이 초기화되었습니다.\n홈 화면으로 이동합니다.',
+        icon: '✅',
+        onCloseCallback: () => { window.location.href = '/'; }
+      });
     } catch {
-      alert('❌ 학습 기록 초기화에 실패했습니다.\n잠시 후 다시 시도해주세요.');
+      setAlertModal({ isOpen: true, message: '학습 기록 초기화에 실패했습니다.\n잠시 후 다시 시도해주세요.', icon: '❌' });
     }
   };
 
@@ -273,12 +279,14 @@ const SettingsPage = () => {
       // React Query 캐시 전체 삭제
       queryClient.clear();
 
-      alert('✅ 계정이 삭제되었습니다.\n그동안 이용해 주셔서 감사합니다.');
-
-      // 로그인 페이지로 리다이렉트
-      window.location.href = '/login';
+      setAlertModal({
+        isOpen: true,
+        message: '계정이 삭제되었습니다.\n그동안 이용해 주셔서 감사합니다.',
+        icon: '✅',
+        onCloseCallback: () => { window.location.href = '/login'; }
+      });
     } catch {
-      alert('❌ 계정 삭제에 실패했습니다.\n잠시 후 다시 시도해주세요.');
+      setAlertModal({ isOpen: true, message: '계정 삭제에 실패했습니다.\n잠시 후 다시 시도해주세요.', icon: '❌' });
     }
   };
 
@@ -286,9 +294,9 @@ const SettingsPage = () => {
   const handleProfileSave = async (profileData) => {
     try {
       await updateProfileMutation.mutateAsync(profileData);
-      alert('프로필이 저장되었습니다.');
+      setAlertModal({ isOpen: true, message: '프로필이 저장되었습니다.', icon: '✅' });
     } catch {
-      alert('프로필 저장에 실패했습니다.');
+      setAlertModal({ isOpen: true, message: '프로필 저장에 실패했습니다.', icon: '❌' });
     }
   };
 
@@ -449,6 +457,18 @@ const SettingsPage = () => {
         confirmText="계정 삭제"
         cancelText="취소"
         type="danger"
+      />
+
+      {/* Alert 모달 */}
+      <AlertModal
+        isOpen={alertModal.isOpen}
+        onClose={() => {
+          const callback = alertModal.onCloseCallback;
+          setAlertModal({ isOpen: false, message: '', icon: '', onCloseCallback: null });
+          if (callback) callback();
+        }}
+        message={alertModal.message}
+        icon={alertModal.icon}
       />
     </div>
   );

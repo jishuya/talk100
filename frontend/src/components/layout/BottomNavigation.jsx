@@ -1,10 +1,13 @@
+import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getIcon } from '../../utils/iconMap';
 import { api } from '../../services/apiService';
+import AlertModal from '../ui/AlertModal';
 
 const BottomNavigation = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [alertModal, setAlertModal] = useState({ isOpen: false, message: '', icon: '' });
 
   const navItems = [
     {
@@ -65,11 +68,11 @@ const BottomNavigation = () => {
           localStorage.setItem(`quiz_session_${sessionId}`, JSON.stringify(newSession));
           navigate(`/quiz?session=${sessionId}`);
         } else {
-          alert('더 이상 풀 문제가 없습니다.');
+          setAlertModal({ isOpen: true, message: '더 이상 풀 문제가 없습니다.', icon: '📭' });
         }
       }
     } catch {
-      alert('퀴즈를 불러오는데 실패했습니다.');
+      setAlertModal({ isOpen: true, message: '퀴즈를 불러오는데 실패했습니다.', icon: '❌' });
     }
   };
 
@@ -99,6 +102,14 @@ const BottomNavigation = () => {
           }`}>{item.label}</span>
         </button>
       ))}
+
+      {/* Alert 모달 */}
+      <AlertModal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal({ isOpen: false, message: '', icon: '' })}
+        message={alertModal.message}
+        icon={alertModal.icon}
+      />
     </nav>
   );
 };

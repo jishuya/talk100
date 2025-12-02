@@ -8,6 +8,7 @@ import StudyHistorySection from '../components/home/StudyHistorySection';
 import OnboardingTutorial from '../components/home/OnboardingTutorial';
 import Modal, { ModalBody } from '../components/ui/Modal';
 import Button from '../components/ui/Button';
+import AlertModal from '../components/ui/AlertModal';
 import DaySelectModal from '../components/quiz/DaySelectModal';
 
 // 데이터 훅들
@@ -41,6 +42,9 @@ const HomePage = () => {
 
   // 🎉 퀴즈 완료 후 축하 효과용 상태
   const [celebrateDay, setCelebrateDay] = useState(null);
+
+  // Alert 모달 상태
+  const [alertModal, setAlertModal] = useState({ isOpen: false, message: '', icon: '' });
 
   // 데이터 훅들 (ApiService가 자동으로 fallback 처리)
   const { data: userData, isLoading: userLoading } = useUserData();
@@ -159,7 +163,7 @@ const HomePage = () => {
 
         // 문제가 없으면 (모두 풀었음)
         if (!questions || questions.length === 0) {
-          alert('오늘 풀 수 있는 모든 문제를 완료했습니다!');
+          setAlertModal({ isOpen: true, message: '오늘 풀 수 있는 모든 문제를 완료했습니다!', icon: '🎉' });
           return;
         }
 
@@ -178,10 +182,10 @@ const HomePage = () => {
 
         navigate(`/quiz?session=${sessionId}`);
       } else {
-        alert('퀴즈 데이터를 가져올 수 없습니다.');
+        setAlertModal({ isOpen: true, message: '퀴즈 데이터를 가져올 수 없습니다.', icon: '❌' });
       }
     } catch {
-      alert('퀴즈를 시작할 수 없습니다. 다시 시도해주세요.');
+      setAlertModal({ isOpen: true, message: '퀴즈를 시작할 수 없습니다. 다시 시도해주세요.', icon: '❌' });
     }
   };
 
@@ -204,7 +208,7 @@ const HomePage = () => {
 
         // 문제가 없는 경우
         if (!questions || questions.length === 0) {
-          alert(`Day ${day}에 문제가 없습니다.`);
+          setAlertModal({ isOpen: true, message: `Day ${day}에 문제가 없습니다.`, icon: '📭' });
           return;
         }
 
@@ -219,10 +223,10 @@ const HomePage = () => {
 
         navigate(`/quiz?session=${sessionId}`);
       } else {
-        alert('퀴즈 데이터를 가져올 수 없습니다.');
+        setAlertModal({ isOpen: true, message: '퀴즈 데이터를 가져올 수 없습니다.', icon: '❌' });
       }
     } catch {
-      alert('퀴즈를 시작할 수 없습니다. 다시 시도해주세요.');
+      setAlertModal({ isOpen: true, message: '퀴즈를 시작할 수 없습니다. 다시 시도해주세요.', icon: '❌' });
     }
   };
 
@@ -242,7 +246,7 @@ const HomePage = () => {
         // 문제가 없는 경우
         if (!questions || questions.length === 0) {
           const quizName = category_id === 5 ? '틀린 문제' : '즐겨찾기';
-          alert(`${quizName}가 없습니다.`);
+          setAlertModal({ isOpen: true, message: `${quizName}가 없습니다.`, icon: '📭' });
           return;
         }
 
@@ -257,10 +261,10 @@ const HomePage = () => {
 
         navigate(`/quiz?session=${sessionId}`);
       } else {
-        alert('퀴즈 데이터를 가져올 수 없습니다.');
+        setAlertModal({ isOpen: true, message: '퀴즈 데이터를 가져올 수 없습니다.', icon: '❌' });
       }
     } catch {
-      alert('퀴즈를 시작할 수 없습니다. 다시 시도해주세요.');
+      setAlertModal({ isOpen: true, message: '퀴즈를 시작할 수 없습니다. 다시 시도해주세요.', icon: '❌' });
     }
   };
 
@@ -344,6 +348,14 @@ const HomePage = () => {
           </div>
         </ModalBody>
       </Modal>
+
+      {/* Alert 모달 */}
+      <AlertModal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal({ isOpen: false, message: '', icon: '' })}
+        message={alertModal.message}
+        icon={alertModal.icon}
+      />
     </div>
   );
 };

@@ -1,4 +1,5 @@
 import { useMemo, useEffect, useRef, useState } from 'react';
+import Modal from '../ui/Modal';
 
 /**
  * Day 선택 모달
@@ -48,67 +49,64 @@ export const DaySelectModal = ({
     }
   }, [isOpen, celebrateDay]);
 
-  if (!isOpen || !category) return null;
+  if (!category) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-2xl max-w-sm w-full mx-4 animate-fade-in shadow-xl overflow-hidden">
-        {/* 헤더 */}
-        <div className="bg-gradient-to-r from-primary to-primary-dark px-5 py-4">
-          <div className="text-center">
-            <h2 className="text-lg font-bold text-white">{category.name || category.title}</h2>
-            {/* <p className="text-sm text-white font-medium mt-0.5">학습할 Day를 선택하세요</p> */}
-          </div>
-        </div>
-
-        {/* Day 그리드 */}
-        <div className="p-4 max-h-[50vh] overflow-y-auto">
-          <div className="grid grid-cols-5 gap-2">
-            {days.map((day) => {
-              const isCompleted = completedDays.includes(day);
-              const isCelebrating = day === celebrateDay && showCelebration;
-
-              return (
-                <button
-                  key={day}
-                  ref={day === celebrateDay ? celebrateRef : null}
-                  onClick={() => handleDayClick(day)}
-                  className={`
-                    relative py-2.5 rounded-xl text-center font-medium transition-all
-                    hover:scale-105 active:scale-95 shadow-sm
-                    ${isCompleted
-                      ? 'bg-primary text-white'
-                      : 'bg-accent-pale text-gray-700 hover:bg-primary/20'
-                    }
-                    ${isCelebrating ? 'animate-celebrate ring-4 ring-yellow-400 ring-opacity-75' : ''}
-                  `}
-                >
-                  {/* ✨ 반짝이 효과 (2초간만 표시) */}
-                  {isCelebrating && (
-                    <>
-                      <span className="absolute -top-1 -right-1 text-xs animate-bounce">✨</span>
-                      <span className="absolute -bottom-1 -left-1 text-xs animate-bounce delay-100">⭐</span>
-                    </>
-                  )}
-                  <span className="text-[10px] text-current opacity-60 block leading-none">Day</span>
-                  <span className="text-sm font-bold">{day}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* 닫기 버튼 */}
-        <div className="px-4 pb-2 pt-2">
-          <button
-            onClick={onClose}
-            className="w-full px-4 py-2.5 bg-gray-100 text-gray-600 rounded-xl font-medium hover:bg-gray-200 transition-colors"
-          >
-            닫기
-          </button>
+    <Modal isOpen={isOpen} onClose={onClose} showCloseButton={false} size="sm" className="overflow-hidden">
+      {/* 헤더 */}
+      <div className="bg-gradient-to-r from-primary to-primary-dark px-5 py-4">
+        <div className="text-center">
+          <h2 className="text-lg font-bold text-white">{category.name || category.title}</h2>
         </div>
       </div>
-    </div>
+
+      {/* Day 그리드 */}
+      <div className="p-4 max-h-[50vh] overflow-y-auto">
+        <div className="grid grid-cols-5 gap-2">
+          {days.map((day) => {
+            const isCompleted = completedDays.includes(day);
+            const isCelebrating = day === celebrateDay && showCelebration;
+
+            return (
+              <button
+                key={day}
+                ref={day === celebrateDay ? celebrateRef : null}
+                onClick={() => handleDayClick(day)}
+                className={`
+                  relative py-2.5 rounded-xl text-center font-medium transition-all
+                  hover:scale-105 active:scale-95 shadow-sm
+                  ${isCompleted
+                    ? 'bg-primary text-white'
+                    : 'bg-accent-pale text-gray-700 hover:bg-primary/20'
+                  }
+                  ${isCelebrating ? 'animate-celebrate ring-4 ring-yellow-400 ring-opacity-75' : ''}
+                `}
+              >
+                {/* ✨ 반짝이 효과 (2초간만 표시) */}
+                {isCelebrating && (
+                  <>
+                    <span className="absolute -top-1 -right-1 text-xs animate-bounce">✨</span>
+                    <span className="absolute -bottom-1 -left-1 text-xs animate-bounce delay-100">⭐</span>
+                  </>
+                )}
+                <span className="text-[10px] text-current opacity-60 block leading-none">Day</span>
+                <span className="text-sm font-bold">{day}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 닫기 버튼 */}
+      <div className="px-4 pb-4 pt-2">
+        <button
+          onClick={onClose}
+          className="w-full px-4 py-2.5 bg-gray-100 text-gray-600 rounded-xl font-medium hover:bg-gray-200 transition-colors"
+        >
+          닫기
+        </button>
+      </div>
+    </Modal>
   );
 };
 

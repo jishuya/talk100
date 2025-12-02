@@ -154,7 +154,7 @@ class QuizQueries {
       const result = await db.task(async t => {
         // 1. 사용자 설정 조회 (daily_goal)
         const settings = await this._getUserQuizSettings(t, userId);
-        const dailyGoal = settings.daily_goal || 20; // 기본값 20문제
+        const dailyGoal = settings.daily_goal || 10; // 기본값 10문제
 
         // 2. user_progress 조회 (category_id = 4: 오늘의 퀴즈)
         let userProgress = await t.oneOrNone(

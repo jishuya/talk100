@@ -84,6 +84,7 @@ export const useVoiceInput = () => {
 
     // 음성인식 에러 처리
     recognitionInstance.onerror = (event) => {
+
       let errorMessage = '음성 인식에 실패했습니다.';
 
       switch (event.error) {
@@ -100,8 +101,9 @@ export const useVoiceInput = () => {
           errorMessage = '인터넷 연결을 확인해주세요.';
           break;
         case 'aborted':
-          errorMessage = '음성 인식이 중단되었습니다.';
-          break;
+          // aborted는 사용자가 의도적으로 중단한 경우이므로 에러로 처리하지 않음
+          setIsListening(false);
+          return;
         default:
           errorMessage = `음성 인식 오류: ${event.error}`;
       }
@@ -140,7 +142,7 @@ export const useVoiceInput = () => {
   }, []);
 
   // 녹음 시작
-  const startListening = useCallback(() => {
+  const startListening = useCallback(async () => {
     if (!recognitionRef.current) {
       setError('음성인식을 초기화할 수 없습니다.');
       return;
@@ -151,6 +153,11 @@ export const useVoiceInput = () => {
     }
 
     try {
+      // 먼저 마이크 권한을 명시적으로 요청
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // 권한 획득 후 스트림 정리 (SpeechRecognition이 자체적으로 마이크 접근)
+      stream.getTracks().forEach(track => track.stop());
+
       // 기존 타이머 정리
       if (silenceTimerRef.current) {
         clearTimeout(silenceTimerRef.current);
@@ -162,8 +169,14 @@ export const useVoiceInput = () => {
       setTranscript('');
       setError(null);
       recognitionRef.current.start();
-    } catch {
-      setError('음성 인식을 시작할 수 없습니다. 다시 시도해주세요.');
+    } catch (err) {
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        setError('마이크 권한이 필요합니다. 브라우저 설정에서 마이크 권한을 허용해주세요.');
+      } else if (err.name === 'NotFoundError') {
+        setError('마이크를 찾을 수 없습니다.');
+      } else {
+        setError('음성 인식을 시작할 수 없습니다. 다시 시도해주세요.');
+      }
     }
   }, [isListening]);
 

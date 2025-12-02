@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getIcon } from '../../utils/iconMap';
 import { getBadgeIconName } from '../../utils/badgeIcons';
+import Modal from './Modal';
 
 /**
  * 뱃지 획득 알림 모달
@@ -10,7 +11,6 @@ import { getBadgeIconName } from '../../utils/badgeIcons';
  */
 const BadgeModal = ({ badges, onClose }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isVisible, setIsVisible] = useState(true);
 
   // 여러 뱃지가 있을 경우 순차 표시
   useEffect(() => {
@@ -24,19 +24,12 @@ const BadgeModal = ({ badges, onClose }) => {
       if (currentIndex < badges.length - 1) {
         setCurrentIndex(currentIndex + 1);
       } else {
-        handleClose();
+        onClose();
       }
     }, 3000);
 
     return () => clearTimeout(timer);
   }, [currentIndex, badges, onClose]);
-
-  const handleClose = () => {
-    setIsVisible(false);
-    setTimeout(() => {
-      onClose();
-    }, 300); // 애니메이션 시간
-  };
 
   if (!badges || badges.length === 0) return null;
 
@@ -44,18 +37,14 @@ const BadgeModal = ({ badges, onClose }) => {
   const iconName = getBadgeIconName(currentBadge.id);
 
   return (
-    <div
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 transition-opacity duration-300 ${
-        isVisible ? 'opacity-100' : 'opacity-0'
-      }`}
-      onClick={handleClose}
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      showCloseButton={false}
+      size="sm"
+      closeOnOverlayClick={true}
     >
-      <div
-        className={`bg-white rounded-3xl p-8 max-w-sm mx-4 text-center shadow-2xl transform transition-all duration-300 ${
-          isVisible ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'
-        }`}
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="p-8 text-center">
         {/* 뱃지 아이콘 */}
         <div className="mb-6 animate-bounce">
           <div className="flex justify-center mb-2">
@@ -102,7 +91,7 @@ const BadgeModal = ({ badges, onClose }) => {
 
         {/* 닫기 버튼 */}
         <button
-          onClick={handleClose}
+          onClick={onClose}
           className="w-full py-3 bg-gradient-primary text-white rounded-xl font-medium
                      active:scale-95 transition-transform duration-150 shadow-lg"
         >
@@ -112,14 +101,14 @@ const BadgeModal = ({ badges, onClose }) => {
         {/* 건너뛰기 버튼 (여러 뱃지가 있을 경우) */}
         {badges.length > 1 && currentIndex < badges.length - 1 && (
           <button
-            onClick={handleClose}
+            onClick={onClose}
             className="mt-2 text-sm text-text-secondary hover:text-text-primary transition-colors"
           >
             모두 건너뛰기
           </button>
         )}
       </div>
-    </div>
+    </Modal>
   );
 };
 

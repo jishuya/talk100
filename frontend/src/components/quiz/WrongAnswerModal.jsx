@@ -1,3 +1,5 @@
+import Modal from '../ui/Modal';
+
 /**
  * 오답 피드백 모달
  * - 답변 제출 시 오답인 경우 표시
@@ -10,13 +12,9 @@ export const WrongAnswerModal = ({
   onRetry,      // 다시 시도
   onShowAnswer  // 정답 보기
 }) => {
-  if (!isOpen) return null;
-
-  const percentage = Math.round((correctCount / totalCount) * 100);
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-2xl p-6 max-w-sm mx-4 text-center animate-fade-in shadow-xl">
+    <Modal isOpen={isOpen} onClose={onRetry} showCloseButton={false} size="sm">
+      <div className="p-6 text-center">
         {/* 아이콘 */}
         <div className="text-5xl mb-4">
           {correctCount > 0 ? '🤔' : '💪'}
@@ -61,6 +59,6 @@ export const WrongAnswerModal = ({
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 };

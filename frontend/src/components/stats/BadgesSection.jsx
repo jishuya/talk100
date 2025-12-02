@@ -1,14 +1,18 @@
+import { useState } from 'react';
 import { getIcon } from '../../utils/iconMap';
 import { getBadgeIconName } from '../../utils/badgeIcons';
+import AlertModal from '../ui/AlertModal';
 
 const BadgesSection = ({ data }) => {
+  const [alertModal, setAlertModal] = useState({ isOpen: false, message: '', icon: '' });
+
   if (!data || !Array.isArray(data)) return null;
 
   const handleBadgeClick = (badge) => {
     if (badge.earned) {
-      alert(`🎉 "${badge.name}" 뱃지를 획득하셨습니다!\n${badge.description}`);
+      setAlertModal({ isOpen: true, message: `"${badge.name}" 뱃지를 획득하셨습니다!\n${badge.description}`, icon: '🎉' });
     } else {
-      alert(`"${badge.name}" 뱃지 획득 조건:\n${badge.description}`);
+      setAlertModal({ isOpen: true, message: `"${badge.name}" 뱃지 획득 조건:\n${badge.description}`, icon: '🏆' });
     }
   };
 
@@ -46,6 +50,14 @@ const BadgesSection = ({ data }) => {
           );
         })}
       </div>
+
+      {/* Alert 모달 */}
+      <AlertModal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal({ isOpen: false, message: '', icon: '' })}
+        message={alertModal.message}
+        icon={alertModal.icon}
+      />
     </div>
   );
 };

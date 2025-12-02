@@ -26,6 +26,7 @@ import AvatarModal from '../components/mypage/AvatarModal';
 import GoalEditModal from '../components/mypage/GoalEditModal';
 import FeedbackModal from '../components/mypage/FeedbackModal';
 import HelpModal from '../components/mypage/HelpModal';
+import AlertModal from '../components/ui/AlertModal';
 
 const MyPage = () => {
   const navigate = useNavigate();
@@ -59,6 +60,9 @@ const MyPage = () => {
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showVoiceSpeedModal, setShowVoiceSpeedModal] = useState(false);
+
+  // Alert 모달 상태
+  const [alertModal, setAlertModal] = useState({ isOpen: false, message: '', icon: '' });
 
   // 앱 설정 로컬 상태
   const [localAppSettings, setLocalAppSettings] = useState([]);
@@ -109,7 +113,7 @@ const MyPage = () => {
             try {
               await updateVoiceGenderMutation.mutateAsync(value);
             } catch {
-              alert('음성 선택 변경에 실패했습니다.');
+              setAlertModal({ isOpen: true, message: '음성 선택 변경에 실패했습니다.', icon: '❌' });
             }
           },
           bgColor: 'bg-gray-light'
@@ -205,7 +209,7 @@ const MyPage = () => {
 
       await updateSettingsMutation.mutateAsync(updateData);
     } catch {
-      alert('설정 변경에 실패했습니다.');
+      setAlertModal({ isOpen: true, message: '설정 변경에 실패했습니다.', icon: '❌' });
 
       // 에러 발생시 이전 상태로 롤백
       if (apiSettings) {
@@ -276,7 +280,7 @@ const MyPage = () => {
         await updateVoiceGenderMutation.mutateAsync(value);
       }
     } catch {
-      alert('음성 선택 변경에 실패했습니다.');
+      setAlertModal({ isOpen: true, message: '음성 선택 변경에 실패했습니다.', icon: '❌' });
 
       // 에러 발생시 이전 상태로 롤백
       if (profile) {
@@ -295,9 +299,9 @@ const MyPage = () => {
   const handleAvatarSave = async (avatar) => {
     try {
       await updateAvatarMutation.mutateAsync(avatar);
-      alert('아바타가 변경되었습니다!');
+      setAlertModal({ isOpen: true, message: '아바타가 변경되었습니다!', icon: '✅' });
     } catch {
-      alert('아바타 변경에 실패했습니다.');
+      setAlertModal({ isOpen: true, message: '아바타 변경에 실패했습니다.', icon: '❌' });
     }
   };
 
@@ -305,9 +309,9 @@ const MyPage = () => {
   const handleGoalsSave = async (newGoals) => {
     try {
       await updateGoalsMutation.mutateAsync(newGoals);
-      alert('학습 목표가 수정되었습니다!');
+      setAlertModal({ isOpen: true, message: '학습 목표가 수정되었습니다!', icon: '✅' });
     } catch {
-      alert('목표 수정에 실패했습니다.');
+      setAlertModal({ isOpen: true, message: '목표 수정에 실패했습니다.', icon: '❌' });
     }
   };
 
@@ -318,7 +322,7 @@ const MyPage = () => {
         await logoutMutation.mutateAsync();
         navigate('/login');
       } catch {
-        alert('로그아웃에 실패했습니다.');
+        setAlertModal({ isOpen: true, message: '로그아웃에 실패했습니다.', icon: '❌' });
       }
     }
   };
@@ -448,6 +452,14 @@ const MyPage = () => {
       <HelpModal
         isOpen={showVoiceSpeedModal}
         onClose={() => setShowVoiceSpeedModal(false)}
+      />
+
+      {/* Alert 모달 */}
+      <AlertModal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal({ isOpen: false, message: '', icon: '' })}
+        message={alertModal.message}
+        icon={alertModal.icon}
       />
       </div>
     </div>

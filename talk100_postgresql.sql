@@ -67,7 +67,7 @@ CREATE TABLE users (
     daily_goal INTEGER DEFAULT 10 CHECK (daily_goal >= 1),  -- Quiz Set (Day 개수) - 일일 학습목표 10문제
     attendance_goal int4 DEFAULT 3 NULL,   -- 주간 목표 출석일 - 주 3일
     quiz_count_goal int4 DEFAULT 30 NULL,   -- 주간 목표 문제수 - 주 30문제
-    quiz_mode VARCHAR(20) DEFAULT 'keyboard' NOT NULL CHECK (quiz_mode IN ('voice', 'keyboard')),  -- 퀴즈 입력 모드
+    quiz_mode VARCHAR(20) DEFAULT 'voice' NOT NULL CHECK (quiz_mode IN ('voice', 'keyboard')),  -- 퀴즈 입력 모드
     
     -- 통계
     total_questions_attempted INTEGER DEFAULT 0,

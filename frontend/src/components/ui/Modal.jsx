@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { cn } from '../../utils/cn';
 import Button from './Button';
 import { getIcon } from '../../utils/iconMap';
@@ -62,7 +62,7 @@ const Modal = ({
       {/* Modal Content */}
       <div
         className={cn(
-          'relative bg-white rounded-primary shadow-primary-lg animate-slide-up w-full',
+          'relative bg-white rounded-2xl shadow-xl animate-slide-up w-full',
           sizeClasses[size],
           className
         )}

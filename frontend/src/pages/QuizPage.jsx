@@ -14,6 +14,7 @@ import LevelUpModal from '../components/quiz/LevelUpModal';
 import { WrongAnswerModal } from '../components/quiz/WrongAnswerModal';
 import QuizOnboarding from '../components/quiz/QuizOnboarding';
 import Button from '../components/ui/Button';
+import AlertModal from '../components/ui/AlertModal';
 import { getIcon } from '../utils/iconMap';
 
 // API 서비스
@@ -146,6 +147,7 @@ const QuizPage = () => {
   const [newBadges, setNewBadges] = useState([]);
   const [levelUpInfo, setLevelUpInfo] = useState(null);
   const [wrongAnswerFeedback, setWrongAnswerFeedback] = useState(null); // { correctCount, totalCount }
+  const [alertModal, setAlertModal] = useState({ isOpen: false, message: '', icon: '' });
 
   // 모달 버튼 ref
   const continueButtonRef = useRef(null);
@@ -442,14 +444,14 @@ const QuizPage = () => {
   // 🎤 음성인식 에러 표시
   useEffect(() => {
     if (voiceError) {
-      alert(voiceError);
+      setAlertModal({ isOpen: true, message: voiceError, icon: '⚠️' });
     }
   }, [voiceError]);
 
   // 음성 녹음 토글
   const handleToggleRecording = useCallback(() => {
     if (!isVoiceSupported) {
-      alert('이 브라우저는 음성인식을 지원하지 않습니다. Chrome이나 Safari를 사용해주세요.');
+      setAlertModal({ isOpen: true, message: '이 브라우저는 음성인식을 지원하지 않습니다.\nChrome이나 Safari를 사용해주세요.', icon: '🎤' });
       return;
     }
 
@@ -574,7 +576,7 @@ const QuizPage = () => {
       }, 100);
 
     } catch {
-      alert('다음 문제 로드에 실패했습니다.');
+      setAlertModal({ isOpen: true, message: '다음 문제 로드에 실패했습니다.', icon: '❌' });
     }
   }, [sessionId, question?.id, question?.day, session?.category, session?.day, quizMode, navigate, resetGrading, resetVoiceTranscript, updateProgressMutation, markDayCompletedMutation]);
 
@@ -608,7 +610,7 @@ const QuizPage = () => {
       await moveToNext();
 
     } catch {
-      alert('다음 문제 로드에 실패했습니다.');
+      setAlertModal({ isOpen: true, message: '다음 문제 로드에 실패했습니다.', icon: '❌' });
     }
   }, [sessionId, question?.id, moveToNext]);
 
@@ -677,7 +679,7 @@ const QuizPage = () => {
   // 🔁 수동 음원 재생 (다시 듣기 버튼 - 1배속)
   const handlePlayAudio = useCallback(async () => {
     if (!audioRef.current || !audioUrl) {
-      alert('음원을 찾을 수 없습니다.');
+      setAlertModal({ isOpen: true, message: '음원을 찾을 수 없습니다.', icon: '🔇' });
       return;
     }
 
@@ -690,14 +692,14 @@ const QuizPage = () => {
       setAudioError(false);
     } catch (error) {
       setAudioError(true);
-      alert('오디오 재생에 실패했습니다.');
+      setAlertModal({ isOpen: true, message: '오디오 재생에 실패했습니다.', icon: '🔇' });
     }
   }, [audioUrl]);
 
   // 🔁 수동 음원 재생 (다시 듣기 버튼 - 0.8배속)
   const handlePlayAudioSlow = useCallback(async () => {
     if (!audioRef.current || !audioUrl) {
-      alert('음원을 찾을 수 없습니다.');
+      setAlertModal({ isOpen: true, message: '음원을 찾을 수 없습니다.', icon: '🔇' });
       return;
     }
 
@@ -710,7 +712,7 @@ const QuizPage = () => {
       setAudioError(false);
     } catch (error) {
       setAudioError(true);
-      alert('오디오 재생에 실패했습니다.');
+      setAlertModal({ isOpen: true, message: '오디오 재생에 실패했습니다.', icon: '🔇' });
     }
   }, [audioUrl]);
 
@@ -781,7 +783,7 @@ const QuizPage = () => {
       }
 
     } catch {
-      alert('즐겨찾기 변경에 실패했습니다.');
+      setAlertModal({ isOpen: true, message: '즐겨찾기 변경에 실패했습니다.', icon: '❌' });
     }
   };
 
@@ -809,7 +811,7 @@ const QuizPage = () => {
       }
 
     } catch {
-      alert('별표 변경에 실패했습니다.');
+      setAlertModal({ isOpen: true, message: '별표 변경에 실패했습니다.', icon: '❌' });
     }
   };
 
@@ -868,12 +870,12 @@ const QuizPage = () => {
         // 7. 새 세션으로 페이지 이동
         navigate(`/quiz?session=${newSessionId}`);
       } else {
-        alert('추가 학습할 문제가 없습니다.');
+        setAlertModal({ isOpen: true, message: '추가 학습할 문제가 없습니다.', icon: '📭' });
         handleGoToHome();
       }
 
     } catch {
-      alert('추가 학습 시작에 실패했습니다. 다시 시도해주세요.');
+      setAlertModal({ isOpen: true, message: '추가 학습 시작에 실패했습니다.\n다시 시도해주세요.', icon: '❌' });
     }
   };
 
@@ -1101,6 +1103,14 @@ const QuizPage = () => {
           setWrongAnswerFeedback(null);
           handleShowFullAnswer();
         }}
+      />
+
+      {/* Alert 모달 */}
+      <AlertModal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal({ isOpen: false, message: '', icon: '' })}
+        message={alertModal.message}
+        icon={alertModal.icon}
       />
 
     </div>

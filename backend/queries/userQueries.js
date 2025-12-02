@@ -89,7 +89,7 @@ class UserQueries {
           `INSERT INTO users (
              uid, name, email, profile_image, voice_gender,
              default_difficulty, daily_goal, level, created_at, last_login_at
-           ) VALUES ($1, $2, $3, $4, $5, $6, 1, 1, NOW(), NOW())
+           ) VALUES ($1, $2, $3, $4, $5, $6, 10, 1, NOW(), NOW())
            RETURNING *`,
           [
             userData.uid,
@@ -599,9 +599,9 @@ class UserQueries {
 
 
       return result || {
-        dailyGoal: 1,
-        weeklyAttendance: 1,
-        weeklyTotalQuiz: 1
+        dailyGoal: 10,
+        weeklyAttendance: 3,
+        weeklyTotalQuiz: 30
       };
 
     } catch (error) {
@@ -715,7 +715,7 @@ class UserQueries {
       );
 
 
-      return result ? result.quiz_mode : 'keyboard';
+      return result ? result.quiz_mode : 'voice';
 
     } catch (error) {
       console.error('❌ [Get Quiz Mode] Query error:', error);
