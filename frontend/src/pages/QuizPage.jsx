@@ -19,6 +19,7 @@ import { getIcon } from '../utils/iconMap';
 
 // API 서비스
 import { api } from '../services/apiService';
+import { ENV } from '../config/environment';
 
 // 세션 관리 유틸리티
 import {
@@ -652,6 +653,26 @@ const QuizPage = () => {
         continueButtonRef.current?.focus();
       }, 100);
     }
+  }, [showGoalAchievedModal]);
+
+  // 🎉 목표 달성 모달이 열릴 때 축하 음원 재생
+  useEffect(() => {
+    let celebrateAudio = null;
+    if (showGoalAchievedModal) {
+      const audioUrl = `${ENV.API_BASE_URL}/audio/effect/celebrate.mp3`;
+      console.log('[QuizPage] Goal achieved! Playing celebrate sound:', audioUrl);
+      celebrateAudio = new Audio(audioUrl);
+      celebrateAudio.volume = 0.7;
+      celebrateAudio.play()
+        .then(() => console.log('[QuizPage] Celebrate audio playing'))
+        .catch((err) => console.error('[QuizPage] Celebrate audio failed:', err));
+    }
+    return () => {
+      if (celebrateAudio) {
+        celebrateAudio.pause();
+        celebrateAudio = null;
+      }
+    };
   }, [showGoalAchievedModal]);
 
   // 목표 달성 모달에서 Enter 키로 추가 학습하기

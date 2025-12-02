@@ -1,4 +1,6 @@
+import { useEffect, useRef } from 'react';
 import Modal from '../ui/Modal';
+import { ENV } from '../../config/environment';
 
 export const GoalAchievedModal = ({
   isOpen,
@@ -6,6 +8,26 @@ export const GoalAchievedModal = ({
   onContinue,     // 추가 학습
   onGoHome        // 그만하기
 }) => {
+  const audioRef = useRef(null);
+
+  // 모달이 열릴 때 축하 음원 재생
+  useEffect(() => {
+    if (isOpen) {
+      const audioUrl = `${ENV.API_BASE_URL}/audio/effect/celebrate.mp3`;
+      const audio = new Audio(audioUrl);
+      audio.volume = 0.7;
+      audioRef.current = audio;
+
+      audio.play().catch(() => {});
+    }
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, [isOpen]);
+
   return (
     <Modal isOpen={isOpen} onClose={onGoHome} showCloseButton={false} size="sm">
       <div className="p-8 text-center">

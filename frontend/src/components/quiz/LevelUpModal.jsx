@@ -1,7 +1,32 @@
+import { useEffect, useRef } from 'react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
+import { ENV } from '../../config/environment';
 
 const LevelUpModal = ({ isOpen, onClose, levelUpInfo }) => {
+  const audioRef = useRef(null);
+
+  // 모달이 열릴 때 축하 음원 재생
+  useEffect(() => {
+    if (isOpen && levelUpInfo) {
+      const audioUrl = `${ENV.API_BASE_URL}/audio/effect/celebrate.mp3`;
+      const audio = new Audio(audioUrl);
+      audio.volume = 0.7;
+      audioRef.current = audio;
+
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {});
+      }
+    }
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, [isOpen, levelUpInfo]);
+
   if (!levelUpInfo) return null;
 
   const {
