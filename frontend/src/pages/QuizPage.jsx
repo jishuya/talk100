@@ -356,8 +356,15 @@ const QuizPage = () => {
   // 1️⃣ 실시간 채점: 모든 키워드 정답시 grading 모드로 전환 (자동 이동 X)
   useEffect(() => {
     if (quizMode === 'solving' && inputMode === 'keyboard' && question?.keywords) {
+      console.log('[AutoGrading] 키워드 확인:', {
+        questionKeywords: question.keywords,
+        keywordInputs,
+        userAnswer
+      });
       // 모든 키워드가 정답인지 확인
-      if (checkAllKeywords(keywordInputs)) {
+      const isAllCorrect = checkAllKeywords(keywordInputs);
+      console.log('[AutoGrading] checkAllKeywords 결과:', isAllCorrect);
+      if (isAllCorrect) {
         // 채점 결과 설정 (체크마크 표시를 위해)
         submitAnswer(keywordInputs, userAnswer);
         // 정답 효과음 재생
@@ -414,6 +421,8 @@ const QuizPage = () => {
   // 🎤 음성인식 결과를 userAnswer에 반영 및 키워드 자동 추출
   useEffect(() => {
     if (voiceTranscript && inputMode === 'voice' && selectedKeywords.length > 0) {
+      console.log('[VoiceGrading] 음성인식 결과:', voiceTranscript);
+      console.log('[VoiceGrading] selectedKeywords:', selectedKeywords);
       setUserAnswer(voiceTranscript);
 
       // 음성인식 결과에서 키워드 자동 추출
@@ -422,10 +431,15 @@ const QuizPage = () => {
 
       selectedKeywords.forEach(keyword => {
         const keywordLower = keyword.toLowerCase();
-        if (voiceLower.includes(keywordLower)) {
-          newKeywordInputs[keyword] = keyword;
+        const found = voiceLower.includes(keywordLower);
+        console.log(`[VoiceGrading] 키워드 "${keyword}" 검색: "${keywordLower}" in "${voiceLower}" = ${found}`);
+        if (found) {
+          // areAllKeywordsCorrect에서 소문자 키로 조회하므로 소문자로 저장
+          newKeywordInputs[keywordLower] = keyword;
         }
       });
+
+      console.log('[VoiceGrading] 추출된 키워드:', newKeywordInputs);
 
       // 키워드 입력값 업데이트 (함수형 업데이트로 이전 키워드 유지)
       setKeywordInputs(prevInputs => {
@@ -434,8 +448,11 @@ const QuizPage = () => {
           ...newKeywordInputs  // 새로 맞춘 키워드 추가
         };
 
+        console.log('[VoiceGrading] 병합된 키워드:', mergedKeywordInputs);
+
         // 음성인식 결과로 자동 채점 (병합된 키워드로 채점)
         const allCorrect = checkAllKeywords(mergedKeywordInputs);
+        console.log('[VoiceGrading] checkAllKeywords 결과:', allCorrect);
 
         submitAnswer(mergedKeywordInputs, voiceTranscript);
 
