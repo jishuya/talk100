@@ -162,10 +162,19 @@ export const QuizContent = ({
                 const voiceDisplayValue = getVoiceDisplayValue();
                 const isShowingHintOrAnswerVoice = !hasInput && (showHint || showAnswer);
 
+                // 빈칸 클릭 시 키보드 모드로 전환 + 해당 키워드 전달
+                const handleBlankClick = () => {
+                  if (!hasInput && onInputModeChange) {
+                    // 키워드를 함께 전달하여 해당 input에 포커스되도록 함
+                    onInputModeChange('keyboard', cleanWord.toLowerCase());
+                  }
+                };
+
                 return (
                   <span
                     key={index}
-                    className={`px-2 py-0.5 rounded font-semibold ${
+                    onClick={handleBlankClick}
+                    className={`px-2 py-0.5 rounded font-semibold cursor-pointer hover:opacity-80 transition-opacity ${
                       hasInput
                         ? isCorrect
                           ? 'bg-green-200 text-green-800'  // 정답이면 초록색

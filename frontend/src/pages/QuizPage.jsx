@@ -152,6 +152,7 @@ const QuizPage = () => {
 
   // 모달 버튼 ref
   const continueButtonRef = useRef(null);
+  const focusKeywordRef = useRef(null); // 빈칸 클릭 시 포커스할 키워드
 
   // 🎵 음원 재생 관련 상태 및 ref
   const audioRef = useRef(null);
@@ -267,13 +268,23 @@ const QuizPage = () => {
     setAudioError(true);
   }, []);
 
-  // 첫 문제 로드 시 첫 번째 키워드 input에 자동 포커스
+  // 첫 문제 로드 시 키워드 input에 자동 포커스
   useEffect(() => {
     if (question && inputMode === 'keyboard' && quizMode === 'solving') {
       setTimeout(() => {
-        const firstInput = document.querySelector('input[data-keyword]');
-        if (firstInput) {
-          firstInput.focus();
+        // 빈칸 클릭으로 전환된 경우 해당 키워드에 포커스
+        if (focusKeywordRef.current) {
+          const targetInput = document.querySelector(`input[data-keyword="${focusKeywordRef.current}"]`);
+          if (targetInput) {
+            targetInput.focus();
+          }
+          focusKeywordRef.current = null; // 사용 후 초기화
+        } else {
+          // 일반 모드 전환 시 첫 번째 input에 포커스
+          const firstInput = document.querySelector('input[data-keyword]');
+          if (firstInput) {
+            firstInput.focus();
+          }
         }
       }, 100);
     }
@@ -363,7 +374,9 @@ const QuizPage = () => {
   // ================================================================
 
   // 입력 모드 전환 (음성 ↔ 키보드)
-  const handleInputModeChange = (mode) => {
+  // focusKeyword: 빈칸 클릭 시 포커스할 키워드 (선택적)
+  const handleInputModeChange = (mode, focusKeyword = null) => {
+    focusKeywordRef.current = focusKeyword; // 포커스할 키워드 저장
     setInputMode(mode);
     // 키워드 입력값은 유지 (음성모드에서 입력한 값이 키보드모드에서도 보이도록)
     // setKeywordInputs는 초기화하지 않음
