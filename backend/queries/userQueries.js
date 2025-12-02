@@ -765,6 +765,41 @@ class UserQueries {
       throw new Error('Failed to update voice gender');
     }
   }
+
+  // 파워암기모드 설정 조회
+  async getPowerMemoryMode(uid) {
+    try {
+      const result = await db.oneOrNone(
+        `SELECT power_memory_mode FROM users WHERE uid = $1`,
+        [uid]
+      );
+
+      // 기본값
+      const defaultSettings = {
+        koreanVoice: 'female',
+        answerTime: 3,
+        englishVoices: ['male']
+      };
+
+      return result?.power_memory_mode || defaultSettings;
+    } catch (error) {
+      console.error('❌ [Get Power Memory Mode] Query error:', error);
+      throw new Error('Failed to fetch power memory mode');
+    }
+  }
+
+  // 파워암기모드 설정 업데이트
+  async updatePowerMemoryMode(uid, settings) {
+    try {
+      await db.none(
+        `UPDATE users SET power_memory_mode = $1 WHERE uid = $2`,
+        [settings, uid]
+      );
+    } catch (error) {
+      console.error('❌ [Update Power Memory Mode] Query error:', error);
+      throw new Error('Failed to update power memory mode');
+    }
+  }
 }
 
 module.exports = new UserQueries();

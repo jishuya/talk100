@@ -37,7 +37,8 @@ const MobileHeader = () => {
       3: 'Cases in Point',
       4: '오늘의 퀴즈',
       5: '틀린 문제',
-      6: '즐겨찾기'
+      6: '즐겨찾기',
+      7: '랜덤복습'
     };
     return categoryMap[categoryId] || '퀴즈';
   };
@@ -80,6 +81,13 @@ const MobileHeader = () => {
       case '/settings':
         return {
           title: '설정',
+          showBackButton: true,
+          showLogo: false,
+          rightContent: '',
+        };
+      case '/power-memory':
+        return {
+          title: '파워암기모드',
           showBackButton: true,
           showLogo: false,
           rightContent: '',

@@ -62,7 +62,7 @@ const Modal = ({
       {/* Modal Content */}
       <div
         className={cn(
-          'relative bg-white rounded-2xl shadow-xl animate-slide-up w-full',
+          'relative bg-white rounded-2xl shadow-xl animate-slide-up w-full max-h-[70vh] flex flex-col',
           sizeClasses[size],
           className
         )}
@@ -84,7 +84,7 @@ const Modal = ({
 
 // Modal Header 컴포넌트
 export const ModalHeader = ({ children, className = '', ...props }) => (
-  <div className={cn('px-6 py-4 border-b border-gray-border', className)} {...props}>
+  <div className={cn('px-6 py-4 border-b border-gray-border flex-shrink-0', className)} {...props}>
     <h2 className="text-lg font-bold text-text-primary">
       {children}
     </h2>
@@ -93,14 +93,14 @@ export const ModalHeader = ({ children, className = '', ...props }) => (
 
 // Modal Body 컴포넌트
 export const ModalBody = ({ children, className = '', ...props }) => (
-  <div className={cn('px-6 py-4', className)} {...props}>
+  <div className={cn('px-6 py-4 overflow-y-auto flex-1', className)} {...props}>
     {children}
   </div>
 );
 
 // Modal Footer 컴포넌트
 export const ModalFooter = ({ children, className = '', ...props }) => (
-  <div className={cn('px-6 py-4 border-t border-gray-border flex justify-end gap-3', className)} {...props}>
+  <div className={cn('px-6 py-4 border-t border-gray-border flex justify-end gap-3 flex-shrink-0', className)} {...props}>
     {children}
   </div>
 );

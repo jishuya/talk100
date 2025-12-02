@@ -52,4 +52,10 @@ router.get('/quiz-mode', verifyToken, userController.getQuizMode);
 // PUT /api/users/quiz-mode - 퀴즈 모드 업데이트
 router.put('/quiz-mode', verifyToken, userController.updateQuizMode);
 
+// GET /api/users/power-memory-mode - 파워암기모드 설정 조회
+router.get('/power-memory-mode', verifyToken, userController.getPowerMemoryMode);
+
+// PUT /api/users/power-memory-mode - 파워암기모드 설정 업데이트
+router.put('/power-memory-mode', verifyToken, userController.updatePowerMemoryMode);
+
 module.exports = router;

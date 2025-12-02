@@ -639,6 +639,95 @@ class UserController {
       });
     }
   }
+
+  // GET /api/users/power-memory-mode
+  async getPowerMemoryMode(req, res) {
+    try {
+      const uid = req.user?.uid;
+
+      if (!uid) {
+        return res.status(401).json({
+          success: false,
+          message: 'User not authenticated'
+        });
+      }
+
+      const settings = await userQueries.getPowerMemoryMode(uid);
+
+      res.json({
+        success: true,
+        data: settings
+      });
+
+    } catch (error) {
+      console.error('getPowerMemoryMode controller error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch power memory mode settings'
+      });
+    }
+  }
+
+  // PUT /api/users/power-memory-mode
+  async updatePowerMemoryMode(req, res) {
+    try {
+      const uid = req.user?.uid;
+      const { koreanVoice, answerTime, englishVoices } = req.body;
+
+      if (!uid) {
+        return res.status(401).json({
+          success: false,
+          message: 'User not authenticated'
+        });
+      }
+
+      // 입력값 검증
+      if (koreanVoice && !['male', 'female'].includes(koreanVoice)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid koreanVoice. Must be "male" or "female"'
+        });
+      }
+
+      if (answerTime !== undefined && (answerTime < 2 || answerTime > 10)) {
+        return res.status(400).json({
+          success: false,
+          message: 'answerTime must be between 2 and 10'
+        });
+      }
+
+      if (englishVoices) {
+        if (!Array.isArray(englishVoices) || englishVoices.length === 0 || englishVoices.length > 3) {
+          return res.status(400).json({
+            success: false,
+            message: 'englishVoices must be an array with 1-3 items'
+          });
+        }
+        if (!englishVoices.every(v => ['male', 'female'].includes(v))) {
+          return res.status(400).json({
+            success: false,
+            message: 'Each englishVoice must be "male" or "female"'
+          });
+        }
+      }
+
+      const settings = { koreanVoice, answerTime, englishVoices };
+      await userQueries.updatePowerMemoryMode(uid, settings);
+
+      res.json({
+        success: true,
+        message: '파워암기모드 설정이 업데이트되었습니다.',
+        data: settings
+      });
+
+    } catch (error) {
+      console.error('updatePowerMemoryMode controller error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update power memory mode settings'
+      });
+    }
+  }
 }
 
 module.exports = new UserController();

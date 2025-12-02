@@ -10,6 +10,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 // 페이지 컴포넌트들
 import HomePage from './pages/HomePage';
 import QuizPage from './pages/QuizPage';
+import PowerMemoryPage from './pages/PowerMemoryPage';
 import StatusPage from './pages/StatusPage';
 import MyPage from './pages/MyPage';
 import SettingsPage from './pages/SettingsPage';
@@ -94,6 +95,11 @@ function App() {
                     <Route path="/settings" element={
                       <ProtectedRoute>
                         <SettingsPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/power-memory" element={
+                      <ProtectedRoute>
+                        <PowerMemoryPage />
                       </ProtectedRoute>
                     } />
                     <Route path="/samples/modals" element={<GoalModalSamples />} />

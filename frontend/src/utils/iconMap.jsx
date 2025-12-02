@@ -95,6 +95,16 @@ const ICON_MAP = {
   RandomReview: 'lucide:shuffle',
   PowerMemory: 'lucide:target',
 
+  // === Media Player Controls ===
+  'lucide:settings': 'tabler:settings',
+  'lucide:play': 'tabler:player-play-filled',
+  'lucide:pause': 'tabler:player-pause-filled',
+  'lucide:square': 'tabler:player-stop-filled',
+  'lucide:skip-forward': 'tabler:player-skip-forward-filled',
+  'lucide:skip-back': 'tabler:player-skip-back-filled',
+  'lucide:trash-2': 'tabler:trash',
+  'lucide:rotate-ccw': 'tabler:rotate',
+
   // === Legacy & Misc ===
   IoLibraryOutline: 'noto:books',
   IoSchoolOutline: 'noto:school',

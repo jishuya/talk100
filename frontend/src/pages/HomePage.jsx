@@ -271,9 +271,9 @@ const HomePage = () => {
 
   // 복습 퀴즈 클릭 핸들러
   const handleReviewQuizClick = async (quiz) => {
-    // 랜덤복습만 구현, 파워암기모드는 준비 중
+    // 파워암기모드는 별도 페이지로 이동
     if (quiz.id === 'power') {
-      setAlertModal({ isOpen: true, message: '파워암기모드는 준비 중입니다.', icon: '🚧' });
+      navigate('/power-memory');
       return;
     }
 

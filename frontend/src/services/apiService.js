@@ -458,6 +458,23 @@ class ApiService {
   // ==============================================
   // 🔍 공통/기타 API (여러 페이지에서 사용)
   // ==============================================
+
+  // ==============================================
+  // 🎯 PowerMemoryPage - 파워암기모드 관련 API
+  // ==============================================
+
+  // 🎯 PowerMemoryPage.jsx에서 사용 - 파워암기모드 설정 조회
+  getPowerMemoryMode() {
+    return this.request('/api/users/power-memory-mode', null);
+  }
+
+  // 🎯 PowerMemoryPage.jsx에서 사용 - 파워암기모드 설정 업데이트
+  updatePowerMemoryMode(settings) {
+    return this.request('/api/users/power-memory-mode', null, {
+      method: 'PUT',
+      body: settings
+    });
+  }
 }
 
 // 싱글톤 인스턴스 생성 및 내보내기
