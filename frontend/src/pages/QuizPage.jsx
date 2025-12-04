@@ -635,6 +635,11 @@ const QuizPage = () => {
 
           // 🏆 새로운 뱃지가 있으면 모달 표시
           if (result?.newBadges && result.newBadges.length > 0) {
+            // 사용자 상호작용 컨텍스트 내에서 축하 음원 재생
+            const audio = new Audio(`${ENV.API_BASE_URL}/audio/effect/celebrate.mp3`);
+            audio.volume = 0.7;
+            audio.play().catch(() => {});
+
             setNewBadges(result.newBadges);
             return; // 뱃지 모달이 닫힐 때까지 대기
           }

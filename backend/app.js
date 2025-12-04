@@ -102,6 +102,19 @@ app.use('/audio', express.static(path.join(__dirname, 'public/audio'), {
   }
 }));
 
+// 루트 경로 응답
+app.get('/', (req, res) => {
+  res.json({
+    name: 'talk100 API',
+    version: '1.0.0',
+    status: 'running',
+    endpoints: {
+      health: '/health',
+      api: '/api/*'
+    }
+  });
+});
+
 // 헬스 체크 엔드포인트
 app.get('/health', (req, res) => {
   res.json({

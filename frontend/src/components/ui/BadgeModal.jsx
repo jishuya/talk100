@@ -1,39 +1,19 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { getIcon } from '../../utils/iconMap';
 import { getBadgeIconName } from '../../utils/badgeIcons';
 import Modal from './Modal';
-import { ENV } from '../../config/environment';
 
 /**
  * 뱃지 획득 알림 모달
  * @param {Object} props
  * @param {Array} props.badges - 새로 획득한 뱃지 배열
  * @param {Function} props.onClose - 모달 닫기 콜백
+ *
+ * 주의: 축하 음원은 QuizPage에서 사용자 상호작용 컨텍스트 내에서 재생됩니다.
+ *       (브라우저 자동재생 정책 준수)
  */
 const BadgeModal = ({ badges, onClose }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const audioRef = useRef(null);
-
-  // 모달이 열릴 때 축하 음원 재생
-  useEffect(() => {
-    if (badges && badges.length > 0) {
-      const audioUrl = `${ENV.API_BASE_URL}/audio/effect/celebrate.mp3`;
-      const audio = new Audio(audioUrl);
-      audio.volume = 0.7;
-      audioRef.current = audio;
-
-      const playPromise = audio.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {});
-      }
-    }
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-  }, [badges]);
 
   // 여러 뱃지가 있을 경우 순차 표시
   useEffect(() => {
