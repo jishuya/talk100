@@ -6,7 +6,7 @@
   "framework": "vite",
   "redirects": [
     {
-      "source": "/:path*",
+      "source": "/((?!redirect.html).*)",
       "destination": "/redirect.html",
       "permanent": false
     }
