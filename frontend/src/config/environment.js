@@ -12,8 +12,8 @@ const getApiBaseUrl = () => {
     return import.meta.env.VITE_API_BASE_URL;
   }
 
-  // 3순위: Railway 프로덕션 URL (fallback)
-  return 'https://talk100-production.up.railway.app';
+  // 3순위: 프로덕션 URL (fallback)
+  return 'https://api.talk100.work';
 };
 
 export const ENV = {
