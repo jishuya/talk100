@@ -159,6 +159,6 @@ Tailwind에서 `bg-primary`, `text-primary-dark` 등으로 사용.
 
 ## 배포
 
-- **Backend**: Railway (`railway.json`)
-- **Frontend**: Vercel (`vite.json`)
+- **Frontend**: Vercel (https://talk100.work)
+- **Backend**: Cloudflare Tunnel을 통해 로컬 PC에서 서빙
 - **가이드**: `DEPLOYMENT.md` 참고
