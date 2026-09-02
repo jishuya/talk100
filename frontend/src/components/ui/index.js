@@ -16,6 +16,7 @@ export { default as ProgressBar, CircularProgress } from './ProgressBar';
 // Modal 컴포넌트들
 export { default as Modal, ModalHeader, ModalBody, ModalFooter, ConfirmModal } from './Modal';
 export { default as AlertModal } from './AlertModal';
+export { default as Logo } from './Logo';
 
 // Other UI 컴포넌트들
 export { default as ToggleSwitch } from './ToggleSwitch';
