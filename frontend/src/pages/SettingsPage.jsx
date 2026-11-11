@@ -1,3 +1,4 @@
+import SoundSettings from '../components/settings/SoundSettings';
 import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -397,6 +398,8 @@ const SettingsPage = () => {
           onItemChange={(key, value) => handleSettingChange('display', key, value)}
           onItemClick={handleItemClick}
         /> */}
+
+        <SoundSettings />
 
         {/* 데이터 관리 */}
         <SettingsSection

@@ -1,3 +1,4 @@
+import { createAnswerStreak } from '../utils/answerStreak';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -19,7 +20,7 @@ import { getIcon } from '../utils/iconMap';
 
 // API 서비스
 import { api } from '../services/apiService';
-import { ENV } from '../config/environment';
+import { stopEffectSound } from '../utils/soundEffects';
 
 // 세션 관리 유틸리티
 import {
@@ -137,6 +138,8 @@ const QuizPage = () => {
   const [userAnswer, setUserAnswer] = useState('');
   const [inputMode, setInputMode] = useState('keyboard'); // 초기값은 기본값, useEffect에서 세션/DB 값으로 업데이트
   const [quizMode, setQuizMode] = useState('solving'); // 'solving' | 'grading'
+  const answerStreak = useMemo(() => createAnswerStreak(), [sessionId]);
+  const [streakMilestone, setStreakMilestone] = useState(null);
   const [showHint, setShowHint] = useState(false);
   const [showAnswer, setShowAnswer] = useState(false);
   const [keywordInputs, setKeywordInputs] = useState({});
@@ -310,7 +313,24 @@ const QuizPage = () => {
       return newInputs;
     });
 
-    // 1️⃣ 실시간 채점: 개별 키워드 검증
+    // Wait for microphone shutdown so the reward is audible and never recorded.
+  useEffect(() => {
+    if (quizMode !== 'grading' || isVoiceListening || !question?.id) return;
+    const reward = answerStreak.correct(question.id);
+    if (!reward) return;
+    playEffectSound(reward.sound);
+    if ([3, 5, 10].includes(reward.count)) {
+      setStreakMilestone({ count: reward.count, sessionId });
+    }
+  }, [quizMode, isVoiceListening, question?.id, answerStreak, sessionId]);
+
+  useEffect(() => {
+    if (!streakMilestone) return;
+    const timer = setTimeout(() => setStreakMilestone(null), 1800);
+    return () => clearTimeout(timer);
+  }, [streakMilestone]);
+
+  // 1️⃣ 실시간 채점: 개별 키워드 검증
     if (checkKeyword(value, keyword)) {
       // 정답이면 다음 키워드로 포커스 이동
       setTimeout(() => {
@@ -368,7 +388,7 @@ const QuizPage = () => {
         // 채점 결과 설정 (체크마크 표시를 위해)
         submitAnswer(keywordInputs, userAnswer);
         // 정답 효과음 재생
-        playEffectSound('success');
+        // Success feedback is handled once on entering grading mode.
         // grading 모드로 전환 (자동으로 다음 문제로 이동하지 않음)
         setQuizMode('grading');
       }
@@ -406,17 +426,18 @@ const QuizPage = () => {
 
     if (result.isAllCorrect) {
       // 정답: grading 모드로 전환 (자동 이동 X)
-      playEffectSound('success');
+      // Success feedback is handled once on entering grading mode.
       setQuizMode('grading');
     } else {
       // 오답: 피드백 모달 표시
+      answerStreak.fail(question?.id);
       playEffectSound('error');
       setWrongAnswerFeedback({
         correctCount: result.correctCount,
         totalCount: result.totalCount
       });
     }
-  }, [keywordInputs, userAnswer, submitAnswer]);
+  }, [keywordInputs, userAnswer, submitAnswer, answerStreak, question?.id]);
 
   // 🎤 음성인식 결과를 userAnswer에 반영 및 키워드 자동 추출
   useEffect(() => {
@@ -463,7 +484,7 @@ const QuizPage = () => {
             stopVoiceListening();
           }
           // 정답 효과음 재생
-          playEffectSound('success');
+          // Success feedback is handled once on entering grading mode.
           setQuizMode('grading');
         }
 
@@ -576,6 +597,7 @@ const QuizPage = () => {
             }
           }
 
+          if (isCategoryQuiz) playEffectSound('dayComplete');
           deleteSession(sessionId);
 
           // 카테고리 퀴즈 완료 시 완료 정보와 함께 홈으로 이동
@@ -629,6 +651,7 @@ const QuizPage = () => {
 
           // 🎊 레벨업이 있으면 모달 표시 (최우선)
           if (result?.levelUp) {
+            playEffectSound('celebrate');
             setLevelUpInfo(result.levelUp);
             return; // 레벨업 모달이 닫힐 때까지 대기
           }
@@ -636,9 +659,7 @@ const QuizPage = () => {
           // 🏆 새로운 뱃지가 있으면 모달 표시
           if (result?.newBadges && result.newBadges.length > 0) {
             // 사용자 상호작용 컨텍스트 내에서 축하 음원 재생
-            const audio = new Audio(`${ENV.API_BASE_URL}/audio/effect/celebrate.mp3`);
-            audio.volume = 0.7;
-            audio.play().catch(() => {});
+            playEffectSound('celebrate');
 
             setNewBadges(result.newBadges);
             return; // 뱃지 모달이 닫힐 때까지 대기
@@ -698,21 +719,9 @@ const QuizPage = () => {
 
   // 🎉 목표 달성 모달이 열릴 때 축하 음원 재생
   useEffect(() => {
-    let celebrateAudio = null;
-    if (showGoalAchievedModal) {
-      const audioUrl = `${ENV.API_BASE_URL}/audio/effect/celebrate.mp3`;
-      console.log('[QuizPage] Goal achieved! Playing celebrate sound:', audioUrl);
-      celebrateAudio = new Audio(audioUrl);
-      celebrateAudio.volume = 0.7;
-      celebrateAudio.play()
-        .then(() => console.log('[QuizPage] Celebrate audio playing'))
-        .catch((err) => console.error('[QuizPage] Celebrate audio failed:', err));
-    }
+    if (showGoalAchievedModal) playEffectSound('celebrate');
     return () => {
-      if (celebrateAudio) {
-        celebrateAudio.pause();
-        celebrateAudio = null;
-      }
+      if (showGoalAchievedModal) stopEffectSound();
     };
   }, [showGoalAchievedModal]);
 
@@ -792,6 +801,7 @@ const QuizPage = () => {
     setShowAnswer(willShowAnswer);
 
     if (willShowAnswer) {
+      answerStreak.fail(question?.id);
       setShowHint(false);
 
       // 정답을 보면 자동으로 틀린문제(wrong_answer)에 추가 (별표가 안 되어 있을 때만)
@@ -982,6 +992,12 @@ const QuizPage = () => {
     <div className="quiz-container min-h-screen bg-background flex flex-col">
       {/* 퀴즈 온보딩 튜토리얼 (첫 사용자용) */}
       <QuizOnboarding />
+
+      {streakMilestone?.sessionId === sessionId && (
+        <div role="status" className="fixed top-24 left-1/2 -translate-x-1/2 z-[110] rounded-full bg-primary px-5 py-3 text-white font-bold shadow-lg motion-safe:animate-bounce pointer-events-none">
+          ✨ {streakMilestone.count}문제 연속 정답!
+        </div>
+      )}
 
       {/* 🎵 숨겨진 Audio 엘리먼트 (자동재생용) */}
       {audioUrl && (

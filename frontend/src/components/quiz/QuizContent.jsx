@@ -63,6 +63,7 @@ export const QuizContent = ({
                 size: 'md',
                 className: 'text-red-400'
               })}
+              sound="favorite"
               onClick={onFavoriteToggle}
               variant="ghost"
               className="!px-1 !py-1 md:!px-2"
@@ -72,6 +73,7 @@ export const QuizContent = ({
                 size: 'md',
                 className: 'text-yellow-400'
               })}
+              sound="select"
               onClick={onStarToggle}
               variant="ghost"
               className="!px-1 !py-1 md:!px-2"

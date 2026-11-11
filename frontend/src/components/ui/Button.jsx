@@ -1,4 +1,5 @@
 import React from 'react';
+import { playEffectSound } from '../../utils/soundEffects';
 import { cn } from '../../utils/cn';
 
 // Button variants 정의
@@ -33,6 +34,8 @@ const Button = React.forwardRef(({
   loading = false,
   icon,
   iconPosition = 'left',
+  sound = 'click',
+  onClick,
   ...props
 }, ref) => {
   const baseClasses = 'inline-flex items-center justify-center font-semibold transition-all duration-300 touchable focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed';
@@ -90,6 +93,10 @@ const Button = React.forwardRef(({
       className={buttonClasses}
       disabled={disabled || loading}
       {...props}
+      onClick={(event) => {
+        if (sound) playEffectSound(sound);
+        onClick?.(event);
+      }}
     >
       {renderContent()}
     </button>

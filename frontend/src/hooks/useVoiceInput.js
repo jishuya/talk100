@@ -1,3 +1,4 @@
+import { setEffectRecording } from '../utils/soundEffects';
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 /**
@@ -102,6 +103,7 @@ export const useVoiceInput = () => {
           break;
         case 'aborted':
           // aborted는 사용자가 의도적으로 중단한 경우이므로 에러로 처리하지 않음
+          setEffectRecording(false);
           setIsListening(false);
           return;
         default:
@@ -109,11 +111,13 @@ export const useVoiceInput = () => {
       }
 
       setError(errorMessage);
+      setEffectRecording(false);
       setIsListening(false);
     };
 
     // 음성인식 종료 처리
     recognitionInstance.onend = () => {
+      setEffectRecording(false);
       setIsListening(false);
 
       // 🎯 중요: 자동 중지된 경우, 마지막 transcript를 다시 설정하여 useEffect 트리거
@@ -132,6 +136,7 @@ export const useVoiceInput = () => {
 
     // Cleanup
     return () => {
+      setEffectRecording(false);
       if (recognitionRef.current) {
         recognitionRef.current.abort();
       }
@@ -152,6 +157,7 @@ export const useVoiceInput = () => {
       return;
     }
 
+    setEffectRecording(true);
     try {
       // 먼저 마이크 권한을 명시적으로 요청
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -170,6 +176,7 @@ export const useVoiceInput = () => {
       setError(null);
       recognitionRef.current.start();
     } catch (err) {
+      setEffectRecording(false);
       if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
         setError('마이크 권한이 필요합니다. 브라우저 설정에서 마이크 권한을 허용해주세요.');
       } else if (err.name === 'NotFoundError') {

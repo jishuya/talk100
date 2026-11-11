@@ -1,3 +1,4 @@
+import { playEffectSound } from '../../utils/soundEffects';
 import { useState } from 'react';
 import Button from '../ui/Button';
 import { getIcon } from '../../utils/iconMap';
@@ -24,6 +25,7 @@ export const QuizControls = ({
 
   // 버튼 클릭 핸들러 (애니메이션 효과)
   const handleButtonClick = (buttonName, callback) => {
+    if (buttonName === 'skipQuestion') playEffectSound('click');
     setClickedButton(buttonName);
     setTimeout(() => setClickedButton(null), 300);
     callback?.();
@@ -37,7 +39,7 @@ export const QuizControls = ({
         {quizMode === 'solving' && (
           <div className="flex gap-2 mb-3" data-onboarding="hint-answer">
             <button
-              onClick={onShowFirstLetters}
+              onClick={() => { playEffectSound('select'); onShowFirstLetters?.(); }}
               className={`flex-1 px-3 py-2 md:p-3 border border-gray-border rounded-brand-sm transition-all duration-200 active:scale-[0.97] flex flex-row md:flex-col items-center justify-center gap-1.5 md:gap-1 ${showHint ? 'bg-primary-light border-primary' : 'bg-white active:bg-primary-light active:border-primary'}`}
             >
               {getIcon('AiOutlineQuestionCircle', {
@@ -47,7 +49,7 @@ export const QuizControls = ({
               <span className={`${LABEL_STYLE} font-semibold ${showHint ? 'text-white' : ''}`}>힌트보기</span>
             </button>
             <button
-              onClick={onShowFullAnswer}
+              onClick={() => { playEffectSound('select'); onShowFullAnswer?.(); }}
               className={`flex-1 px-3 py-2 md:p-3 border border-gray-border rounded-brand-sm transition-all duration-200 active:scale-[0.97] flex flex-row md:flex-col items-center justify-center gap-1.5 md:gap-1 ${showAnswer ? 'bg-primary-light border-primary' : 'bg-white active:bg-primary-light active:border-primary'}`}
             >
               {getIcon('AiOutlineCheckCircle', {
@@ -109,6 +111,7 @@ export const QuizControls = ({
         {/* 메인 액션 버튼 (문제풀이 모드에서만) */}
         {quizMode === 'solving' && (
           <Button
+            sound={false}
             onClick={onMainAction}
             size="lg"
             shape="pill"

@@ -46,21 +46,5 @@ export const checkAudioAvailable = async (audioFilename) => {
   }
 };
 
-/**
- * 효과음 재생
- * @param {'success' | 'error'} type - 효과음 타입
- */
-export const playEffectSound = (type) => {
-  const soundMap = {
-    success: 'effect/successed.mp3',
-    error: 'effect/error.mp3'
-  };
-
-  const filename = soundMap[type];
-  if (!filename) return;
-
-  const audioUrl = `${ENV.API_BASE_URL}/audio/${filename}`;
-  const audio = new Audio(audioUrl);
-  audio.volume = 0.5; // 볼륨 50%
-  audio.play().catch(() => {});
-};
+// Keep the existing import path for quiz feedback.
+export { playEffectSound } from './soundEffects';

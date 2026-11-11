@@ -1,3 +1,4 @@
+import SoundSettings from '../components/settings/SoundSettings';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
@@ -396,6 +397,8 @@ const MyPage = () => {
           onToggleChange={handleAppSettingToggle}
           onRadioChange={handleAppSettingRadio}
         />
+
+        <SoundSettings />
 
         {/* 로그아웃 버튼 */}
         <Button

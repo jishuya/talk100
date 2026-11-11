@@ -1,3 +1,4 @@
+import { playEffectSound } from '../../utils/soundEffects';
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getIcon } from '../../utils/iconMap';
@@ -77,6 +78,7 @@ const BottomNavigation = () => {
   };
 
   const handleNavClick = (path) => {
+    playEffectSound('select');
     // '학습' 버튼을 클릭한 경우 오늘의 퀴즈 시작
     if (path === '/quiz') {
       startTodayQuiz();

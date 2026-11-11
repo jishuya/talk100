@@ -1,3 +1,4 @@
+import { preloadEffectSounds } from './utils/soundEffects';
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -51,6 +52,7 @@ const queryClient = new QueryClient({
              └── 실제 페이지들
 */
 function App() {
+  useEffect(() => { preloadEffectSounds(); }, []);
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider> 

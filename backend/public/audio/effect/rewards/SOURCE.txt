@@ -1,0 +1,9 @@
+Original synthesized reward chimes for Talk100, created 2026-11-11.
+Generated with scripts/generate-reward-sounds.py (Python standard library).
+No downloaded samples or third-party audio recordings used.
+Regenerate from repository root: python3 scripts/generate-reward-sounds.py
+
+streak-3.wav: 3 consecutive correct answers
+streak-5.wav: 5 consecutive correct answers
+streak-10.wav: 10 consecutive correct answers
+day-complete.wav: category Day completed

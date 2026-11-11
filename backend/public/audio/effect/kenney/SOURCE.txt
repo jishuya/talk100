@@ -1,0 +1,17 @@
+Kenney Interface Sounds 1.0
+Downloaded: 2026-11-11 (Asia/Seoul)
+Creator: Kenney
+Official source: https://kenney.nl/assets/interface-sounds
+Download mirror: https://github.com/Calinou/kenney-interface-sounds
+Mirror commit: 4596a49eaf5a533948d49a47467f606bcdea70ff
+License: CC0 1.0; personal, educational and commercial use permitted; attribution optional.
+License URL: https://creativecommons.org/publicdomain/zero/1.0/
+Original license included in LICENSE.txt. Files are unmodified.
+
+Candidates (not yet connected to buttons):
+click_001.wav / click_003.wav: button click alternatives
+select_001.wav: selection candidate
+pluck_001.wav: favorite / reward candidate
+
+Existing successed.mp3, error.mp3 and celebrate.mp3 are not part of this download.
+These license terms apply only to the files in this directory.
