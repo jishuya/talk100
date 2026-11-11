@@ -70,7 +70,7 @@ export const QuizContent = ({
     <main className="flex-1 overflow-y-auto p-3 pb-32 md:p-4 -webkit-overflow-scrolling-touch">
       {/* 퀴즈 박스 */}
       <div className="bg-white rounded-brand shadow-soft p-3 mb-3 md:p-4 md:mb-4">
-        {/* Day, 카테고리, 문제 번호 + 즐겨찾기/별표 버튼 */}
+        {/* Day, 카테고리, 문제 번호 + 즐겨찾기/틀린 문제 버튼 */}
         <div className="flex items-center justify-between gap-2 mb-3 md:mb-4">
           <div className="flex flex-wrap gap-1.5 md:gap-2">
             <span className="px-2 py-1 md:px-3 md:py-1.5 bg-primary text-white rounded-full text-xs md:text-sm font-bold shadow-soft">
@@ -85,23 +85,27 @@ export const QuizContent = ({
               {getCategoryName(question.categoryId)}
             </span>
           </div>
-          {/* 오른쪽: 즐겨찾기/별표 버튼 */}
+          {/* 오른쪽: 즐겨찾기/틀린 문제 버튼 */}
           <div className="flex shrink-0 gap-1" data-onboarding="favorite-star">
             <IconButton
-              icon={getIcon(isFavorite ? 'fluent:heart-24-filled' : 'fluent:heart-24-regular', {
+              icon={getIcon(isFavorite ? 'fluent:bookmark-24-filled' : 'fluent:bookmark-24-regular', {
                 size: 'md',
-                className: 'text-red-400'
+                className: `transition-colors ${isFavorite ? 'text-orange-500' : 'text-text-secondary'}`
               })}
+              aria-label={isFavorite ? '즐겨찾기 해제' : '즐겨찾기 추가'}
+              aria-pressed={isFavorite}
               sound="favorite"
               onClick={onFavoriteToggle}
               variant="ghost"
               className="!px-1 !py-1 md:!px-2"
             />
             <IconButton
-              icon={getIcon(isStarred ? 'fluent:star-24-filled' : 'fluent:star-24-regular', {
+              icon={getIcon(isStarred ? 'fluent:notebook-24-filled' : 'fluent:notebook-24-regular', {
                 size: 'md',
-                className: 'text-yellow-400'
+                className: `transition-colors ${isStarred ? 'text-violet-500' : 'text-text-secondary'}`
               })}
+              aria-label={isStarred ? '틀린 문제에서 해제' : '틀린 문제에 추가'}
+              aria-pressed={isStarred}
               sound="select"
               onClick={onStarToggle}
               variant="ghost"

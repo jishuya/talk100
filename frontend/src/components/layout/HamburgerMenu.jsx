@@ -25,14 +25,14 @@ const HamburgerMenu = ({ isOpen, onClose }) => {
     {
       id: 'wrong-answers',
       title: '틀린 문제',
-      icon: 'fluent:star-24-regular',
+      icon: 'fluent:notebook-24-regular',
       path: '/wrong-answers',
       description: '복습이 필요한 문제들'
     },
     {
       id: 'favorites',
       title: '즐겨찾기',
-      icon: 'IoHeartOutline',
+      icon: 'fluent:bookmark-24-regular',
       path: '/favorites',
       description: '중요 표시한 문제들'
     },

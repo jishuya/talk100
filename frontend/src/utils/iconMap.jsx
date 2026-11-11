@@ -50,6 +50,10 @@ const ICON_MAP = {
   'noto:sparkles': 'noto:sparkles',
 
   // === Interactive Elements ===
+  'fluent:bookmark-24-filled': 'fluent:bookmark-24-filled',
+  'fluent:bookmark-24-regular': 'fluent:bookmark-24-regular',
+  'fluent:notebook-24-filled': 'fluent:notebook-24-filled',
+  'fluent:notebook-24-regular': 'fluent:notebook-24-regular',
   'fluent:star-24-filled': 'fluent:star-24-filled',
   'fluent:star-24-regular': 'fluent:star-24-regular',
   'fluent:heart-24-filled': 'fluent:heart-24-filled',

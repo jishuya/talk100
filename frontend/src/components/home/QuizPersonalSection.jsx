@@ -5,7 +5,7 @@ const QuizPersonalSection = ({ personalQuizzes, onPersonalQuizClick }) => {
     {
       id: 'wrong-answers',
       category_id: 5,
-      icon: 'fluent:star-24-filled',
+      icon: 'fluent:notebook-24-filled',
       title: '틀린문제',
       path: '/quiz/wrong-answers',
       count: 5
@@ -13,7 +13,7 @@ const QuizPersonalSection = ({ personalQuizzes, onPersonalQuizClick }) => {
     {
       id: 'favorites',
       category_id: 6,
-      icon: 'fluent:heart-24-filled',
+      icon: 'fluent:bookmark-24-filled',
       title: '즐겨찾기',
       path: '/quiz/favorites',
       count: 2
@@ -51,8 +51,8 @@ const QuizPersonalSection = ({ personalQuizzes, onPersonalQuizClick }) => {
             <div className="w-9 h-9 bg-accent-pale rounded-full flex items-center justify-center mr-3 flex-shrink-0">
               {typeof quiz.icon === 'string' ? getIcon(quiz.icon, {
                 size: 'lg',
-                className: quiz.id === 'wrong-answers' ? 'text-yellow-400' :
-                          quiz.id === 'favorites' ? 'text-red-400' : ''
+                className: quiz.id === 'wrong-answers' ? 'text-violet-500' :
+                          quiz.id === 'favorites' ? 'text-orange-500' : ''
               }) : quiz.icon}
             </div>
             <div className="flex-1">
@@ -76,8 +76,8 @@ const QuizPersonalSection = ({ personalQuizzes, onPersonalQuizClick }) => {
             <div className="w-12 h-12 mx-auto mb-2 flex items-center justify-center">
               {typeof quiz.icon === 'string' ? getIcon(quiz.icon, {
                 size: '3xl',
-                className: quiz.id === 'wrong-answers' ? 'text-yellow-400' :
-                          quiz.id === 'favorites' ? 'text-red-400' : ''
+                className: quiz.id === 'wrong-answers' ? 'text-violet-500' :
+                          quiz.id === 'favorites' ? 'text-orange-500' : ''
               }) : quiz.icon}
             </div>
             <div className="text-sm font-bold text-gray-700 mb-1">

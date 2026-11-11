@@ -1,3 +1,5 @@
+import { getIcon } from '../../utils/iconMap';
+
 const SummaryCard = ({ data }) => {
   if (!data) return null;
 
@@ -19,7 +21,7 @@ const SummaryCard = ({ data }) => {
         </div>
         <div className="text-center">
           <span className="block text-xl font-bold">{data.reviewCount}</span>
-          <span className="text-xs opacity-90 mt-1">복습 표시 ⭐</span>
+          <span className="inline-flex items-center gap-1 text-xs opacity-90 mt-1">복습 표시 {getIcon('fluent:notebook-24-regular', { size: 'sm' })}</span>
         </div>
       </div>
     </div>

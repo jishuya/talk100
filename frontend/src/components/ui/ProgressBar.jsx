@@ -57,6 +57,7 @@ export const CircularProgress = ({
   strokeWidth = 12,
   className = '',
   showText = true,
+  animate = false,
   ...props
 }) => {
   const percentage = Math.min(Math.max((value / max) * 100, 0), 100);
@@ -87,7 +88,8 @@ export const CircularProgress = ({
           strokeDasharray={circumference}
           strokeDashoffset={strokeDashoffset}
           strokeLinecap="round"
-          className="transition-all duration-500 ease-out"
+          className={cn('transition-all duration-500 ease-out', animate && 'home-progress-fill')}
+          style={animate ? { '--progress-circumference': circumference } : undefined}
         />
       </svg>
       {showText && (

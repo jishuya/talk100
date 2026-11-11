@@ -28,7 +28,7 @@ const QuizOnboarding = ({ onComplete }) => {
       id: 'favorite-star',
       selector: '[data-onboarding="favorite-star"]',
       title: '즐겨찾기 / 틀린문제',
-      description: '문제를 ❤️로 즐겨찾기에 추가하거나\n⭐로 틀린문제에 추가할 수 있어요.',
+      description: '책갈피를 눌러 즐겨찾기에 저장하거나\n노트를 눌러 틀린 문제에 추가할 수 있어요.\n선택하면 아이콘에 색이 채워져요.',
       position: 'bottom'
     }
   ];

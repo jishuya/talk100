@@ -331,3 +331,48 @@ body {
     animation: none;
   }
 }
+
+@keyframes homeAvatarFloat {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-5px) rotate(3deg); }
+}
+
+@keyframes homeProgressFill {
+  from { stroke-dashoffset: var(--progress-circumference); }
+}
+
+.home-avatar {
+  display: inline-block;
+  transform-origin: center bottom;
+  animation: homeAvatarFloat 3.6s ease-in-out infinite;
+}
+
+.home-progress-fill {
+  animation: homeProgressFill 1.2s cubic-bezier(.22, 1, .36, 1) both;
+  transition: stroke-dashoffset .8s ease-out;
+}
+
+.character-card .btn-start-learning {
+  transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease;
+}
+
+@media (hover: hover) {
+  .character-card .btn-start-learning:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgb(85 173 155 / 35%);
+  }
+}
+
+.character-card .btn-start-learning:active { transform: scale(.98); }
+
+@media (prefers-reduced-motion: reduce) {
+  .character-card.animate-fade-in,
+  .home-avatar,
+  .home-progress-fill { animation: none; }
+
+  .home-progress-fill,
+  .character-card .btn-start-learning { transition: none; }
+
+  .character-card .btn-start-learning:hover,
+  .character-card .btn-start-learning:active { transform: none; }
+}

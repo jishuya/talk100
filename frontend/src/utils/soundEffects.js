@@ -7,7 +7,7 @@ const sounds = {
   click: 'kenney/click_003.wav',
   quizStart: 'kenney-jingles/quiz-start.mp3',
   select: 'kenney/select_001.wav',
-  favorite: 'kenney/pluck_001.wav',
+  favorite: 'rewards/favorite.wav',
   success: 'successed.mp3',
   error: 'error.mp3',
   celebrate: 'celebrate.mp3',

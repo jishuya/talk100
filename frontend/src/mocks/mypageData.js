@@ -82,7 +82,7 @@ export const mypageData = {
       id: 'wrong-answers',
       title: '틀린 문제',
       description: '복습이 필요한 문제들',
-      icon: 'noto:star',
+      icon: 'fluent:notebook-24-filled',
       bgColor: 'bg-red-100',
       count: 15,
       path: '/quiz/wrong-answers'
@@ -91,7 +91,7 @@ export const mypageData = {
       id: 'favorites',
       title: '즐겨찾기',
       description: '중요 표시한 문제들',
-      icon: 'noto:red-heart',
+      icon: 'fluent:bookmark-24-filled',
       bgColor: 'bg-yellow-100',
       count: 28,
       path: '/quiz/favorites'

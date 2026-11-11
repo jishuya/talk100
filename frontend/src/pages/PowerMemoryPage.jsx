@@ -421,7 +421,7 @@ const PowerMemoryPage = () => {
         <span className="deck-screw top-left" /><span className="deck-screw top-right" /><span className="deck-screw bottom-left" /><span className="deck-screw bottom-right" />
       </section>
       <section className="memory-favorites" aria-label="즐겨찾기 문제">
-        <div className="favorites-heading"><h2><span className="favorites-heart text-red-400">{getIcon('fluent:heart-24-filled', { size: 'sm' })}</span>즐겨찾기 문제 <small>({questions.length - removedFavorites.size}개)</small></h2><span>MY TRACKS</span></div>
+        <div className="favorites-heading"><h2><span className="favorites-bookmark text-orange-500">{getIcon('fluent:bookmark-24-filled', { size: 'sm' })}</span>즐겨찾기 문제 <small>({questions.length - removedFavorites.size}개)</small></h2><span>MY TRACKS</span></div>
         {questions.length === 0 ? <div className="memory-empty"><p>즐겨찾기한 문제가 없습니다.</p><Button variant="primary" onClick={() => navigate('/')}>문제 풀러 가기</Button></div> :
           <div className="memory-track-list">{questions.map((question, index) => {
             const isCurrent = currentIndex === index;
@@ -436,12 +436,12 @@ const PowerMemoryPage = () => {
               </button>
               <div className="track-actions"><button
                 type="button"
-                className="track-heart text-red-400"
+                className="track-bookmark"
                 aria-label={removedFavorites.has(question.question_id) ? '즐겨찾기 추가' : '즐겨찾기 해제'}
                 aria-pressed={!removedFavorites.has(question.question_id)}
                 disabled={pendingFavorites.has(question.question_id)}
                 onClick={() => handleFavoriteToggle(question.question_id)}
-              >{getIcon(removedFavorites.has(question.question_id) ? 'fluent:heart-24-regular' : 'fluent:heart-24-filled', { size: 'sm' })}</button><button aria-label={`${index + 1}번 문제 ${isCurrent && isPlaying && !isPaused ? '일시정지' : '재생'}`} onClick={() => { if (isCurrent && isPlaying) { if (isPaused) handlePlay(); else handlePause(); } else { handleStop(); startPlayback(index); } }}>{getIcon(isCurrent && isPlaying && !isPaused ? 'lucide:pause' : 'lucide:play', { size: 'sm' })}</button></div>
+              >{getIcon(removedFavorites.has(question.question_id) ? 'fluent:bookmark-24-regular' : 'fluent:bookmark-24-filled', { size: 'sm' })}</button><button aria-label={`${index + 1}번 문제 ${isCurrent && isPlaying && !isPaused ? '일시정지' : '재생'}`} onClick={() => { if (isCurrent && isPlaying) { if (isPaused) handlePlay(); else handlePause(); } else { handleStop(); startPlayback(index); } }}>{getIcon(isCurrent && isPlaying && !isPaused ? 'lucide:pause' : 'lucide:play', { size: 'sm' })}</button></div>
             </article>;
           })}</div>}
       </section>

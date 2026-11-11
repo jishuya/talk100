@@ -14,11 +14,13 @@ const LearningPattern = ({ data }) => {
     },
     {
       value: data.reviewQuestions,
-      label: '복습 문제 ⭐'
+      label: '복습 문제',
+      icon: 'fluent:notebook-24-regular'
     },
     {
       value: data.favorites,
-      label: '즐겨찾기 ❤️'
+      label: '즐겨찾기',
+      icon: 'fluent:bookmark-24-regular'
     }
   ];
 
@@ -36,7 +38,7 @@ const LearningPattern = ({ data }) => {
             <span className="block text-2xl font-bold text-primary mb-1">
               {item.value}
             </span>
-            <span className="text-xs text-text-secondary">{item.label}</span>
+            <span className="inline-flex items-center justify-center gap-1 text-xs text-text-secondary">{item.label}{item.icon && getIcon(item.icon, { size: 'sm' })}</span>
           </div>
         ))}
       </div>

@@ -31,10 +31,11 @@ const CharacterSection = ({
           size={80}
           strokeWidth={8}
           showText={false}
+          animate
         />
         {/* 아바타 (원형 차트 중앙) */}
         <span
-          className="absolute text-3xl"
+          className="home-avatar absolute text-3xl"
           title={`${avatarInfo.name} (레벨 ${user?.level || 1}) - ${avatarInfo.desc}`}
         >
           {displayAvatar}
@@ -62,7 +63,7 @@ const CharacterSection = ({
       {/* ===== 태블릿/데스크톱 레이아웃 (기존) ===== */}
       {/* 캐릭터 아바타 */}
       <div className="hidden md:flex w-25 h-25 mx-auto mb-3 bg-surface rounded-full items-center justify-center text-5xl" title={`${avatarInfo.name} (레벨 ${user?.level || 1}) - ${avatarInfo.desc}`}>
-        {displayAvatar}
+        <span className="home-avatar">{displayAvatar}</span>
       </div>
 
       {/* 캐릭터 정보 */}
@@ -80,6 +81,7 @@ const CharacterSection = ({
           max={100}
           size={120}
           strokeWidth={12}
+          animate
         />
       </div>
 
