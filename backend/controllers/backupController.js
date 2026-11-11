@@ -21,8 +21,7 @@ class BackupController {
         data: backupData
       });
 
-    } catch (error) {
-      console.error('getBackupData controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch backup data'
@@ -50,8 +49,7 @@ class BackupController {
         data: exportData
       });
 
-    } catch (error) {
-      console.error('getExportData controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch export data'
@@ -79,8 +77,7 @@ class BackupController {
         message: 'Learning data reset successfully'
       });
 
-    } catch (error) {
-      console.error('resetLearningData controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to reset learning data'
@@ -105,9 +102,6 @@ class BackupController {
 
       // 세션 삭제 (쿠키 제거)
       req.session.destroy((err) => {
-        if (err) {
-          console.error('Session destruction error:', err);
-        }
       });
 
       // 응답 헤더에서 쿠키 삭제
@@ -118,8 +112,7 @@ class BackupController {
         message: 'Account deleted successfully'
       });
 
-    } catch (error) {
-      console.error('deleteAccount controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to delete account'

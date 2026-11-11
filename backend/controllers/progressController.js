@@ -44,8 +44,7 @@ class ProgressController {
         streak: result.streak  // 연속 학습 정보
       });
 
-    } catch (error) {
-      console.error('updateProgress controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to update progress'
@@ -87,8 +86,7 @@ class ProgressController {
         }
       });
 
-    } catch (error) {
-      console.error('getCompletedDays controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to get completed days'
@@ -136,8 +134,7 @@ class ProgressController {
         data: result
       });
 
-    } catch (error) {
-      console.error('markDayCompleted controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to mark day as completed'
@@ -168,8 +165,7 @@ class ProgressController {
         data: result
       });
 
-    } catch (error) {
-      console.error('resetSolvedCount controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to reset solved count'

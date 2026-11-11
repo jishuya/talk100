@@ -20,8 +20,7 @@ class SettingsController {
         data: settings
       });
 
-    } catch (error) {
-      console.error('getSettings controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch settings'
@@ -57,8 +56,7 @@ class SettingsController {
         message: 'Settings updated successfully'
       });
 
-    } catch (error) {
-      console.error('updateSettings controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to update settings'

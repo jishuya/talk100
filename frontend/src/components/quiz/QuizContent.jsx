@@ -54,19 +54,23 @@ export const QuizContent = ({
     <main className="flex-1 overflow-y-auto p-3 pb-32 md:p-4 -webkit-overflow-scrolling-touch">
       {/* 퀴즈 박스 */}
       <div className="bg-white rounded-brand shadow-soft p-3 mb-3 md:p-4 md:mb-4">
-        {/* Day & 카테고리 + 즐겨찾기/별표 버튼 (한 줄) */}
-        <div className="flex items-center justify-between mb-3 md:mb-4">
-          {/* 왼쪽: Day & 카테고리 */}
-          <div className="flex gap-1.5 md:gap-2">
+        {/* Day, 카테고리, 문제 번호 + 즐겨찾기/별표 버튼 */}
+        <div className="flex items-center justify-between gap-2 mb-3 md:mb-4">
+          <div className="flex flex-wrap gap-1.5 md:gap-2">
             <span className="px-2 py-1 md:px-3 md:py-1.5 bg-primary text-white rounded-full text-xs md:text-sm font-bold shadow-soft">
-              Day {question.day}
+              Day{question.day}
             </span>
+            {question.questionNumber != null && (
+              <span className="px-2 py-1 md:px-3 md:py-1.5 bg-primary text-white rounded-full text-xs md:text-sm font-bold shadow-soft">
+                {question.questionNumber}
+              </span>
+            )}
             <span className="px-2 py-1 md:px-3 md:py-1.5 bg-primary text-white rounded-full text-xs md:text-sm font-bold shadow-soft">
               {getCategoryName(question.categoryId)}
             </span>
           </div>
           {/* 오른쪽: 즐겨찾기/별표 버튼 */}
-          <div className="flex gap-1" data-onboarding="favorite-star">
+          <div className="flex shrink-0 gap-1" data-onboarding="favorite-star">
             <IconButton
               icon={getIcon(isFavorite ? 'fluent:heart-24-filled' : 'fluent:heart-24-regular', {
                 size: 'md',

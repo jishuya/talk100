@@ -1,5 +1,5 @@
-import SoundSettings from '../components/settings/SoundSettings';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useSyncExternalStore } from 'react';
+import { getSoundSettings, subscribeSoundSettings, updateSoundSettings } from '../utils/soundEffects';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { useTheme } from '../contexts/ThemeContext';
@@ -32,6 +32,7 @@ import AlertModal from '../components/ui/AlertModal';
 const MyPage = () => {
   const navigate = useNavigate();
   const { changeTheme } = useTheme();
+  const { enabled: soundEnabled } = useSyncExternalStore(subscribeSoundSettings, getSoundSettings);
 
   // 데이터 훅들 - 이제 모든 데이터를 useMypageData()에서 가져옴
   const { data: apiMypageData, isLoading, error, refetch } = useMypageData();
@@ -190,6 +191,11 @@ const MyPage = () => {
 
   // 앱 설정 토글
   const handleAppSettingToggle = async (settingId, value) => {
+    if (settingId === 'soundEffects') {
+      updateSoundSettings({ enabled: value });
+      return;
+    }
+
     try {
       // 로컬 상태 즉시 업데이트 (Optimistic UI)
       setLocalAppSettings(prev =>
@@ -392,13 +398,21 @@ const MyPage = () => {
         {/* 앱 설정 */}
         <MenuSection
           title="앱 설정"
-          items={localAppSettings}
+          items={[
+            {
+              id: 'soundEffects',
+              icon: 'IoVolumeHigh',
+              title: '효과음',
+              type: 'toggle',
+              value: soundEnabled,
+              bgColor: 'bg-gray-light'
+            },
+            ...localAppSettings
+          ]}
           onItemClick={handleAppSettingClick}
           onToggleChange={handleAppSettingToggle}
           onRadioChange={handleAppSettingRadio}
         />
-
-        <SoundSettings />
 
         {/* 로그아웃 버튼 */}
         <Button

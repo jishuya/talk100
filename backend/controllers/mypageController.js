@@ -9,7 +9,6 @@ class MypageController {
       const { voiceGender } = req.body;
 
       if (!uid) {
-        console.error('❌ [Update Voice Gender] No uid found');
         return res.status(401).json({
           success: false,
           message: 'User not authenticated'
@@ -17,7 +16,6 @@ class MypageController {
       }
 
       if (!voiceGender) {
-        console.error('❌ [Update Voice Gender] No voiceGender provided');
         return res.status(400).json({
           success: false,
           message: 'voiceGender is required'
@@ -35,7 +33,6 @@ class MypageController {
       });
 
     } catch (error) {
-      console.error('❌ [Update Voice Gender] Error:', error);
       res.status(500).json({
         success: false,
         message: error.message || 'Failed to update voice gender'
@@ -49,7 +46,6 @@ class MypageController {
       const uid = req.user?.uid;
 
       if (!uid) {
-        console.error('❌ [MyPage] No uid found');
         return res.status(401).json({
           success: false,
           message: 'User not authenticated'
@@ -60,7 +56,6 @@ class MypageController {
       const userProfile = await userQueries.getUserProfile(uid);
 
       if (!userProfile) {
-        console.error('❌ [MyPage] User not found');
         return res.status(404).json({
           success: false,
           message: 'User not found'
@@ -77,8 +72,7 @@ class MypageController {
       let settings;
       try {
         settings = await settingsQueries.getUserSettings(uid);
-      } catch (error) {
-        console.warn('⚠️ Failed to fetch user settings, using defaults:', error.message);
+      } catch {
         // 앱 설정 조회 실패 시 기본값 사용
         settings = {
           notifications: {
@@ -161,10 +155,7 @@ class MypageController {
         }
       });
 
-    } catch (error) {
-      console.error('❌❌❌ [MyPage] FATAL ERROR:', error);
-      console.error('❌ [MyPage] Error message:', error.message);
-      console.error('❌ [MyPage] Error stack:', error.stack);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch mypage data'

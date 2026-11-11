@@ -56,7 +56,6 @@ async function verifyToken(req, res, next) {
 
     next();
   } catch (error) {
-    console.error('Token verification error:', error.message);
 
     if (error.name === 'TokenExpiredError') {
       return res.status(401).json({
@@ -112,7 +111,7 @@ async function optionalAuth(req, res, next) {
     req.token = token;
 
     next();
-  } catch (error) {
+  } catch {
     // 토큰 검증 실패해도 통과 (선택적이므로)
     req.user = null;
     next();
@@ -195,8 +194,7 @@ async function refreshToken(req, res, next) {
     }
 
     next();
-  } catch (error) {
-    console.error('Token refresh error:', error.message);
+  } catch {
     next(); // 에러가 있어도 계속 진행
   }
 }

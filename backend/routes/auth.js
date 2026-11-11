@@ -13,13 +13,11 @@ router.get('/google', passport.authenticate('google', {
 router.get('/google/callback', (req, res, next) => {
   passport.authenticate('google', (err, user, info) => {
     if (err) {
-      console.error('Google OAuth authentication error:', err);
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
       return res.redirect(`${frontendUrl}?login=error&reason=auth_error`);
     }
 
     if (!user) {
-      console.error('Google OAuth failed - no user:', info);
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
       return res.redirect(`${frontendUrl}?login=error&reason=no_user`);
     }
@@ -41,8 +39,7 @@ router.get('/google/callback', (req, res, next) => {
       const userParam = encodeURIComponent(JSON.stringify(user));
       res.redirect(`${frontendUrl}?token=${token}&user=${userParam}&login=success`);
 
-    } catch (error) {
-      console.error('Google OAuth callback error:', error.message);
+    } catch {
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
       res.redirect(`${frontendUrl}?login=error&reason=token_error`);
     }
@@ -56,13 +53,11 @@ router.get('/naver', passport.authenticate('naver'));
 router.get('/naver/callback', (req, res, next) => {
   passport.authenticate('naver', (err, user, info) => {
     if (err) {
-      console.error('Naver OAuth authentication error:', err);
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
       return res.redirect(`${frontendUrl}?login=error&reason=auth_error`);
     }
 
     if (!user) {
-      console.error('Naver OAuth failed - no user:', info);
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
       return res.redirect(`${frontendUrl}?login=error&reason=no_user`);
     }
@@ -84,8 +79,7 @@ router.get('/naver/callback', (req, res, next) => {
       const userParam = encodeURIComponent(JSON.stringify(user));
       res.redirect(`${frontendUrl}?token=${token}&user=${userParam}&login=success`);
 
-    } catch (error) {
-      console.error('Naver OAuth callback error:', error.message);
+    } catch {
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
       res.redirect(`${frontendUrl}?login=error&reason=token_error`);
     }
@@ -103,15 +97,11 @@ router.get('/kakao/callback', (req, res, next) => {
   passport.authenticate('kakao', (err, user, info) => {
 
     if (err) {
-      console.error('❌ Kakao OAuth authentication error:', err);
-      console.error('Error stack:', err.stack);
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
       return res.redirect(`${frontendUrl}?login=error&reason=auth_error`);
     }
 
     if (!user) {
-      console.error('❌ Kakao OAuth failed - no user returned');
-      console.error('Info:', info);
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
       return res.redirect(`${frontendUrl}?login=error&reason=no_user`);
     }
@@ -135,9 +125,7 @@ router.get('/kakao/callback', (req, res, next) => {
       const redirectUrl = `${frontendUrl}?token=${token}&user=${userParam}&login=success`;
       res.redirect(redirectUrl);
 
-    } catch (error) {
-      console.error('❌ Kakao OAuth callback error:', error.message);
-      console.error('Error stack:', error.stack);
+    } catch {
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
       res.redirect(`${frontendUrl}?login=error&reason=token_error`);
     }
@@ -157,9 +145,6 @@ router.post('/logout', verifyToken, (req, res) => {
 
     // Passport 세션 제거
     req.logout((err) => {
-      if (err) {
-        console.error('Logout error:', err.message);
-      }
     });
 
     res.json({
@@ -167,8 +152,7 @@ router.post('/logout', verifyToken, (req, res) => {
       message: 'Logged out successfully'
     });
 
-  } catch (error) {
-    console.error('Logout error:', error.message);
+  } catch {
     res.status(500).json({
       success: false,
       message: 'Logout failed'
@@ -199,8 +183,7 @@ router.get('/me', verifyToken, (req, res) => {
       }
     });
 
-  } catch (error) {
-    console.error('Get user info error:', error.message);
+  } catch {
     res.status(500).json({
       success: false,
       message: 'Failed to get user information'
@@ -246,8 +229,7 @@ router.post('/refresh', verifyToken, (req, res) => {
       message: 'Token refreshed successfully'
     });
 
-  } catch (error) {
-    console.error('Token refresh error:', error.message);
+  } catch {
     res.status(500).json({
       success: false,
       message: 'Failed to refresh token'
@@ -292,7 +274,7 @@ router.get('/status', (req, res) => {
       }
     });
 
-  } catch (error) {
+  } catch {
     res.json({
       success: false,
       authenticated: false,
@@ -325,8 +307,7 @@ router.post('/test-token', (req, res) => {
       user: testUser
     });
 
-  } catch (error) {
-    console.error('Test token generation error:', error.message);
+  } catch {
     res.status(500).json({
       success: false,
       message: 'Failed to generate test token'
@@ -336,7 +317,6 @@ router.post('/test-token', (req, res) => {
 
 // 에러 처리 미들웨어
 router.use((error, req, res, next) => {
-  console.error('Auth route error:', error.message);
 
   if (error.message.includes('OAuth')) {
     return res.status(401).json({

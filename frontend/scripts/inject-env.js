@@ -20,9 +20,6 @@ const distPath = path.join(__dirname, '../dist/index.html');
 // 환경 변수 가져오기
 const VITE_API_BASE_URL = process.env.VITE_API_BASE_URL || 'https://api.talk100.work';
 
-console.log('\n🔧 [inject-env] 환경 변수 주입 시작...');
-console.log(`📍 Target file: ${distPath}`);
-console.log(`🌐 VITE_API_BASE_URL: ${VITE_API_BASE_URL}`);
 
 try {
   // index.html 파일 읽기
@@ -34,8 +31,6 @@ try {
   // 파일 다시 쓰기
   fs.writeFileSync(distPath, html, 'utf8');
 
-  console.log('✅ [inject-env] 환경 변수 주입 완료!\n');
-} catch (error) {
-  console.error('❌ [inject-env] 환경 변수 주입 실패:', error.message);
+} catch {
   process.exit(1);
 }

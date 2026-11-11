@@ -6,6 +6,7 @@ import Modal, { ModalHeader, ModalBody } from '../components/ui/Modal';
 import AlertModal from '../components/ui/AlertModal';
 import { api } from '../services/apiService';
 import { ENV } from '../config/environment';
+import { getAnswerWaitTime } from '../utils/powerMemory';
 
 // 성우 옵션
 const VOICE_OPTIONS = [
@@ -36,8 +37,8 @@ const PowerMemoryPage = () => {
   // 설정 상태 (DB에서 불러온 값으로 초기화)
   const [koreanVoice, setKoreanVoice] = useState('female');
   const [answerTime, setAnswerTime] = useState(3);
+  const [answerTimeMode, setAnswerTimeMode] = useState('auto');
   const [englishVoices, setEnglishVoices] = useState(['male']); // 최대 3개
-  const [settingsLoaded, setSettingsLoaded] = useState(false);
 
   // 설정 모달 상태
   const [showSettingsModal, setShowSettingsModal] = useState(false);
@@ -73,7 +74,7 @@ const PowerMemoryPage = () => {
           setKoreanVoice(settings.koreanVoice || 'female');
           setAnswerTime(settings.answerTime || 3);
           setEnglishVoices(settings.englishVoices || ['male']);
-          setSettingsLoaded(true);
+          setAnswerTimeMode(settings.answerTimeMode === 'manual' ? 'manual' : 'auto');
         }
 
         // 2. 즐겨찾기 문제 로드
@@ -200,7 +201,7 @@ const PowerMemoryPage = () => {
 
       // 2. 정답 말하기 시간 대기
       setPlayPhase('waiting');
-      await wait(answerTime);
+      await wait(getAnswerWaitTime(question, answerTimeMode, answerTime));
 
       if (isStoppedRef.current) return false;
 
@@ -217,12 +218,11 @@ const PowerMemoryPage = () => {
       }
 
       return true;
-    } catch (error) {
-      console.error('Audio playback error:', error);
+    } catch {
       // 에러 발생해도 다음 문제로 넘어감
       return true;
     }
-  }, [questions, koreanVoice, answerTime, englishVoices, playAudio, wait]);
+  }, [questions, koreanVoice, answerTime, answerTimeMode, englishVoices, playAudio, wait]);
 
   // 전체 재생 시퀀스
   const startPlayback = useCallback(async (startIndex = 0) => {
@@ -306,6 +306,9 @@ const PowerMemoryPage = () => {
   }, []);
 
 
+  const currentWaitTime = getAnswerWaitTime(questions[currentIndex], answerTimeMode, answerTime);
+  const waitLabel = answerTimeMode === 'auto' ? `자동(${currentWaitTime}초)` : `${currentWaitTime}초`;
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -335,7 +338,7 @@ const PowerMemoryPage = () => {
             <p className="text-white/70 text-xs font-medium mb-1">
               {isPlaying
                 ? playPhase === 'korean' ? '🇰🇷 한글 재생 중'
-                : playPhase === 'waiting' ? `⏱️ ${answerTime}초 대기 중`
+                : playPhase === 'waiting' ? `⏱️ ${waitLabel} 대기 중`
                 : playPhase === 'english' ? `🇺🇸 영어${englishVoices.length > 1 ? ` ${currentEnglishIndex + 1}` : ''} 재생 중`
                 : '재생 중'
                 : isPaused ? '일시정지' : '대기 중'}
@@ -382,7 +385,7 @@ const PowerMemoryPage = () => {
               </span>
               <span className="text-white/50 text-sm">→</span>
               <span className="inline-flex items-center px-2 py-0.5 bg-white/20 rounded-full text-sm font-medium">
-                ⏱️ {answerTime}초
+                ⏱️ {waitLabel}
               </span>
               <span className="text-white/50 text-sm">→</span>
               {englishVoices.map((voice, index) => (
@@ -536,10 +539,33 @@ const PowerMemoryPage = () => {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="text-sm font-medium text-text-primary">정답 말하기 시간</label>
-                <span className="text-sm font-bold text-primary">{answerTime}초</span>
+                <span className="text-sm font-bold text-primary">{waitLabel}</span>
               </div>
+              <div className="flex gap-2 mb-3" role="group" aria-label="정답 말하기 시간 설정 방식">
+                {[{ id: 'auto', label: '자동' }, { id: 'manual', label: '수동' }].map((option) => (
+                  <button
+                    key={option.id}
+                    aria-pressed={answerTimeMode === option.id}
+                    onClick={() => setAnswerTimeMode(option.id)}
+                    className={`flex-1 py-2.5 px-3 rounded-lg text-sm font-medium transition-all ${
+                      answerTimeMode === option.id
+                        ? 'bg-primary text-white'
+                        : 'bg-gray-100 text-text-secondary hover:bg-gray-200'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+              {answerTimeMode === 'auto' ? (
+                <p className="text-xs text-text-secondary leading-relaxed">
+                  한글의 공백·문장부호를 제외한 글자 수에 따라 자동으로 기다려요.
+                  (1초 + 글자당 0.3초, 올림하여 최소 2초)
+                </p>
+              ) : (
               <div className="px-1">
                 <input
+                  aria-label="정답 말하기 시간 (초)"
                   type="range"
                   min="2"
                   max="10"
@@ -560,6 +586,7 @@ const PowerMemoryPage = () => {
                   <span>10초</span>
                 </div>
               </div>
+              )}
             </div>
 
             {/* 영어 문장 성우 */}
@@ -615,7 +642,8 @@ const PowerMemoryPage = () => {
                 <button
                   onClick={() => {
                     setKoreanVoice('female');
-                    setAnswerTime(5);
+                    setAnswerTime(3);
+                    setAnswerTimeMode('auto');
                     setEnglishVoices(['female']);
                   }}
                   className="p-1.5 text-text-secondary hover:text-primary hover:bg-white/50 rounded-lg transition-colors"
@@ -629,7 +657,7 @@ const PowerMemoryPage = () => {
                 </span>
                 <span className="text-text-secondary text-sm">→</span>
                 <span className="inline-flex items-center px-2 py-0.5 bg-white rounded-full text-sm font-medium text-text-primary">
-                  ⏱️ {answerTime}초
+                  ⏱️ {waitLabel}
                 </span>
                 <span className="text-text-secondary text-sm">→</span>
                 {englishVoices.map((voice, index) => (
@@ -653,10 +681,11 @@ const PowerMemoryPage = () => {
                   await api.updatePowerMemoryMode({
                     koreanVoice,
                     answerTime,
+                    answerTimeMode,
                     englishVoices
                   });
-                } catch (error) {
-                  console.error('설정 저장 실패:', error);
+                } catch {
+                  // 설정 저장에 실패해도 현재 화면에서는 선택한 설정을 유지합니다.
                 }
                 handleStop();
                 setCurrentIndex(0);

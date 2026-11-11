@@ -23,8 +23,7 @@ class QuizController {
         data: result
       });
 
-    } catch (error) {
-      console.error('getDailyQuiz controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch daily quiz'
@@ -73,8 +72,7 @@ class QuizController {
         data: result
       });
 
-    } catch (error) {
-      console.error('getCategoryQuiz controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch category quiz'
@@ -104,8 +102,7 @@ class QuizController {
         data: result
       });
 
-    } catch (error) {
-      console.error('getWrongAnswersQuiz controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch wrong answers quiz'
@@ -135,8 +132,7 @@ class QuizController {
         data: result
       });
 
-    } catch (error) {
-      console.error('getFavoritesQuiz controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch favorites quiz'
@@ -176,8 +172,7 @@ class QuizController {
         data: result
       });
 
-    } catch (error) {
-      console.error('getRandomReviewQuiz controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch random review quiz'
@@ -217,8 +212,7 @@ class QuizController {
         data: result
       });
 
-    } catch (error) {
-      console.error('toggleWrongAnswer controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to toggle wrong answer'
@@ -258,8 +252,7 @@ class QuizController {
         data: result
       });
 
-    } catch (error) {
-      console.error('toggleFavorite controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to toggle favorite'
@@ -300,8 +293,7 @@ class QuizController {
         data: result
       });
 
-    } catch (error) {
-      console.error('recordAttempt controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to record question attempt'

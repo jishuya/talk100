@@ -73,8 +73,7 @@ class SettingsQueries {
         }
       };
 
-    } catch (error) {
-      console.error('❌ [Get User Settings] Query error:', error);
+    } catch {
       throw new Error('Failed to fetch user settings');
     }
   }
@@ -137,8 +136,7 @@ class SettingsQueries {
         }
       };
 
-    } catch (error) {
-      console.error('❌ [Create Default Settings] Query error:', error);
+    } catch {
       throw new Error('Failed to create default settings');
     }
   }
@@ -222,8 +220,7 @@ class SettingsQueries {
 
       return await this.getUserSettings(uid);
 
-    } catch (error) {
-      console.error('❌ [Update User Settings] Query error:', error);
+    } catch {
       throw new Error('Failed to update user settings');
     }
   }

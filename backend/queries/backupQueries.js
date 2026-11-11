@@ -93,8 +93,7 @@ class BackupQueries {
            WHERE user_id = $1`,
           [userId]
         );
-      } catch (error) {
-        console.warn('Settings table does not exist, using null:', error.message);
+      } catch {
         backupData.settings = null;
       }
 
@@ -113,7 +112,6 @@ class BackupQueries {
       return backupData;
 
     } catch (error) {
-      console.error('getUserBackupData query error:', error);
       throw error;
     }
   }
@@ -199,7 +197,6 @@ class BackupQueries {
       };
 
     } catch (error) {
-      console.error('getExportStatistics query error:', error);
       throw error;
     }
   }
@@ -233,7 +230,6 @@ class BackupQueries {
 
       return { success: true };
     } catch (error) {
-      console.error('resetUserLearningData query error:', error);
       throw error;
     }
   }
@@ -253,8 +249,8 @@ class BackupQueries {
         // 2. 사용자 설정 삭제 (user_settings 테이블이 존재하면)
         try {
           await t.none('DELETE FROM user_settings WHERE user_id = $1', [userId]);
-        } catch (error) {
-          console.warn('user_settings table does not exist or already deleted:', error.message);
+        } catch {
+          // user_settings 테이블이 없어도 계정 삭제를 계속합니다.
         }
 
         // 3. 세션 삭제 (session 테이블에서 해당 사용자의 세션 제거)
@@ -268,7 +264,6 @@ class BackupQueries {
 
       return { success: true };
     } catch (error) {
-      console.error('deleteUserAccount query error:', error);
       throw error;
     }
   }

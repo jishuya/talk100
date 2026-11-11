@@ -23,8 +23,7 @@ class UserQueries {
       );
 
       return result;
-    } catch (error) {
-      console.error('getUserProfile query error:', error);
+    } catch {
       throw new Error('Failed to fetch user profile');
     }
   }
@@ -38,8 +37,7 @@ class UserQueries {
       );
 
       return result;
-    } catch (error) {
-      console.error('findUserByUid query error:', error);
+    } catch {
       throw new Error('Failed to find user');
     }
   }
@@ -59,8 +57,7 @@ class UserQueries {
       );
 
       return result;
-    } catch (error) {
-      console.error('getUserBadges query error:', error);
+    } catch {
       throw new Error('Failed to fetch user badges');
     }
   }
@@ -103,8 +100,7 @@ class UserQueries {
       }
 
       return user;
-    } catch (error) {
-      console.error('findOrCreateUser query error:', error);
+    } catch {
       throw new Error('Failed to find or create user');
     }
   }
@@ -143,8 +139,7 @@ class UserQueries {
         total,
         percentage
       };
-    } catch (error) {
-      console.error('❌ [Get User Progress] Query error:', error);
+    } catch {
       throw new Error('Failed to fetch user progress');
     }
   }
@@ -176,8 +171,7 @@ class UserQueries {
         { category_id: 5, count: 0 },
         { category_id: 6, count: 0 }
       ];
-    } catch (error) {
-      console.error('getPersonalQuizzes query error:', error);
+    } catch {
       throw new Error('Failed to fetch personal quizzes');
     }
   }
@@ -219,8 +213,7 @@ class UserQueries {
       );
 
       return result || [];
-    } catch (error) {
-      console.error('❌ [getUserHistory] Query error:', error);
+    } catch {
       throw new Error('Failed to fetch user history');
     }
   }
@@ -244,8 +237,7 @@ class UserQueries {
         best: parseInt(result.best) || 0
       };
 
-    } catch (error) {
-      console.error('❌ [Get Streak Data] Query error:', error);
+    } catch {
       throw new Error('Failed to fetch streak data');
     }
   }
@@ -327,8 +319,7 @@ class UserQueries {
 
       return weeklyData;
 
-    } catch (error) {
-      console.error('❌ [Get Weekly Chart] Query error:', error);
+    } catch {
       throw new Error('Failed to fetch weekly chart data');
     }
   }
@@ -410,8 +401,7 @@ class UserQueries {
         reviewCount: parseInt(result.review_count) || 0
       };
 
-    } catch (error) {
-      console.error('❌ [Get Summary Stats] Query error:', error);
+    } catch {
       throw new Error('Failed to fetch summary stats');
     }
   }
@@ -465,8 +455,7 @@ class UserQueries {
 
       return categoryProgress;
 
-    } catch (error) {
-      console.error('❌ [Get Category Progress] Query error:', error);
+    } catch {
       throw new Error('Failed to fetch category progress');
     }
   }
@@ -525,8 +514,7 @@ class UserQueries {
         favorites: parseInt(result.favorites) || 0
       };
 
-    } catch (error) {
-      console.error('❌ [Get Learning Pattern] Query error:', error);
+    } catch {
       throw new Error('Failed to fetch learning pattern');
     }
   }
@@ -577,8 +565,7 @@ class UserQueries {
         weeklyQuestions: parseInt(result.weekly_questions) || 0
       };
 
-    } catch (error) {
-      console.error('❌ [Get MyPage Summary] Query error:', error);
+    } catch {
       throw new Error('Failed to fetch mypage summary');
     }
   }
@@ -604,8 +591,7 @@ class UserQueries {
         weeklyTotalQuiz: 30
       };
 
-    } catch (error) {
-      console.error('❌ [Get Goals] Query error:', error);
+    } catch {
       throw new Error('Failed to fetch goals');
     }
   }
@@ -654,8 +640,7 @@ class UserQueries {
       await db.none(query, values);
 
 
-    } catch (error) {
-      console.error('❌ [Update Goals] Query error:', error);
+    } catch {
       throw new Error('Failed to update goals');
     }
   }
@@ -699,8 +684,7 @@ class UserQueries {
       await db.none(query, values);
 
 
-    } catch (error) {
-      console.error('❌ [Update Profile] Query error:', error);
+    } catch {
       throw new Error('Failed to update profile');
     }
   }
@@ -717,8 +701,7 @@ class UserQueries {
 
       return result ? result.quiz_mode : 'voice';
 
-    } catch (error) {
-      console.error('❌ [Get Quiz Mode] Query error:', error);
+    } catch {
       throw new Error('Failed to fetch quiz mode');
     }
   }
@@ -738,8 +721,7 @@ class UserQueries {
       );
 
 
-    } catch (error) {
-      console.error('❌ [Update Quiz Mode] Query error:', error);
+    } catch {
       throw new Error('Failed to update quiz mode');
     }
   }
@@ -760,8 +742,7 @@ class UserQueries {
       );
 
 
-    } catch (error) {
-      console.error('❌ [Update Voice Gender] Query error:', error);
+    } catch {
       throw new Error('Failed to update voice gender');
     }
   }
@@ -778,12 +759,12 @@ class UserQueries {
       const defaultSettings = {
         koreanVoice: 'female',
         answerTime: 3,
+        answerTimeMode: 'auto',
         englishVoices: ['male']
       };
 
       return result?.power_memory_mode || defaultSettings;
-    } catch (error) {
-      console.error('❌ [Get Power Memory Mode] Query error:', error);
+    } catch {
       throw new Error('Failed to fetch power memory mode');
     }
   }
@@ -795,8 +776,7 @@ class UserQueries {
         `UPDATE users SET power_memory_mode = $1 WHERE uid = $2`,
         [settings, uid]
       );
-    } catch (error) {
-      console.error('❌ [Update Power Memory Mode] Query error:', error);
+    } catch {
       throw new Error('Failed to update power memory mode');
     }
   }

@@ -90,8 +90,7 @@ class ProgressQueries {
           );
 
         }
-      } catch (dayCompletionError) {
-        console.error('⚠️ [Day Completion] Update failed (non-critical):', dayCompletionError);
+      } catch {
         // Day 완료 추적 실패해도 진행률 업데이트는 성공으로 처리
       }
 
@@ -102,8 +101,7 @@ class ProgressQueries {
         goalAchieved,
         streak: streakInfo
       };
-    } catch (error) {
-      console.error('❌ [User Progress] Update failed:', error);
+    } catch {
       throw new Error('Failed to update user progress');
     }
   }
@@ -124,8 +122,7 @@ class ProgressQueries {
       );
 
       return result.map(row => row.day);
-    } catch (error) {
-      console.error('❌ [Completed Days] Query failed:', error);
+    } catch {
       throw new Error('Failed to get completed days');
     }
   }
@@ -147,8 +144,7 @@ class ProgressQueries {
       );
 
       return { success: true, message: 'Day marked as completed' };
-    } catch (error) {
-      console.error('❌ [Mark Day Completed] Failed:', error);
+    } catch {
       throw new Error('Failed to mark day as completed');
     }
   }
@@ -171,8 +167,7 @@ class ProgressQueries {
         success: true,
         message: 'Solved count reset successfully'
       };
-    } catch (error) {
-      console.error('❌ [Reset Solved Count] Failed:', error);
+    } catch {
       throw new Error('Failed to reset solved count');
     }
   }

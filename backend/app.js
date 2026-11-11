@@ -3,7 +3,6 @@ const cors = require('cors');
 const { getAllowedFrontendOrigins } = require('./config/frontendOrigins');
 const helmet = require('helmet');
 const compression = require('compression');
-const morgan = require('morgan');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 const cookieParser = require('cookie-parser');
@@ -58,7 +57,6 @@ app.use(cors({
 
 // 기본 미들웨어
 app.use(compression());
-app.use(morgan('combined'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -147,7 +145,6 @@ app.use((req, res) => {
 
 // 전역 에러 핸들러
 app.use((error, req, res, next) => {
-  console.error('서버 에러:', error);
 
   // 개발 환경에서는 상세 에러 정보 제공
   const isDevelopment = process.env.NODE_ENV === 'development';
@@ -161,20 +158,6 @@ app.use((error, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`🚀 talk100 백엔드 서버가 포트 ${PORT}에서 실행 중입니다`);
-  console.log(`📍 헬스 체크: http://localhost:${PORT}/health`);
-  console.log(`🌍 환경: ${process.env.NODE_ENV || 'development'}`);
-
-  // OAuth 설정 확인 로그
-  console.log('\n=== OAuth 설정 확인 ===');
-  console.log('Google Client ID:', process.env.GOOGLE_CLIENT_ID ? '✓ 설정됨' : '✗ 없음');
-  console.log('Naver Client ID:', process.env.NAVER_CLIENT_ID ? '✓ 설정됨' : '✗ 없음');
-  console.log('Kakao Client ID:', process.env.KAKAO_CLIENT_ID ? '✓ 설정됨' : '✗ 없음');
-  console.log('Kakao Client ID 값:', process.env.KAKAO_CLIENT_ID);
-  console.log('Kakao Client Secret:', process.env.KAKAO_CLIENT_SECRET ? '✓ 설정됨' : '✗ 없음');
-  console.log('Kakao Callback URL:', process.env.KAKAO_CALLBACK_URL);
-  console.log('======================\n');
-});
+app.listen(PORT);
 
 module.exports = app;

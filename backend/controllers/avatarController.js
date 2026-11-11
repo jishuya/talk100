@@ -23,8 +23,7 @@ class AvatarController {
         data: avatarSystem
       });
 
-    } catch (error) {
-      console.error('getAvatarSystem controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch avatar system'
@@ -63,7 +62,6 @@ class AvatarController {
       });
 
     } catch (error) {
-      console.error('updateAvatar controller error:', error);
 
       // 잠긴 아바타 선택 시도
       if (error.message.includes('locked')) {

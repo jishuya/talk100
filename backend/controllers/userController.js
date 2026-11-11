@@ -33,8 +33,7 @@ class UserController {
         }
       });
 
-    } catch (error) {
-      console.error('getUserProfile controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch user profile'
@@ -71,8 +70,7 @@ class UserController {
         }
       });
 
-    } catch (error) {
-      console.error('getBadges controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch user badges'
@@ -110,8 +108,7 @@ class UserController {
         }
       });
 
-    } catch (error) {
-      console.error('getProgress controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch user progress'
@@ -145,8 +142,7 @@ class UserController {
         data: personalQuizzes
       });
 
-    } catch (error) {
-      console.error('getPersonalQuizzes controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch personal quizzes'
@@ -224,8 +220,7 @@ class UserController {
         data: processedHistory
       });
 
-    } catch (error) {
-      console.error('getHistory controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch user history'
@@ -252,8 +247,7 @@ class UserController {
         data: badges
       });
 
-    } catch (error) {
-      console.error('getBadgesAchievements controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch badges'
@@ -280,8 +274,7 @@ class UserController {
         data: result
       });
 
-    } catch (error) {
-      console.error('checkBadges controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to check badges'
@@ -317,8 +310,7 @@ class UserController {
         data: summaryStats
       });
 
-    } catch (error) {
-      console.error('getSummaryStats controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch summary stats'
@@ -345,8 +337,7 @@ class UserController {
         data: streakData
       });
 
-    } catch (error) {
-      console.error('getStreakData controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch streak data'
@@ -382,8 +373,7 @@ class UserController {
         data: weeklyChart
       });
 
-    } catch (error) {
-      console.error('getWeeklyChart controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch weekly chart'
@@ -410,8 +400,7 @@ class UserController {
         data: categoryProgress
       });
 
-    } catch (error) {
-      console.error('getCategoryProgress controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch category progress'
@@ -447,8 +436,7 @@ class UserController {
         data: learningPattern
       });
 
-    } catch (error) {
-      console.error('getLearningPattern controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch learning pattern'
@@ -503,8 +491,7 @@ class UserController {
         message: '학습 목표가 업데이트되었습니다.'
       });
 
-    } catch (error) {
-      console.error('updateGoals controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to update goals'
@@ -565,8 +552,7 @@ class UserController {
         message: '프로필이 업데이트되었습니다.'
       });
 
-    } catch (error) {
-      console.error('updateProfile controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to update profile'
@@ -593,8 +579,7 @@ class UserController {
         data: { quizMode }
       });
 
-    } catch (error) {
-      console.error('getQuizMode controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch quiz mode'
@@ -631,8 +616,7 @@ class UserController {
         data: { quizMode }
       });
 
-    } catch (error) {
-      console.error('updateQuizMode controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to update quiz mode'
@@ -659,8 +643,7 @@ class UserController {
         data: settings
       });
 
-    } catch (error) {
-      console.error('getPowerMemoryMode controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch power memory mode settings'
@@ -672,7 +655,7 @@ class UserController {
   async updatePowerMemoryMode(req, res) {
     try {
       const uid = req.user?.uid;
-      const { koreanVoice, answerTime, englishVoices } = req.body;
+      const { koreanVoice, answerTime, answerTimeMode, englishVoices } = req.body;
 
       if (!uid) {
         return res.status(401).json({
@@ -689,7 +672,14 @@ class UserController {
         });
       }
 
-      if (answerTime !== undefined && (answerTime < 2 || answerTime > 10)) {
+      if (answerTimeMode !== undefined && !['auto', 'manual'].includes(answerTimeMode)) {
+        return res.status(400).json({
+          success: false,
+          message: 'answerTimeMode must be auto or manual'
+        });
+      }
+
+      if (answerTime !== undefined && (!Number.isInteger(answerTime) || answerTime < 2 || answerTime > 10)) {
         return res.status(400).json({
           success: false,
           message: 'answerTime must be between 2 and 10'
@@ -711,7 +701,7 @@ class UserController {
         }
       }
 
-      const settings = { koreanVoice, answerTime, englishVoices };
+      const settings = { koreanVoice, answerTime, answerTimeMode: answerTimeMode ?? 'manual', englishVoices };
       await userQueries.updatePowerMemoryMode(uid, settings);
 
       res.json({
@@ -720,8 +710,7 @@ class UserController {
         data: settings
       });
 
-    } catch (error) {
-      console.error('updatePowerMemoryMode controller error:', error);
+    } catch {
       res.status(500).json({
         success: false,
         message: 'Failed to update power memory mode settings'

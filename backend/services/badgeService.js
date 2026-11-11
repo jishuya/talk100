@@ -217,7 +217,6 @@ class BadgeService {
           [JSON.stringify(updatedBadges), userId]
         );
 
-      } else {
       }
 
       return {
@@ -226,7 +225,6 @@ class BadgeService {
       };
 
     } catch (error) {
-      console.error('❌ [Badge Service] Error checking badges:', error);
       throw error;
     }
   }
@@ -271,7 +269,6 @@ class BadgeService {
       return badges;
 
     } catch (error) {
-      console.error('❌ [Badge Service] Error fetching user badges:', error);
       throw error;
     }
   }

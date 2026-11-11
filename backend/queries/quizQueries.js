@@ -277,8 +277,7 @@ class QuizQueries {
       });
 
       return result;
-    } catch (error) {
-      console.error('❌ [Today Quiz] Error:', error);
+    } catch {
       throw new Error('Failed to get today quiz with progress');
     }
   }
@@ -354,8 +353,7 @@ class QuizQueries {
       });
 
       return result;
-    } catch (error) {
-      console.error('getCategoryQuizQuestions query error:', error);
+    } catch {
       throw new Error('Failed to get category quiz with progress');
     }
   }
@@ -438,8 +436,7 @@ class QuizQueries {
         },
         questions: processedQuestions
       };
-    } catch (error) {
-      console.error('getWrongAnswersQuiz query error:', error);
+    } catch {
       throw new Error('Failed to get wrong answers quiz');
     }
   }
@@ -522,8 +519,7 @@ class QuizQueries {
         },
         questions: processedQuestions
       };
-    } catch (error) {
-      console.error('getFavoritesQuiz query error:', error);
+    } catch {
       throw new Error('Failed to get favorites quiz');
     }
   }
@@ -604,8 +600,7 @@ class QuizQueries {
         },
         questions: processedQuestions
       };
-    } catch (error) {
-      console.error('getRandomReviewQuiz query error:', error);
+    } catch {
       throw new Error('Failed to get random review quiz');
     }
   }
@@ -636,8 +631,7 @@ class QuizQueries {
         );
         return { isStarred: true };
       }
-    } catch (error) {
-      console.error('toggleWrongAnswer query error:', error);
+    } catch {
       throw new Error('Failed to toggle wrong answer');
     }
   }
@@ -668,8 +662,7 @@ class QuizQueries {
         );
         return { isFavorite: true };
       }
-    } catch (error) {
-      console.error('toggleFavorite query error:', error);
+    } catch {
       throw new Error('Failed to toggle favorite');
     }
   }
@@ -820,8 +813,7 @@ class QuizQueries {
             : 'Question attempt recorded successfully'
         };
       });
-    } catch (error) {
-      console.error('recordQuestionAttempt query error:', error);
+    } catch {
       throw new Error('Failed to record question attempt');
     }
   }
@@ -847,7 +839,6 @@ class QuizQueries {
       };
 
     } catch (error) {
-      console.error('recordQuestionAttemptWithBadges error:', error);
       throw error;
     }
   }

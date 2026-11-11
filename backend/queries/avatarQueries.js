@@ -28,8 +28,7 @@ class AvatarQueries {
         totalQuestions: user.total_questions_attempted,
         avatars: avatars
       };
-    } catch (error) {
-      console.error('getAvatarSystem query error:', error);
+    } catch {
       throw new Error('Failed to fetch avatar system');
     }
   }
@@ -68,7 +67,6 @@ class AvatarQueries {
         message: 'Avatar updated successfully'
       };
     } catch (error) {
-      console.error('updateAvatar query error:', error);
       throw error;
     }
   }

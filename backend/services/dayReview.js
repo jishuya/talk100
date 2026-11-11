@@ -26,7 +26,6 @@ async function createDayReview(userId, dayNumber) {
     };
 
   } catch (error) {
-    console.error('Error creating day review:', error.message);
     throw error;
   }
 }
@@ -86,7 +85,6 @@ async function getReviewQuestions(dayNumber) {
     return questions;
 
   } catch (error) {
-    console.error(`Error selecting review questions for Day ${dayNumber}:`, error.message);
     throw error;
   }
 }

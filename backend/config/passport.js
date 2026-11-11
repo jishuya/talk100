@@ -35,12 +35,10 @@ passport.use(new GoogleStrategy({
   try {
     // 필수 정보 검증
     if (!profile.id) {
-      console.error('Google OAuth Error: No profile ID');
       return done(new Error('Google profile ID is missing'), null);
     }
 
     if (!profile.emails || !profile.emails[0] || !profile.emails[0].value) {
-      console.error('Google OAuth Error: No email in profile');
       return done(new Error('Google profile email is missing'), null);
     }
 
@@ -58,7 +56,6 @@ passport.use(new GoogleStrategy({
     return done(null, user);
 
   } catch (error) {
-    console.error('Google OAuth Error:', error.message);
     return done(error, null);
   }
 }));
@@ -72,12 +69,10 @@ passport.use(new NaverStrategy({
   try {
     // 필수 정보 검증
     if (!profile.id) {
-      console.error('Naver OAuth Error: No profile ID');
       return done(new Error('Naver profile ID is missing'), null);
     }
 
     if (!profile.email) {
-      console.error('Naver OAuth Error: No email in profile');
       return done(new Error('Naver profile email is missing'), null);
     }
 
@@ -95,7 +90,6 @@ passport.use(new NaverStrategy({
     return done(null, user);
 
   } catch (error) {
-    console.error('Naver OAuth Error:', error.message);
     return done(error, null);
   }
 }));
@@ -111,23 +105,17 @@ passport.use(new KakaoStrategy({
 
     // 필수 정보 검증
     if (!profile.id) {
-      console.error('❌ Kakao OAuth Error: No profile ID');
       return done(new Error('Kakao profile ID is missing'), null);
     }
 
     // Kakao 프로필에서 이메일 추출 (선택사항)
     const kakaoAccount = profile._json?.kakao_account;
 
-    if (kakaoAccount) {
-    }
 
     const email = kakaoAccount?.email;
 
     // 이메일이 없으면 가상 이메일 생성
     const finalEmail = email || `kakao_${profile.id}@kakao.local`;
-    if (!email) {
-    } else {
-    }
 
     // 닉네임 추출 (동의 필요 시 기본값 사용)
     let nickname = profile.displayName || 'Kakao User';
@@ -150,8 +138,6 @@ passport.use(new KakaoStrategy({
     return done(null, user);
 
   } catch (error) {
-    console.error('❌ Kakao OAuth Error:', error.message);
-    console.error('Error stack:', error.stack);
     return done(error, null);
   }
 }));
