@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { getIcon } from '../utils/iconMap';
 import Button from '../components/ui/Button';
 import Modal, { ModalHeader, ModalBody } from '../components/ui/Modal';
@@ -7,6 +8,8 @@ import AlertModal from '../components/ui/AlertModal';
 import { api } from '../services/apiService';
 import { ENV } from '../config/environment';
 import { getAnswerWaitTime } from '../utils/powerMemory';
+import './PowerMemoryPage.css';
+import { PowerMemorySettingsContext } from '../contexts/PowerMemorySettingsContext';
 
 // 성우 옵션
 const VOICE_OPTIONS = [
@@ -31,8 +34,25 @@ const getAudioPath = (question, language, gender) => {
   return `${ENV.API_BASE_URL}/audio/${folder}/${audioFilename}`;
 };
 
+const PlaybackRoute = ({ koreanVoice, englishVoices, playPhase = 'idle', currentEnglishIndex = 0, waitLabel, waitSeconds }) => (
+  <div className={`route-steps${englishVoices.length >= 3 ? ' route-steps-long' : ''}`}>
+              <span className={playPhase === 'korean' ? 'route-step active' : 'route-step'}><span>🇰🇷{koreanVoice === 'male' ? '👨' : '👩'}</span><span>한글({koreanVoice === 'male' ? '男' : '女'})</span></span>
+              <div className="route-part">
+                <span className="route-arrow">→</span>
+                <span className={playPhase === 'waiting' ? 'route-step active' : 'route-step'} title={waitLabel}>
+                  <span>🗣️</span><span>{waitSeconds}초</span>
+                </span>
+              </div>
+              {englishVoices.map((voice, index) => <div className="route-part" key={index}><span className="route-arrow">→</span><span className={playPhase === 'english' && currentEnglishIndex === index ? 'route-step active' : 'route-step'}><span>🇺🇸{voice === 'male' ? '👨' : '👩'}</span><span>영어{englishVoices.length > 1 ? index + 1 : ''}({voice === 'male' ? '男' : '女'})</span></span></div>)}
+            </div>
+);
+
 const PowerMemoryPage = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [removedFavorites, setRemovedFavorites] = useState(new Set());
+  const [pendingFavorites, setPendingFavorites] = useState(new Set());
+  const pendingFavoritesRef = useRef(new Set());
 
   // 설정 상태 (DB에서 불러온 값으로 초기화)
   const [koreanVoice, setKoreanVoice] = useState('female');
@@ -41,7 +61,7 @@ const PowerMemoryPage = () => {
   const [englishVoices, setEnglishVoices] = useState(['male']); // 최대 3개
 
   // 설정 모달 상태
-  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useContext(PowerMemorySettingsContext);
 
   // 퀴즈 데이터
   const [questions, setQuestions] = useState([]);
@@ -58,6 +78,8 @@ const PowerMemoryPage = () => {
   // 오디오 ref
   const audioRef = useRef(null);
   const timerRef = useRef(null);
+  const playbackIdRef = useRef(0);
+  const pausedRef = useRef(false);
   const isStoppedRef = useRef(false); // 정지 플래그 (비동기 작업 중단용)
   const questionRefs = useRef([]); // 문제 카드 refs
 
@@ -126,6 +148,30 @@ const PowerMemoryPage = () => {
     setEnglishVoices(newVoices);
   };
 
+  const handleFavoriteToggle = async (questionId) => {
+    if (pendingFavoritesRef.current.has(questionId)) return;
+    pendingFavoritesRef.current.add(questionId);
+    setPendingFavorites(new Set(pendingFavoritesRef.current));
+    const isFavorite = !removedFavorites.has(questionId);
+    try {
+      const result = await api.toggleFavorite(questionId, isFavorite);
+      const nextIsFavorite = result?.isFavorite ?? result?.data?.isFavorite ?? !isFavorite;
+      setRemovedFavorites(previous => {
+        const next = new Set(previous);
+        if (nextIsFavorite) next.delete(questionId);
+        else next.add(questionId);
+        return next;
+      });
+      queryClient.invalidateQueries({ queryKey: ['quiz', 'favorites'] });
+      queryClient.invalidateQueries({ queryKey: ['user', 'personalQuizzes'] });
+    } catch {
+      setAlertModal({ isOpen: true, message: '즐겨찾기 변경에 실패했습니다. 다시 시도해 주세요.', icon: '❌' });
+    } finally {
+      pendingFavoritesRef.current.delete(questionId);
+      setPendingFavorites(new Set(pendingFavoritesRef.current));
+    }
+  };
+
   // 카드 클릭 (토글)
   const handleCardClick = (index) => {
     setExpandedIndex(expandedIndex === index ? null : index);
@@ -178,13 +224,22 @@ const PowerMemoryPage = () => {
   // 대기 시간 Promise wrapper
   const wait = useCallback((seconds) => {
     return new Promise((resolve) => {
-      timerRef.current = setTimeout(resolve, seconds * 1000);
+      let remaining = seconds * 1000;
+      let lastTick = performance.now();
+      const tick = () => {
+        const now = performance.now();
+        if (!pausedRef.current) remaining -= now - lastTick;
+        lastTick = now;
+        if (remaining <= 0 || isStoppedRef.current) resolve();
+        else timerRef.current = setTimeout(tick, 100);
+      };
+      timerRef.current = setTimeout(tick, 100);
     });
   }, []);
 
   // 한 문제 재생 시퀀스
-  const playQuestionSequence = useCallback(async (questionIndex) => {
-    if (isStoppedRef.current) return false;
+  const playQuestionSequence = useCallback(async (questionIndex, playbackId) => {
+    if (isStoppedRef.current || playbackId !== playbackIdRef.current) return false;
 
     const question = questions[questionIndex];
     if (!question) return false;
@@ -197,17 +252,17 @@ const PowerMemoryPage = () => {
         await playAudio(koreanUrl);
       }
 
-      if (isStoppedRef.current) return false;
+      if (isStoppedRef.current || playbackId !== playbackIdRef.current) return false;
 
       // 2. 정답 말하기 시간 대기
       setPlayPhase('waiting');
       await wait(getAnswerWaitTime(question, answerTimeMode, answerTime));
 
-      if (isStoppedRef.current) return false;
+      if (isStoppedRef.current || playbackId !== playbackIdRef.current) return false;
 
       // 3. 영어 음성 재생 (설정된 횟수만큼)
       for (let i = 0; i < englishVoices.length; i++) {
-        if (isStoppedRef.current) return false;
+        if (isStoppedRef.current || playbackId !== playbackIdRef.current) return false;
 
         setPlayPhase('english');
         setCurrentEnglishIndex(i);
@@ -226,12 +281,14 @@ const PowerMemoryPage = () => {
 
   // 전체 재생 시퀀스
   const startPlayback = useCallback(async (startIndex = 0) => {
+    const playbackId = ++playbackIdRef.current;
     isStoppedRef.current = false;
     setIsPlaying(true);
+    pausedRef.current = false;
     setIsPaused(false);
 
     for (let i = startIndex; i < questions.length; i++) {
-      if (isStoppedRef.current) break;
+      if (isStoppedRef.current || playbackId !== playbackIdRef.current) break;
 
       setCurrentIndex(i);
 
@@ -243,13 +300,13 @@ const PowerMemoryPage = () => {
         });
       }
 
-      const success = await playQuestionSequence(i);
+      const success = await playQuestionSequence(i, playbackId);
 
-      if (!success || isStoppedRef.current) break;
+      if (!success || isStoppedRef.current || playbackId !== playbackIdRef.current) break;
     }
 
     // 재생 완료 또는 중단
-    if (!isStoppedRef.current) {
+    if (!isStoppedRef.current && playbackId === playbackIdRef.current) {
       setIsPlaying(false);
       setPlayPhase('idle');
       setCurrentIndex(0);
@@ -267,31 +324,32 @@ const PowerMemoryPage = () => {
     if (isPaused) {
       // 일시정지 상태에서 재개
       isStoppedRef.current = false;
-      setIsPaused(false);
-      if (audioRef.current && audioRef.current.paused) {
+      pausedRef.current = false;
+    setIsPaused(false);
+      if (playPhase !== 'waiting' && audioRef.current && audioRef.current.paused) {
         audioRef.current.play();
       }
     } else {
       // 처음부터 재생
       startPlayback(currentIndex);
     }
-  }, [questions, isPaused, currentIndex, startPlayback]);
+  }, [questions, isPaused, currentIndex, startPlayback, playPhase]);
 
   // 일시 정지
   const handlePause = useCallback(() => {
+    pausedRef.current = true;
     setIsPaused(true);
     if (audioRef.current) {
       audioRef.current.pause();
-    }
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
     }
   }, []);
 
   // 정지 (처음으로)
   const handleStop = useCallback(() => {
+    playbackIdRef.current += 1;
     isStoppedRef.current = true;
     setIsPlaying(false);
+    pausedRef.current = false;
     setIsPaused(false);
     setCurrentIndex(0);
     setPlayPhase('idle');
@@ -321,185 +379,72 @@ const PowerMemoryPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      {/* 미디어 플레이어 */}
-      <div className="mx-4 mt-2 mb-4">
-        <div className="bg-gradient-to-br from-primary to-primary-dark rounded-2xl p-5 shadow-lg text-white relative">
-          {/* 우측 상단 설정 버튼 */}
-          <button
-            onClick={() => setShowSettingsModal(true)}
-            className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
-          >
-            {getIcon('lucide:settings', { size: 'md', className: 'text-white' })}
+    <div className="power-memory-page">
+      <section className={`memory-deck ${isPlaying && !isPaused ? 'is-running' : ''}`} aria-label="파워암기 카세트 플레이어">
+        <div className="deck-status">
+          <span><i className={isPlaying && !isPaused ? 'status-light active' : 'status-light'} />
+            {isPaused ? 'PAUSED · 일시정지' : !isPlaying ? 'STANDBY · 대기 중' : playPhase === 'waiting' ? `SPEAK · ${waitLabel} 대기` : playPhase === 'korean' ? 'PLAYING · 한글 재생' : `PLAYING · 영어 ${currentEnglishIndex + 1}`}
+          </span>
+          <button className="deck-settings" onClick={() => setShowSettingsModal(true)} aria-label="재생 설정">
+            {getIcon('lucide:sliders-horizontal', { size: 'sm' })}
           </button>
-
-          {/* 상단: 현재 재생 정보 */}
-          <div className="mb-4 pr-10">
-            <p className="text-white/70 text-xs font-medium mb-1">
-              {isPlaying
-                ? playPhase === 'korean' ? '🇰🇷 한글 재생 중'
-                : playPhase === 'waiting' ? `⏱️ ${waitLabel} 대기 중`
-                : playPhase === 'english' ? `🇺🇸 영어${englishVoices.length > 1 ? ` ${currentEnglishIndex + 1}` : ''} 재생 중`
-                : '재생 중'
-                : isPaused ? '일시정지' : '대기 중'}
-            </p>
-            <p className="text-lg font-bold truncate">
-              {(isPlaying || isPaused) && questions[currentIndex]
-                ? (questions[currentIndex].korean || questions[currentIndex].korean_a || questions[currentIndex].korean_b)
-                : '재생 버튼을 눌러 시작하세요'}
-            </p>
+        </div>
+        <div className="cassette-label">
+          <div className="cassette-heading"><span><b>SIDE A</b> POWER MEMORY</span><span>HQ AUDIO</span></div>
+          <div className="cassette-title" aria-live="polite">
+            <h1>{(isPlaying || isPaused) && questions[currentIndex]
+              ? (questions[currentIndex].korean || questions[currentIndex].korean_a || questions[currentIndex].korean_b)
+              : '재생 버튼을 눌러 시작하세요'}</h1>
+            {(isPaused || isPlaying) && <p>{isPaused ? '잠시 쉬어가도 괜찮아요' : `${currentIndex + 1}번째 문장을 소리 내어 따라 해보세요`}</p>}
           </div>
-
-          {/* 재생 컨트롤 */}
-          <div className="flex items-center justify-center gap-6">
-            {/* 재생/일시정지 버튼 */}
-            <button
-              onClick={isPlaying && !isPaused ? handlePause : handlePlay}
-              className="w-14 h-14 rounded-full bg-white flex items-center justify-center shadow-lg hover:scale-105 transition-all"
-            >
-              {isPlaying && !isPaused
-                ? getIcon('lucide:pause', { size: 'xl', className: 'text-primary' })
-                : getIcon('lucide:play', { size: 'xl', className: 'text-primary ml-0.5' })
-              }
-            </button>
-
-            {/* 정지 버튼 */}
-            <button
-              onClick={handleStop}
-              disabled={!isPlaying && !isPaused}
-              className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${
-                isPlaying || isPaused
-                  ? 'bg-white hover:bg-white/90 shadow-md'
-                  : 'bg-white/50'
-              }`}
-            >
-              {getIcon('lucide:square', { size: 'xl', className: isPlaying || isPaused ? 'text-primary' : 'text-primary/50' })}
-            </button>
+          <div className="cassette-window" aria-hidden="true">
+            <div className="tape-reel"><i /></div>
+            <div className="tape-meter"><div><span>100</span><span>50</span><span>0</span></div><i /></div>
+            <div className="tape-reel"><i /></div>
           </div>
-
-          {/* 재생 순서 태그 */}
-          <div className="mt-4 pt-3 border-t border-white/20">
-            <div className="flex items-center gap-1 flex-wrap justify-center">
-              <span className="inline-flex items-center px-2 py-0.5 bg-white/20 rounded-full text-sm font-medium">
-                🇰🇷 한글({koreanVoice === 'male' ? '남' : '여'})
-              </span>
-              <span className="text-white/50 text-sm">→</span>
-              <span className="inline-flex items-center px-2 py-0.5 bg-white/20 rounded-full text-sm font-medium">
-                ⏱️ {waitLabel}
-              </span>
-              <span className="text-white/50 text-sm">→</span>
-              {englishVoices.map((voice, index) => (
-                <span key={index} className="inline-flex items-center">
-                  <span className="px-2 py-0.5 bg-white/20 rounded-full text-sm font-medium">
-                    🇺🇸 영어{englishVoices.length > 1 ? index + 1 : ''}({voice === 'male' ? '남' : '여'})
-                  </span>
-                  {index < englishVoices.length - 1 && <span className="text-white/50 text-sm mx-1">→</span>}
-                </span>
-              ))}
-            </div>
+          <div className="playback-route">
+            <div className="route-heading"><span>PLAYBACK ROUTE</span><span>{answerTimeMode === 'auto' ? '자동간격' : `${currentWaitTime}초 고정`}</span></div>
+            <PlaybackRoute koreanVoice={koreanVoice} englishVoices={englishVoices} playPhase={playPhase} currentEnglishIndex={currentEnglishIndex} waitLabel={waitLabel} waitSeconds={currentWaitTime} />
           </div>
         </div>
-      </div>
-
-      <div className="px-4">
-
-        {/* 즐겨찾기 문제 목록 */}
-        <div className="card">
-          <div className="p-4 border-b border-gray-border">
-            <h2 className="text-sm font-bold text-text-primary flex items-center gap-2">
-              {getIcon('fluent:heart-24-filled', { size: 'md', className: 'text-red-400' })}
-              즐겨찾기 문제
-              <span className="text-xs font-normal text-text-secondary">
-                ({questions.length}개)
-              </span>
-            </h2>
-          </div>
-
-          {questions.length === 0 ? (
-            <div className="p-8 text-center">
-              <div className="text-4xl mb-2">📭</div>
-              <p className="text-text-secondary">즐겨찾기한 문제가 없습니다.</p>
-              <Button
-                variant="primary"
-                className="mt-4"
-                onClick={() => navigate('/')}
-              >
-                문제 풀러 가기
-              </Button>
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-border">
-              {questions.map((question, index) => {
-                const isCurrentPlaying = isPlaying && currentIndex === index;
-                const isExpanded = expandedIndex === index;
-
-                // 한글/영어 텍스트 추출
-                let korean, english;
-                if (question.question_type === 'dialogue') {
-                  if (question.korean_a) {
-                    korean = question.korean_a;
-                    english = question.english_a;
-                  } else {
-                    korean = question.korean_b;
-                    english = question.english_b;
-                  }
-                } else {
-                  korean = question.korean;
-                  english = question.english;
-                }
-
-                return (
-                  <div
-                    key={question.question_id}
-                    ref={(el) => (questionRefs.current[index] = el)}
-                    onClick={() => handleCardClick(index)}
-                    className={`p-4 cursor-pointer transition-all ${
-                      isCurrentPlaying
-                        ? 'bg-primary/10'
-                        : 'hover:bg-gray-50'
-                    }`}
-                  >
-                    {/* 한글 문장 */}
-                    <div className="flex items-start gap-3">
-                      <span className="text-sm text-text-secondary w-6 pt-0.5 font-medium">
-                        {index + 1}.
-                      </span>
-                      <div className="flex-1">
-                        <p className={`text-sm font-medium leading-relaxed ${isCurrentPlaying ? 'text-primary' : 'text-text-primary'}`}>
-                          {korean}
-                        </p>
-
-                        {/* 영어 문장 (펼쳐진 경우) */}
-                        {isExpanded && (
-                          <p className="mt-2 text-sm text-text-secondary leading-relaxed">
-                            {english}
-                          </p>
-                        )}
-                      </div>
-
-                      {/* 재생 중 표시 */}
-                      {isCurrentPlaying && (
-                        <div className="flex items-center gap-1">
-                          <span className="w-1 h-3 bg-primary rounded-full animate-pulse"></span>
-                          <span className="w-1 h-4 bg-primary rounded-full animate-pulse" style={{ animationDelay: '0.1s' }}></span>
-                          <span className="w-1 h-2 bg-primary rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></span>
-                        </div>
-                      )}
-
-                      {/* 펼침 아이콘 */}
-                      {!isCurrentPlaying && (
-                        <span className="text-text-secondary">
-                          {getIcon(isExpanded ? 'tabler:chevron-up' : 'tabler:chevron-down', { size: 'md' })}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+        <div className="deck-progress">
+          <div className="deck-progress-track" role="progressbar" aria-label="문제 재생 진행률" aria-valuemin={0} aria-valuemax={questions.length || 1} aria-valuenow={questions.length ? currentIndex + (isPlaying ? 1 : 0) : 0}><span style={{ width: `${questions.length ? (currentIndex + (isPlaying ? 1 : 0)) / questions.length * 100 : 0}%` }} /></div>
+          <div><span>TRACK {String(currentIndex + 1).padStart(2, '0')}</span><span>총 {questions.length}문장</span></div>
         </div>
-      </div>
+        <div className="deck-controls">
+          <button aria-label="이전 문제" disabled={currentIndex === 0} onClick={() => { const index = currentIndex - 1; handleStop(); setCurrentIndex(index); }}>{getIcon('lucide:skip-back', { size: 'md' })}</button>
+          <button aria-label="처음으로 정지" onClick={handleStop}>{getIcon('lucide:rotate-ccw', { size: 'md' })}</button>
+          <button className="deck-play" onClick={isPlaying && !isPaused ? handlePause : handlePlay} aria-label={isPlaying && !isPaused ? '일시정지' : '재생'}>{getIcon(isPlaying && !isPaused ? 'lucide:pause' : 'lucide:play', { size: 'md' })}{isPlaying && !isPaused ? 'PAUSE' : 'PLAY'}</button>
+          <button aria-label="정지" onClick={handleStop}>{getIcon('lucide:square', { size: 'md' })}</button>
+          <button aria-label="다음 문제" disabled={currentIndex >= questions.length - 1} onClick={() => { const index = currentIndex + 1; handleStop(); setCurrentIndex(index); }}>{getIcon('lucide:skip-forward', { size: 'md' })}</button>
+        </div>
+        <span className="deck-screw top-left" /><span className="deck-screw top-right" /><span className="deck-screw bottom-left" /><span className="deck-screw bottom-right" />
+      </section>
+      <section className="memory-favorites" aria-label="즐겨찾기 문제">
+        <div className="favorites-heading"><h2><span className="favorites-heart text-red-400">{getIcon('fluent:heart-24-filled', { size: 'sm' })}</span>즐겨찾기 문제 <small>({questions.length - removedFavorites.size}개)</small></h2><span>MY TRACKS</span></div>
+        {questions.length === 0 ? <div className="memory-empty"><p>즐겨찾기한 문제가 없습니다.</p><Button variant="primary" onClick={() => navigate('/')}>문제 풀러 가기</Button></div> :
+          <div className="memory-track-list">{questions.map((question, index) => {
+            const isCurrent = currentIndex === index;
+            const isExpanded = expandedIndex === index;
+            const korean = question.korean || question.korean_a || question.korean_b;
+            const english = question.english || question.english_a || question.english_b;
+            return <article key={question.question_id} ref={el => (questionRefs.current[index] = el)} className={`memory-track ${isCurrent ? 'current' : ''}`}>
+              <span className="track-number">{String(index + 1).padStart(2, '0')}</span>
+              <button className="track-copy" onClick={() => handleCardClick(index)} aria-expanded={isExpanded}>
+                <strong>{korean}</strong><span className={isExpanded ? 'track-english expanded' : 'track-english'}>{english}</span>
+                <span className="track-tags"><small>{isCurrent && isPlaying ? isPaused ? '일시정지' : '재생 중' : '한영 반복'}</small>{isCurrent && <small>1.0× 속도</small>}</span>
+              </button>
+              <div className="track-actions"><button
+                type="button"
+                className="track-heart text-red-400"
+                aria-label={removedFavorites.has(question.question_id) ? '즐겨찾기 추가' : '즐겨찾기 해제'}
+                aria-pressed={!removedFavorites.has(question.question_id)}
+                disabled={pendingFavorites.has(question.question_id)}
+                onClick={() => handleFavoriteToggle(question.question_id)}
+              >{getIcon(removedFavorites.has(question.question_id) ? 'fluent:heart-24-regular' : 'fluent:heart-24-filled', { size: 'sm' })}</button><button aria-label={`${index + 1}번 문제 ${isCurrent && isPlaying && !isPaused ? '일시정지' : '재생'}`} onClick={() => { if (isCurrent && isPlaying) { if (isPaused) handlePlay(); else handlePause(); } else { handleStop(); startPlayback(index); } }}>{getIcon(isCurrent && isPlaying && !isPaused ? 'lucide:pause' : 'lucide:play', { size: 'sm' })}</button></div>
+            </article>;
+          })}</div>}
+      </section>
 
       {/* 설정 모달 */}
       <Modal
@@ -651,24 +596,7 @@ const PowerMemoryPage = () => {
                   {getIcon('lucide:rotate-ccw', { size: 'md' })}
                 </button>
               </div>
-              <div className="flex items-center gap-1 flex-wrap">
-                <span className="inline-flex items-center px-2 py-0.5 bg-white rounded-full text-sm font-medium text-text-primary">
-                  🇰🇷 한글({koreanVoice === 'male' ? '남' : '여'})
-                </span>
-                <span className="text-text-secondary text-sm">→</span>
-                <span className="inline-flex items-center px-2 py-0.5 bg-white rounded-full text-sm font-medium text-text-primary">
-                  ⏱️ {waitLabel}
-                </span>
-                <span className="text-text-secondary text-sm">→</span>
-                {englishVoices.map((voice, index) => (
-                  <span key={index} className="inline-flex items-center">
-                    <span className="px-2 py-0.5 bg-white rounded-full text-sm font-medium text-text-primary">
-                      🇺🇸 영어{englishVoices.length > 1 ? index + 1 : ''}({voice === 'male' ? '남' : '여'})
-                    </span>
-                    {index < englishVoices.length - 1 && <span className="text-text-secondary text-sm mx-1">→</span>}
-                  </span>
-                ))}
-              </div>
+              <PlaybackRoute koreanVoice={koreanVoice} englishVoices={englishVoices} waitLabel={waitLabel} waitSeconds={currentWaitTime} />
             </div>
 
             {/* 확인 버튼 */}

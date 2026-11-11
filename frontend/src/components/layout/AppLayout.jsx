@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { PowerMemorySettingsContext } from '../../contexts/PowerMemorySettingsContext';
 import { useLocation } from 'react-router-dom';
 import MobileHeader from './MobileHeader';
 import BottomNavigation from './BottomNavigation';
@@ -6,6 +7,7 @@ import { useApp } from '../../contexts/AppContext';
 
 const AppLayout = ({ children }) => {
   const location = useLocation();
+  const powerMemorySettings = useState(false);
   const { ui } = useApp();
 
   // 헤더/네비게이션을 숨길 페이지들 (로그인 등)
@@ -31,6 +33,7 @@ const AppLayout = ({ children }) => {
   }
 
   return (
+    <PowerMemorySettingsContext.Provider value={powerMemorySettings}>
     <div className="w-full min-h-screen md:max-w-[768px] lg:max-w-[900px] mx-auto md:shadow-medium flex flex-col bg-background">
       {/* Mobile Header */}
       <MobileHeader />
@@ -47,6 +50,7 @@ const AppLayout = ({ children }) => {
       {/* Bottom Navigation */}
       {!shouldHideBottomNav && <BottomNavigation />}
     </div>
+    </PowerMemorySettingsContext.Provider>
   );
 };
 

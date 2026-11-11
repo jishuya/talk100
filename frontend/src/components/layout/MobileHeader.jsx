@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
+import { PowerMemorySettingsContext } from '../../contexts/PowerMemorySettingsContext';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useUpdateSettings } from '../../hooks/useApi';
@@ -8,6 +9,7 @@ import { getSession } from '../../utils/sessionStorage';
 
 const MobileHeader = () => {
   const location = useLocation();
+  const [, setPowerMemorySettingsOpen] = useContext(PowerMemorySettingsContext);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { theme, changeTheme } = useTheme();
@@ -90,7 +92,7 @@ const MobileHeader = () => {
           title: '파워암기모드',
           showBackButton: true,
           showLogo: false,
-          rightContent: '',
+          rightContent: 'power-memory-settings',
         };
       default:
         return {
@@ -150,6 +152,18 @@ const MobileHeader = () => {
               }
             </button>
           </div>
+        );
+
+      case 'power-memory-settings':
+        return (
+          <button
+            type="button"
+            aria-label="파워암기모드 재생 설정"
+            onClick={() => setPowerMemorySettingsOpen(true)}
+            className="w-9 h-9 flex items-center justify-center text-text-secondary rounded-lg hover:bg-accent-pale touchable"
+          >
+            {getIcon('lucide:settings', { size: 'md' })}
+          </button>
         );
 
       case 'settings':
@@ -223,7 +237,10 @@ const MobileHeader = () => {
             </span>
           </div>
         ) : (
-          <span className="text-base font-semibold text-text-primary">{config.title}</span>
+          <div className="flex items-center gap-2">
+            <span className="text-base font-semibold text-text-primary">{config.title}</span>
+
+          </div>
         )}
       </div>
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { IconButton } from '../ui/Button';
 import { getIcon } from '../../utils/iconMap';
 
@@ -32,6 +32,22 @@ export const QuizContent = ({
   isVoiceListening = false
 }) => {
   const [isEnglishVisible, setIsEnglishVisible] = useState(false);
+  const englishSentenceRef = useRef(null);
+  const focusOnRevealRef = useRef(false);
+
+  useEffect(() => {
+    if (!focusOnRevealRef.current || !isEnglishVisible || inputMode !== 'keyboard') return;
+    englishSentenceRef.current?.querySelector('input[data-keyword]')?.focus();
+    focusOnRevealRef.current = false;
+  }, [isEnglishVisible, inputMode]);
+
+  const handleRevealQuiz = () => {
+    if (quizMode === 'solving' && window.matchMedia('(min-width: 768px)').matches) {
+      focusOnRevealRef.current = true;
+      if (inputMode !== 'keyboard') onInputModeChange?.('keyboard');
+    }
+    setIsEnglishVisible(true);
+  };
 
   // 명시적으로 힌트나 정답을 요청했을 때는 문장도 함께 표시합니다.
   useEffect(() => {
@@ -62,7 +78,7 @@ export const QuizContent = ({
             </span>
             {question.questionNumber != null && (
               <span className="px-2 py-1 md:px-3 md:py-1.5 bg-primary text-white rounded-full text-xs md:text-sm font-bold shadow-soft">
-                {question.questionNumber}
+                No.{question.questionNumber}
               </span>
             )}
             <span className="px-2 py-1 md:px-3 md:py-1.5 bg-primary text-white rounded-full text-xs md:text-sm font-bold shadow-soft">
@@ -111,7 +127,7 @@ export const QuizContent = ({
               type="button"
               aria-expanded={false}
               aria-controls="quiz-english-sentence"
-              onClick={() => setIsEnglishVisible(true)}
+              onClick={handleRevealQuiz}
               className="w-full rounded-xl bg-background px-4 py-6 text-center text-sm text-text-secondary transition-colors hover:bg-accent-pale active:bg-accent-pale focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               <span className="quiz-reveal-prompt inline-flex items-center gap-2 text-base font-bold text-primary">
@@ -122,6 +138,7 @@ export const QuizContent = ({
           )}
           <div
             id="quiz-english-sentence"
+            ref={englishSentenceRef}
             hidden={!isEnglishVisible}
             onClick={(event) => {
               // 빈칸 입력과 음성 모드의 빈칸 선택은 기존 동작을 유지합니다.
