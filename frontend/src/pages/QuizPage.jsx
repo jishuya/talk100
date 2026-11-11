@@ -294,6 +294,23 @@ const QuizPage = () => {
   }, [question?.id, inputMode, quizMode]);
 
 
+  // Wait for microphone shutdown so the reward is audible and never recorded.
+  useEffect(() => {
+    if (quizMode !== 'grading' || isVoiceListening || !question?.id) return;
+    const reward = answerStreak.correct(question.id);
+    if (!reward) return;
+    playEffectSound(reward.sound);
+    if ([3, 5, 10].includes(reward.count)) {
+      setStreakMilestone({ count: reward.count, sessionId });
+    }
+  }, [quizMode, isVoiceListening, question?.id, answerStreak, sessionId]);
+
+  useEffect(() => {
+    if (!streakMilestone) return;
+    const timer = setTimeout(() => setStreakMilestone(null), 1800);
+    return () => clearTimeout(timer);
+  }, [streakMilestone]);
+
   // 키워드 입력 변경 핸들러
   const handleKeywordInputChange = (keyword, value) => {
     setKeywordInputs(prev => {
@@ -312,23 +329,6 @@ const QuizPage = () => {
 
       return newInputs;
     });
-
-    // Wait for microphone shutdown so the reward is audible and never recorded.
-  useEffect(() => {
-    if (quizMode !== 'grading' || isVoiceListening || !question?.id) return;
-    const reward = answerStreak.correct(question.id);
-    if (!reward) return;
-    playEffectSound(reward.sound);
-    if ([3, 5, 10].includes(reward.count)) {
-      setStreakMilestone({ count: reward.count, sessionId });
-    }
-  }, [quizMode, isVoiceListening, question?.id, answerStreak, sessionId]);
-
-  useEffect(() => {
-    if (!streakMilestone) return;
-    const timer = setTimeout(() => setStreakMilestone(null), 1800);
-    return () => clearTimeout(timer);
-  }, [streakMilestone]);
 
   // 1️⃣ 실시간 채점: 개별 키워드 검증
     if (checkKeyword(value, keyword)) {
@@ -387,8 +387,6 @@ const QuizPage = () => {
       if (isAllCorrect) {
         // 채점 결과 설정 (체크마크 표시를 위해)
         submitAnswer(keywordInputs, userAnswer);
-        // 정답 효과음 재생
-        // Success feedback is handled once on entering grading mode.
         // grading 모드로 전환 (자동으로 다음 문제로 이동하지 않음)
         setQuizMode('grading');
       }
@@ -426,7 +424,6 @@ const QuizPage = () => {
 
     if (result.isAllCorrect) {
       // 정답: grading 모드로 전환 (자동 이동 X)
-      // Success feedback is handled once on entering grading mode.
       setQuizMode('grading');
     } else {
       // 오답: 피드백 모달 표시
@@ -483,8 +480,6 @@ const QuizPage = () => {
           if (isVoiceListening) {
             stopVoiceListening();
           }
-          // 정답 효과음 재생
-          // Success feedback is handled once on entering grading mode.
           setQuizMode('grading');
         }
 
