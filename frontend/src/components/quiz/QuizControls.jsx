@@ -108,6 +108,12 @@ export const QuizControls = ({
             </button>
           </div>
         )}
+        {quizMode === 'grading' && (
+          <p className="mb-2 text-center text-xs text-text-secondary">
+            <span className="hidden md:inline">→ 방향키로 다음 문제</span>
+            <span className="md:hidden">왼쪽으로 스와이프하면 다음 문제</span>
+          </p>
+        )}
         {/* 메인 액션 버튼 (문제풀이 모드에서만) */}
         {quizMode === 'solving' && (
           <Button

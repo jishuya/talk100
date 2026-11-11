@@ -1,4 +1,6 @@
 import { createAnswerStreak } from '../utils/answerStreak';
+import { getVisibleKeywords } from '../utils/quizKeywords';
+import { normalizeGradingText } from '../utils/grading';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -155,6 +157,7 @@ const QuizPage = () => {
 
   // 모달 버튼 ref
   const continueButtonRef = useRef(null);
+  const nextQuestionPendingRef = useRef(false);
   const focusKeywordRef = useRef(null); // 빈칸 클릭 시 포커스할 키워드
 
   // 🎵 음원 재생 관련 상태 및 ref
@@ -222,7 +225,7 @@ const QuizPage = () => {
       setIsStarred(question.isWrongAnswer || false);
 
       // 🎲 키워드 랜덤 선택: 백엔드에서 받은 키워드 중 랜덤으로 2개만 선택
-      const keywords = question.keywords || [];
+      const keywords = getVisibleKeywords(question.english, question.keywords || []);
       if (keywords.length > 2) {
         // Fisher-Yates 셔플 알고리즘으로 랜덤 선택
         const shuffled = [...keywords].sort(() => Math.random() - 0.5);
@@ -445,11 +448,12 @@ const QuizPage = () => {
 
       // 음성인식 결과에서 키워드 자동 추출
       const newKeywordInputs = {};
-      const voiceLower = voiceTranscript.toLowerCase();
+      const voiceLower = normalizeGradingText(voiceTranscript);
 
       selectedKeywords.forEach(keyword => {
         const keywordLower = keyword.toLowerCase();
-        const found = voiceLower.includes(keywordLower);
+        const normalizedKeyword = normalizeGradingText(keyword);
+        const found = normalizedKeyword !== '' && voiceLower.includes(normalizedKeyword);
         console.log(`[VoiceGrading] 키워드 "${keyword}" 검색: "${keywordLower}" in "${voiceLower}" = ${found}`);
         if (found) {
           // areAllKeywordsCorrect에서 소문자 키로 조회하므로 소문자로 저장
@@ -636,8 +640,9 @@ const QuizPage = () => {
 
   // 다음 문제로 이동 (뱃지 체크 포함)
   const handleNextQuestion = useCallback(async () => {
+    if (!sessionId || nextQuestionPendingRef.current) return;
+    nextQuestionPendingRef.current = true;
     try {
-      if (!sessionId) return;
 
       // 🎯 문제 완료 시 question_attempts 테이블에 기록 (모든 카테고리)
       if (question?.id) {
@@ -669,6 +674,8 @@ const QuizPage = () => {
 
     } catch {
       setAlertModal({ isOpen: true, message: '다음 문제 로드에 실패했습니다.', icon: '❌' });
+    } finally {
+      nextQuestionPendingRef.current = false;
     }
   }, [sessionId, question?.id, moveToNext]);
 
@@ -686,22 +693,56 @@ const QuizPage = () => {
     moveToNext();
   }, [moveToNext]);
 
-  // Enter 키로 다음 문제 넘어가기 (grading 모드일 때만)
+  // 정답 확인 후 방향키 또는 왼쪽 스와이프로 다음 문제로 이동.
   useEffect(() => {
-    const handleKeyPress = (e) => {
-      // 모달이 열려 있을 때는 이 핸들러를 무시
-      if (e.key === 'Enter' && quizMode === 'grading' && !showGoalAchievedModal && newBadges.length === 0 && !levelUpInfo) {
-        // input이나 textarea에 포커스되어 있지 않을 때만
-        const activeElement = document.activeElement;
-        if (activeElement?.tagName !== 'INPUT' && activeElement?.tagName !== 'TEXTAREA') {
-          handleNextQuestion();
-        }
-      }
+    if (quizMode !== 'grading' || showGoalAchievedModal || newBadges.length > 0 ||
+        levelUpInfo || wrongAnswerFeedback || alertModal.isOpen) return;
+
+    const hasOpenDialog = () => document.querySelector('[role="dialog"], [aria-modal="true"]');
+    const handleKeyPress = (event) => {
+      if (event.defaultPrevented || event.repeat || event.isComposing ||
+          event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || hasOpenDialog()) return;
+      if (event.key !== 'ArrowRight' && event.key !== 'Enter') return;
+      const activeElement = document.activeElement;
+      // 기존 Enter 동작은 유지하고, 방향키는 정답 입력란에 포커스가 있어도 사용 가능.
+      if (event.key === 'Enter' && (activeElement?.matches('input, textarea') || activeElement?.isContentEditable)) return;
+      event.preventDefault();
+      handleNextQuestion();
     };
 
+    let touchStart = null;
+    const handleTouchStart = (event) => {
+      touchStart = null;
+      if (event.touches.length !== 1 || hasOpenDialog() ||
+          !event.target.closest('.quiz-container') ||
+          event.target.closest('input, textarea, select, [contenteditable="true"]')) return;
+      const touch = event.touches[0];
+      touchStart = { id: touch.identifier, x: touch.clientX, y: touch.clientY };
+    };
+    const handleTouchEnd = (event) => {
+      const start = touchStart;
+      touchStart = null;
+      if (!start || event.touches.length > 0 || hasOpenDialog()) return;
+      const touch = Array.from(event.changedTouches).find(item => item.identifier === start.id);
+      if (!touch) return;
+      const distanceX = start.x - touch.clientX;
+      const distanceY = Math.abs(start.y - touch.clientY);
+      // 탭이나 세로 스크롤은 제외하고 왼쪽으로 60px 이상 밀었을 때만 이동.
+      if (distanceX >= 60 && distanceX > distanceY * 1.5) handleNextQuestion();
+    };
+    const cancelTouch = () => { touchStart = null; };
+
     window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [quizMode, handleNextQuestion, showGoalAchievedModal, newBadges, levelUpInfo]);
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd, { passive: true });
+    window.addEventListener('touchcancel', cancelTouch);
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchend', handleTouchEnd);
+      window.removeEventListener('touchcancel', cancelTouch);
+    };
+  }, [quizMode, handleNextQuestion, showGoalAchievedModal, newBadges, levelUpInfo, wrongAnswerFeedback, alertModal.isOpen]);
 
   // 목표 달성 모달이 열릴 때 "계속하기" 버튼에 자동 포커스
   useEffect(() => {

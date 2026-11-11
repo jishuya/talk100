@@ -12,10 +12,13 @@
  * @param {string} keyword - 정답 키워드
  * @returns {boolean} 정답 여부
  */
+export const normalizeGradingText = text => text.toLowerCase().trim().replace(/-/g, '');
+
 export const validateKeywordRealtime = (userInput, keyword) => {
   if (!userInput || !keyword) return false;
 
-  return userInput.toLowerCase().trim() === keyword.toLowerCase().trim();
+  const expected = normalizeGradingText(keyword);
+  return expected !== '' && normalizeGradingText(userInput) === expected;
 };
 
 /**
@@ -82,14 +85,14 @@ export const gradeVoiceAnswer = (userAnswer, keywords) => {
     };
   }
 
-  const normalizedAnswer = userAnswer.toLowerCase().trim();
+  const normalizedAnswer = normalizeGradingText(userAnswer);
   const matchedKeywords = [];
   const missedKeywords = [];
 
   keywords.forEach(keyword => {
-    const normalizedKeyword = keyword.toLowerCase().trim();
+    const normalizedKeyword = normalizeGradingText(keyword);
 
-    if (normalizedAnswer.includes(normalizedKeyword)) {
+    if (normalizedKeyword && normalizedAnswer.includes(normalizedKeyword)) {
       matchedKeywords.push(keyword);
     } else {
       missedKeywords.push(keyword);
