@@ -19,7 +19,7 @@ export default function SoundSettings() {
       </label>
       <p className="text-xs text-text-secondary mt-2">이 기기에 저장되며, 학습 음성 볼륨은 따로 유지돼요.</p>
       <div className="flex flex-wrap gap-2 mt-3">
-        {[['click', '클릭음'], ['select', '선택음'], ['favorite', '즐겨찾기음'], ['streak3', '3연속'], ['streak5', '5연속'], ['streak10', '10연속'], ['dayComplete', 'Day 완료']].map(([type, label]) => (
+        {[['quizStart', '퀴즈 시작음'], ['click', '클릭음'], ['select', '선택음'], ['favorite', '즐겨찾기음'], ['streak3', '3연속'], ['streak5', '5연속'], ['streak10', '10연속'], ['dayComplete', 'Day 완료']].map(([type, label]) => (
           <Button key={type} size="sm" variant="secondary" sound={false} disabled={!enabled || volume === 0}
             onClick={() => playEffectSound(type)}>{label} 듣기</Button>
         ))}

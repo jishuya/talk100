@@ -11,14 +11,24 @@ test('rewards respect priority, settings and recording suppression', async () =>
     pause() { this.paused = true; }
   };
   const source = fs.readFileSync(new URL('../src/utils/soundEffects.js', import.meta.url), 'utf8')
+    .replace("import quizStartUrl from '../assets/sounds/quiz-start.mp3';", "const quizStartUrl = 'https://ui.example.test/assets/quiz-start.mp3';")
     .replace("import { ENV } from '../config/environment';", "const ENV = { API_BASE_URL: 'https://example.test' };");
   const effects = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
   effects.preloadEffectSounds();
   for (const audio of audios) {
-    const relative = new URL(audio.src).pathname.replace('/audio/', '');
-    assert.ok(fs.existsSync(new URL(`../../backend/public/audio/${relative}`, import.meta.url)), relative);
+    const path = new URL(audio.src).pathname;
+    const location = path.startsWith('/assets/')
+      ? new URL('../src/assets/sounds/quiz-start.mp3', import.meta.url)
+      : new URL(`../../backend/public${path}`, import.meta.url);
+    assert.ok(fs.existsSync(location), path);
   }
   const audioFor = name => audios.find(a => a.src.endsWith(name));
+  effects.playEffectSound('quizStart');
+  const start = audioFor('quiz-start.mp3');
+  assert.equal(new URL(start.src).host, 'ui.example.test');
+  assert.equal(start.plays, 1);
+  effects.playEffectSound('click');
+  assert.equal(start.paused, false);
   effects.playEffectSound('streak3');
   assert.equal(audioFor('streak-3.wav').plays, 1);
   effects.playEffectSound('dayComplete');

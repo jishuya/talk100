@@ -1,9 +1,11 @@
+import quizStartUrl from '../assets/sounds/quiz-start.mp3';
 import { ENV } from '../config/environment';
 
 const STORAGE_KEY = 'talk100-sound-settings';
 const defaults = { enabled: true, volume: 0.35 };
 const sounds = {
   click: 'kenney/click_003.wav',
+  quizStart: 'kenney-jingles/quiz-start.mp3',
   select: 'kenney/select_001.wav',
   favorite: 'kenney/pluck_001.wav',
   success: 'successed.mp3',
@@ -54,7 +56,11 @@ export const setEffectRecording = (value) => {
 };
 const getAudio = (type) => {
   if (!cache.has(type)) {
-    const audio = new Audio(`${ENV.API_BASE_URL}/audio/effect/${sounds[type]}`);
+    // Start feedback ships with the UI, independently of backend deployment.
+    const url = type === 'quizStart'
+      ? quizStartUrl
+      : `${ENV.API_BASE_URL}/audio/effect/${sounds[type]}`;
+    const audio = new Audio(url);
     audio.preload = 'auto';
     cache.set(type, audio);
   }
@@ -65,7 +71,7 @@ export const preloadEffectSounds = () => {
 };
 export const playEffectSound = (type) => {
   if (!sounds[type] || !settings.enabled || settings.volume === 0 || recording) return;
-  const interaction = ['click', 'select', 'favorite'].includes(type);
+  const interaction = ['click', 'select', 'favorite', 'quizStart'].includes(type);
   const now = performance.now();
   const priority = priorities[type] || 0;
   if (priority > 0 && priority < rewardPriority && now < rewardUntil) return;
@@ -79,7 +85,7 @@ export const playEffectSound = (type) => {
   const audio = getAudio(type);
   audio.currentTime = 0;
   audio.volume = settings.volume;
-  audio.dataset.reward = interaction ? '' : 'true';
+  audio.dataset.reward = interaction && type !== 'quizStart' ? '' : 'true';
   active = audio;
   audio.play().catch(() => { if (active === audio) active = null; });
 };

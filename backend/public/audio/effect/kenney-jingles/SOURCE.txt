@@ -1,0 +1,12 @@
+Kenney Music Jingles — short quiz start cue
+Creator: Kenney (https://kenney.nl)
+Official source: https://kenney.nl/assets/music-jingles
+Creator upload: https://opengameart.org/content/85-short-music-jingles
+Downloaded: https://opengameart.org/sites/default/files/jingleSounds_Kenney.zip
+Downloaded on: 2026-11-11 (Asia/Seoul)
+License: CC0; personal, educational and commercial use permitted; credit optional.
+Source: OGG/jingles_PIZZA/jingles_PIZZA10.ogg
+Original preserved in backend/public/audio/effect/kenney-jingles/jingles_PIZZA10.ogg.
+Modification: tempo 1.25x with original pitch, maximum 0.75s; 5ms fade-in, fade-out from 0.66s for 0.09s. No layered melodies.
+MP3 encoding: FFmpeg libmp3lame q:a 2, 44100Hz.
+Runtime asset: frontend/src/assets/sounds/quiz-start.mp3 (Vite versioned URL).

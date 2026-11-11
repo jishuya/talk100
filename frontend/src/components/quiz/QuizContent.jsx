@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { IconButton } from '../ui/Button';
 import { getIcon } from '../../utils/iconMap';
 
@@ -31,6 +31,15 @@ export const QuizContent = ({
   gradingResult = null,
   isVoiceListening = false
 }) => {
+  const [isEnglishVisible, setIsEnglishVisible] = useState(false);
+
+  // 명시적으로 힌트나 정답을 요청했을 때는 문장도 함께 표시합니다.
+  useEffect(() => {
+    if (showHint || showAnswer || quizMode === 'grading') {
+      setIsEnglishVisible(true);
+    }
+  }, [showHint, showAnswer, quizMode]);
+
   // userAnswer 변경 로그
   useEffect(() => {
   }, [userAnswer, keywordInputs, gradingResult]);
@@ -93,7 +102,30 @@ export const QuizContent = ({
         </div>
         {/* 정답 영역 */}
         <div className="pt-4 border-t border-dashed border-gray-border">
-          <div className="text-base leading-relaxed text-text-primary flex flex-wrap items-center gap-1">
+          {!isEnglishVisible && (
+            <button
+              type="button"
+              aria-expanded={false}
+              aria-controls="quiz-english-sentence"
+              onClick={() => setIsEnglishVisible(true)}
+              className="w-full rounded-xl bg-background px-4 py-6 text-center text-sm text-text-secondary transition-colors hover:bg-accent-pale active:bg-accent-pale focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              <span className="quiz-reveal-prompt inline-flex items-center gap-2 text-base font-bold text-primary">
+                <span aria-hidden="true" className="text-2xl">🐣</span>
+                <span>퀴즈보기</span>
+              </span>
+            </button>
+          )}
+          <div
+            id="quiz-english-sentence"
+            hidden={!isEnglishVisible}
+            onClick={(event) => {
+              // 빈칸 입력과 음성 모드의 빈칸 선택은 기존 동작을 유지합니다.
+              if (event.target.closest('input, [data-quiz-blank]')) return;
+              setIsEnglishVisible(false);
+            }}
+          >
+          <div className="text-base leading-relaxed text-text-primary flex flex-wrap items-center gap-1 cursor-pointer">
             {question.english?.split(' ').map((word, index) => {
               const cleanWord = word.replace(/[.,!?]/g, '');
               const isKeyword = question.keywords?.some(keyword =>
@@ -175,6 +207,7 @@ export const QuizContent = ({
                 return (
                   <span
                     key={index}
+                    data-quiz-blank
                     onClick={handleBlankClick}
                     className={`px-2 py-0.5 rounded font-semibold cursor-pointer hover:opacity-80 transition-opacity ${
                       hasInput
@@ -212,6 +245,7 @@ export const QuizContent = ({
               if (index === 0) return [curr];
               return [...acc, ' ', curr];
             }, [])}
+          </div>
           </div>
         </div>
         {/* 힌트/정답은 이제 노란색 blank 안에 직접 표시됨 */}
@@ -265,7 +299,9 @@ export const QuizContent = ({
           ) : (
             <span className="text-text-secondary italic text-sm">
               {inputMode === 'keyboard'
-                ? '노란 박스를 클릭해서 답변을 작성하세요'
+                ? isEnglishVisible
+                  ? '노란 박스를 클릭해서 답변을 작성하세요'
+                  : '먼저 말해본 뒤, 영어 문장을 열어 빈칸을 채워보세요'
                 : '아래 정답말하기 버튼을 눌러주세요'
               }
             </span>

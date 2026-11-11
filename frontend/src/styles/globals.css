@@ -314,3 +314,20 @@ body {
 .animate-celebrate {
   animation: celebrate 1.5s ease-in-out infinite;
 }
+
+/* A gentle invitation to reveal the quiz, with both icon and label moving together. */
+@keyframes quizRevealFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  45% { transform: translateY(-4px) scale(1.04); }
+  65% { transform: translateY(0) scale(1); }
+}
+
+.quiz-reveal-prompt {
+  animation: quizRevealFloat 2.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quiz-reveal-prompt {
+    animation: none;
+  }
+}

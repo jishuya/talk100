@@ -1048,6 +1048,7 @@ const QuizPage = () => {
 
       {/* 메인 콘텐츠 */}
       <QuizContent
+        key={`${sessionId}-${currentQuestionIndex}`}
         question={questionWithSelectedKeywords}
         userAnswer={userAnswer}
         inputMode={inputMode}

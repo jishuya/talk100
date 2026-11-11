@@ -78,7 +78,7 @@ const BottomNavigation = () => {
   };
 
   const handleNavClick = (path) => {
-    playEffectSound('select');
+    playEffectSound(path === '/quiz' ? 'quizStart' : 'select');
     // '학습' 버튼을 클릭한 경우 오늘의 퀴즈 시작
     if (path === '/quiz') {
       startTodayQuiz();

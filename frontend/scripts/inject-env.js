@@ -18,7 +18,7 @@ const __dirname = path.dirname(__filename);
 const distPath = path.join(__dirname, '../dist/index.html');
 
 // 환경 변수 가져오기
-const VITE_API_BASE_URL = process.env.VITE_API_BASE_URL || 'https://talk100-production.up.railway.app';
+const VITE_API_BASE_URL = process.env.VITE_API_BASE_URL || 'https://api.talk100.work';
 
 console.log('\n🔧 [inject-env] 환경 변수 주입 시작...');
 console.log(`📍 Target file: ${distPath}`);

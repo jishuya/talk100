@@ -1,3 +1,4 @@
+import { playEffectSound } from '../utils/soundEffects';
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -121,6 +122,7 @@ const HomePage = () => {
 
   // 오늘의 퀴즈 클릭 핸들러
   const handleTodayQuizClick = async () => {
+    playEffectSound('quizStart');
     // 100% 달성 시 추가 학습 확인 모달 표시
     if (progressData?.percentage >= 100) {
       setShowAdditionalLearningModal(true);
@@ -387,6 +389,7 @@ const HomePage = () => {
               <Button
                 ref={continueButtonRef}
                 variant="primary"
+                sound="quizStart"
                 onClick={handleConfirmAdditionalLearning}
                 className="flex-1 py-2.5 focus:ring-4 focus:ring-primary/50 transition-all"
               >
