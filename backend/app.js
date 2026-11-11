@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const { getAllowedFrontendOrigins } = require('./config/frontendOrigins');
 const helmet = require('helmet');
 const compression = require('compression');
 const morgan = require('morgan');
@@ -49,10 +50,10 @@ app.use(helmet({
 
 // CORS 설정
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: getAllowedFrontendOrigins(),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Range'],
 }));
 
 // 기본 미들웨어
@@ -90,11 +91,7 @@ app.use('/audio', express.static(path.join(__dirname, 'public/audio'), {
   lastModified: true,  // Last-Modified 헤더 활성화
   immutable: true,     // 캐시 불변성 (음원은 변경되지 않음)
   setHeaders: (res, filePath) => {
-    // CORS 헤더 명시적 설정
-    res.setHeader('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'http://localhost:5173');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Range');
+    // Use the global CORS middleware for both API and audio responses.
     // 음원 파일용 Content-Type (자동 설정되지만 명시)
     if (filePath.endsWith('.mp3')) {
       res.setHeader('Content-Type', 'audio/mpeg');
