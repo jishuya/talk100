@@ -195,7 +195,7 @@ const QuizPage = () => {
     startListening: startVoiceListening,
     stopListening: stopVoiceListening,
     resetTranscript: resetVoiceTranscript
-  } = useVoiceInput();
+  } = useVoiceInput({ enabled: inputMode === 'voice' && quizMode === 'solving' && Boolean(question) });
 
   // 틀린 문제 토글 mutation
   const toggleWrongAnswerMutation = useToggleWrongAnswer();

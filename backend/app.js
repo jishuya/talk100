@@ -28,8 +28,6 @@ const avatarRoutes = require('./routes/avatar');
 const settingsRoutes = require('./routes/settings');
 const mypageRoutes = require('./routes/mypage');
 const backupRoutes = require('./routes/backup');
-const { createVoiceRouter } = require('./routes/voice');
-const { verifyToken } = require('./middleware/auth');
 
 const app = express();
 
@@ -127,7 +125,6 @@ app.use('/auth', authRoutes);
 app.use('/api/mypage', mypageRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/quiz', quizRoutes);
-app.use('/api/voice', createVoiceRouter({ authenticate: verifyToken }));
 app.use('/api/progress', progressRoutes);
 app.use('/api/avatar', avatarRoutes);
 app.use('/api/settings', settingsRoutes);

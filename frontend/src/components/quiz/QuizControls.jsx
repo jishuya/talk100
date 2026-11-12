@@ -119,10 +119,10 @@ export const QuizControls = ({
         )}
         {quizMode === 'solving' && inputMode === 'voice' && (
           <p role="status" aria-live="polite" className="mb-2 text-center text-sm text-text-secondary">
-            {isVoicePreparing ? '마이크를 준비하고 있어요. 안내가 바뀌면 말씀해주세요.'
+            {isVoicePreparing ? '브라우저에서 마이크를 연결하고 있어요.'
               : isVoiceCapturing ? '이제 말씀하세요. 끝나면 녹음 중지를 눌러주세요.'
               : isVoiceStopping ? '인식 결과를 확인하고 있어요. 잠시 기다려주세요.'
-              : '버튼을 누른 뒤 ‘이제 말씀하세요’ 안내를 기다려주세요.'}
+              : '버튼을 누르고 정답을 말씀해주세요.'}
           </p>
         )}
         {/* 메인 액션 버튼 (문제풀이 모드에서만) */}
@@ -145,7 +145,7 @@ export const QuizControls = ({
                 {isVoicePreparing ? (
                   <>
                     <span aria-hidden="true" className="h-5 w-5 rounded-full border-2 border-current border-t-transparent animate-spin" />
-                    <span>마이크 준비 중 · 취소</span>
+                    <span>녹음 시작 · 취소</span>
                   </>
                 ) : isVoiceStopping ? (
                   <span>인식 마무리 중...</span>
