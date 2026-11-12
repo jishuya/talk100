@@ -22,3 +22,14 @@ test('missing letters and empty answers remain incorrect', () => {
   assert.equal(validateKeywordRealtime('FIRST', 'first'), true);
   assert.equal(validateKeywordRealtime('-', '-'), false);
 });
+
+test('voice accepts punctuation, smart apostrophes and repeated whitespace', () => {
+  assert.equal(gradeVoiceAnswer('Well, I DON’T   know!', ["don't know"]).isAllCorrect, true);
+  assert.equal(gradeVoiceAnswer('Hello, world!', ['hello world']).isAllCorrect, true);
+});
+
+test('voice matches whole words and phrases, never substrings or empty punctuation', () => {
+  const result = gradeVoiceAnswer('the shopper is here', ['he', 'shop', 'here', '!!!']);
+  assert.deepEqual(result.matchedKeywords, ['here']);
+  assert.equal(gradeVoiceAnswer('I do know', ["don't know"]).isAllCorrect, false);
+});

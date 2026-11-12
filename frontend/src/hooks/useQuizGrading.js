@@ -57,7 +57,10 @@ export const useQuizGrading = (question, inputMode) => {
     if (inputMode === 'keyboard') {
       result = gradeKeyboardAnswer(keywordInputs, question.keywords);
     } else {
-      result = gradeVoiceAnswer(userAnswer, question.keywords);
+      // Preserve confirmed keywords from earlier recording attempts.
+      const confirmedKeywords = question.keywords.filter(keyword =>
+        validateKeywordRealtime(keywordInputs[keyword.toLowerCase().trim()], keyword));
+      result = gradeVoiceAnswer([userAnswer, ...confirmedKeywords].join(' '), question.keywords);
     }
 
     setGradingResult(result);

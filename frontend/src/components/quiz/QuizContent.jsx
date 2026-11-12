@@ -15,6 +15,7 @@ const getCategoryName = (categoryId) => {
 export const QuizContent = ({
   question,
   userAnswer = '',
+  voiceStatus = 'idle',
   inputMode = 'voice',
   quizMode = 'solving',
   showHint = false,
@@ -317,7 +318,8 @@ export const QuizContent = ({
         <div className="text-base leading-relaxed text-text-primary min-h-[24px]">
           {isVoiceListening ? (
             <span className="text-primary italic animate-pulse">
-              🎤 듣는 중입니다...
+              {userAnswer || (voiceStatus === 'starting' ? '🎤 마이크 준비 중입니다...'
+                : voiceStatus === 'stopping' ? '🎤 인식 결과를 확인하고 있습니다...' : '🎤 이제 말씀하세요')}
             </span>
           ) : userAnswer ? (
             userAnswer

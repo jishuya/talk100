@@ -1,6 +1,6 @@
 import { createAnswerStreak } from '../utils/answerStreak';
 import { getVisibleKeywords } from '../utils/quizKeywords';
-import { normalizeGradingText } from '../utils/grading';
+import { containsVoiceKeyword } from '../utils/grading';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -188,6 +188,8 @@ const QuizPage = () => {
   const {
     isListening: isVoiceListening,
     transcript: voiceTranscript,
+    interimTranscript: voiceInterimTranscript,
+    status: voiceStatus,
     isSupported: isVoiceSupported,
     error: voiceError,
     startListening: startVoiceListening,
@@ -239,7 +241,7 @@ const QuizPage = () => {
 
   // 🎵 음원 자동재생: 정답을 맞췄을 때 (grading 모드로 전환될 때) 실행
   useEffect(() => {
-    if (quizMode !== 'grading' || !audioRef.current || !audioUrl) {
+    if (quizMode !== 'grading' || isVoiceListening || !audioRef.current || !audioUrl) {
       return;
     }
 
@@ -263,7 +265,7 @@ const QuizPage = () => {
     // 효과음(0.7초) 재생 후 영문 음원 재생
     const timer = setTimeout(playAudio, 700);
     return () => clearTimeout(timer);
-  }, [quizMode, audioUrl]); // grading 모드로 전환될 때마다 재생
+  }, [quizMode, audioUrl, isVoiceListening]); // grading 모드로 전환될 때마다 재생
 
   // 음원 로딩 완료 처리
   const handleAudioCanPlay = useCallback(() => {
@@ -400,6 +402,7 @@ const QuizPage = () => {
   // focusKeyword: 빈칸 클릭 시 포커스할 키워드 (선택적)
   const handleInputModeChange = (mode, focusKeyword = null) => {
     focusKeywordRef.current = focusKeyword; // 포커스할 키워드 저장
+    if (mode !== 'voice') resetVoiceTranscript();
     setInputMode(mode);
     // 키워드 입력값은 유지 (음성모드에서 입력한 값이 키보드모드에서도 보이도록)
     // setKeywordInputs는 초기화하지 않음
@@ -434,52 +437,26 @@ const QuizPage = () => {
     }
   }, [keywordInputs, userAnswer, submitAnswer, answerStreak, question?.id]);
 
-  // 🎤 음성인식 결과를 userAnswer에 반영 및 키워드 자동 추출
+  // Only confirmed words count; interim words are displayed without grading.
   useEffect(() => {
-    if (voiceTranscript && inputMode === 'voice' && selectedKeywords.length > 0) {
-      setUserAnswer(voiceTranscript);
-
-      // 음성인식 결과에서 키워드 자동 추출
-      const newKeywordInputs = {};
-      const voiceLower = normalizeGradingText(voiceTranscript);
-
-      selectedKeywords.forEach(keyword => {
-        const keywordLower = keyword.toLowerCase();
-        const normalizedKeyword = normalizeGradingText(keyword);
-        const found = normalizedKeyword !== '' && voiceLower.includes(normalizedKeyword);
-        if (found) {
-          // areAllKeywordsCorrect에서 소문자 키로 조회하므로 소문자로 저장
-          newKeywordInputs[keywordLower] = keyword;
-        }
-      });
-
-
-      // 키워드 입력값 업데이트 (함수형 업데이트로 이전 키워드 유지)
-      setKeywordInputs(prevInputs => {
-        const mergedKeywordInputs = {
-          ...prevInputs,  // 이전에 맞춘 키워드 유지
-          ...newKeywordInputs  // 새로 맞춘 키워드 추가
-        };
-
-
-        // 음성인식 결과로 자동 채점 (병합된 키워드로 채점)
-        const allCorrect = checkAllKeywords(mergedKeywordInputs);
-
-        submitAnswer(mergedKeywordInputs, voiceTranscript);
-
-        // checkAllKeywords 결과를 우선 사용
-        if (allCorrect) {
-          // 정답이면 녹음 중지하고 grading 모드로 전환
-          if (isVoiceListening) {
-            stopVoiceListening();
-          }
-          setQuizMode('grading');
-        }
-
-        return mergedKeywordInputs;
-      });
+    if (!voiceTranscript || inputMode !== 'voice' || quizMode !== 'solving' || !selectedKeywords.length) return;
+    setUserAnswer(voiceTranscript);
+    const merged = { ...keywordInputs };
+    selectedKeywords.forEach(keyword => {
+      if (containsVoiceKeyword(voiceTranscript, keyword)) {
+        merged[keyword.toLowerCase()] = keyword;
+      }
+    });
+    const changed = selectedKeywords.some(keyword =>
+      merged[keyword.toLowerCase()] !== keywordInputs[keyword.toLowerCase()]);
+    if (changed) setKeywordInputs(merged);
+    submitAnswer(merged, voiceTranscript);
+    if (checkAllKeywords(merged)) {
+      stopVoiceListening();
+      setQuizMode('grading');
     }
-  }, [voiceTranscript, inputMode, selectedKeywords, submitAnswer, checkAllKeywords, isVoiceListening, stopVoiceListening]);
+  }, [voiceTranscript, inputMode, quizMode, selectedKeywords, keywordInputs,
+    submitAnswer, checkAllKeywords, stopVoiceListening]);
 
   // 🎤 음성인식 에러 표시
   useEffect(() => {
@@ -495,6 +472,11 @@ const QuizPage = () => {
       return;
     }
 
+    if (voiceStatus === 'starting') {
+      resetVoiceTranscript();
+      return;
+    }
+
     if (isVoiceListening) {
       // 녹음 중지
       stopVoiceListening();
@@ -507,10 +489,10 @@ const QuizPage = () => {
       }
 
       // 녹음 시작 (부분 정답이더라도 다시 시도 가능)
-      resetVoiceTranscript();
+      audioRef.current?.pause();
       startVoiceListening();
     }
-  }, [isVoiceListening, isVoiceSupported, startVoiceListening, stopVoiceListening, resetVoiceTranscript, userAnswer, gradingResult, keywordInputs]);
+  }, [isVoiceListening, voiceStatus, isVoiceSupported, startVoiceListening, stopVoiceListening, resetVoiceTranscript, userAnswer, gradingResult]);
 
   // 메인 액션 버튼 핸들러
   const handleMainAction = useCallback(() => {
@@ -1075,7 +1057,10 @@ const QuizPage = () => {
       <QuizContent
         key={`${sessionId}-${currentQuestionIndex}`}
         question={questionWithSelectedKeywords}
-        userAnswer={userAnswer}
+        userAnswer={inputMode === 'voice' && isVoiceListening
+          ? [voiceTranscript, voiceInterimTranscript].filter(Boolean).join(' ')
+          : userAnswer}
+        voiceStatus={voiceStatus}
         inputMode={inputMode}
         quizMode={quizMode}
         showHint={showHint}
@@ -1101,6 +1086,7 @@ const QuizPage = () => {
         inputMode={inputMode}
         quizMode={quizMode}
         isRecording={isVoiceListening}
+        voiceStatus={voiceStatus}
         showHint={showHint}
         showAnswer={showAnswer}
         onMainAction={handleMainAction}

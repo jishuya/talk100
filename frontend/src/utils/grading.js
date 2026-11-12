@@ -14,6 +14,18 @@
  */
 export const normalizeGradingText = text => text.toLowerCase().trim().replace(/-/g, '');
 
+// Voice punctuation varies between browser recognition services.
+export const normalizeVoiceText = text => normalizeGradingText(text)
+  .replace(/[‘’ʼ]/g, "'")
+  .replace(/[^a-z0-9'\s]/g, ' ')
+  .replace(/\s+/g, ' ')
+  .trim();
+
+export const containsVoiceKeyword = (answer, keyword) => {
+  const expected = normalizeVoiceText(keyword);
+  return expected !== '' && ` ${normalizeVoiceText(answer)} `.includes(` ${expected} `);
+};
+
 export const validateKeywordRealtime = (userInput, keyword) => {
   if (!userInput || !keyword) return false;
 
@@ -85,14 +97,11 @@ export const gradeVoiceAnswer = (userAnswer, keywords) => {
     };
   }
 
-  const normalizedAnswer = normalizeGradingText(userAnswer);
   const matchedKeywords = [];
   const missedKeywords = [];
 
   keywords.forEach(keyword => {
-    const normalizedKeyword = normalizeGradingText(keyword);
-
-    if (normalizedKeyword && normalizedAnswer.includes(normalizedKeyword)) {
+    if (containsVoiceKeyword(userAnswer, keyword)) {
       matchedKeywords.push(keyword);
     } else {
       missedKeywords.push(keyword);

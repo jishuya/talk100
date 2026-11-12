@@ -11,6 +11,7 @@ export const QuizControls = ({
   inputMode = 'voice',
   quizMode = 'solving',
   isRecording = false,
+  voiceStatus = 'idle',
   onMainAction,
   onPlayAudio,
   onPlayAudioSlow, // 0.5배속 재생
@@ -18,10 +19,12 @@ export const QuizControls = ({
   onShowFullAnswer,
   onSkipQuestion,
   showHint = false,
-  showAnswer = false,
-  gradingResult = null
+  showAnswer = false
 }) => {
   const [clickedButton, setClickedButton] = useState(null);
+  const isVoicePreparing = inputMode === 'voice' && voiceStatus === 'starting';
+  const isVoiceStopping = inputMode === 'voice' && voiceStatus === 'stopping';
+  const isVoiceCapturing = inputMode === 'voice' && voiceStatus === 'listening';
 
   // 버튼 클릭 핸들러 (애니메이션 효과)
   const handleButtonClick = (buttonName, callback) => {
@@ -114,25 +117,42 @@ export const QuizControls = ({
             <span className="md:hidden">왼쪽으로 스와이프하면 다음 문제</span>
           </p>
         )}
+        {quizMode === 'solving' && inputMode === 'voice' && (
+          <p role="status" aria-live="polite" className="mb-2 text-center text-sm text-text-secondary">
+            {isVoicePreparing ? '마이크를 준비하고 있어요. 안내가 바뀌면 말씀해주세요.'
+              : isVoiceCapturing ? '이제 말씀하세요. 끝나면 녹음 중지를 눌러주세요.'
+              : isVoiceStopping ? '인식 결과를 확인하고 있어요. 잠시 기다려주세요.'
+              : '버튼을 누른 뒤 ‘이제 말씀하세요’ 안내를 기다려주세요.'}
+          </p>
+        )}
         {/* 메인 액션 버튼 (문제풀이 모드에서만) */}
         {quizMode === 'solving' && (
           <Button
             sound={false}
+            disabled={isVoiceStopping}
+            aria-busy={isVoicePreparing || isVoiceStopping}
             onClick={onMainAction}
             size="lg"
             shape="pill"
             className={`w-full py-3 md:py-6 text-base md:text-lg font-bold flex items-center justify-center gap-2 transition-all duration-300 ${
-              isRecording
+              isVoiceCapturing
                 ? 'bg-error hover:bg-red-600 animate-pulse'
                 : 'btn-primary'
             }`}
           >
             {inputMode === 'voice' ? (
               <>
-                {isRecording ? (
+                {isVoicePreparing ? (
+                  <>
+                    <span aria-hidden="true" className="h-5 w-5 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                    <span>마이크 준비 중 · 취소</span>
+                  </>
+                ) : isVoiceStopping ? (
+                  <span>인식 마무리 중...</span>
+                ) : isRecording ? (
                   <>
                     {getIcon('IoStop', { size: '2xl' })}
-                    <span>녹음 중지</span>
+                    <span>이제 말씀하세요 · 녹음 중지</span>
                   </>
                 ) : (
                   <>
