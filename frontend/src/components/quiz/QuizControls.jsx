@@ -2,6 +2,7 @@ import { playEffectSound } from '../../utils/soundEffects';
 import { useState } from 'react';
 import Button from '../ui/Button';
 import { getIcon } from '../../utils/iconMap';
+import './QuizControls.css';
 
 // 공통 버튼 스타일
 const BUTTON_BASE_STYLE = "flex-1 p-3 bg-white border border-gray-border rounded-brand-sm transition-all duration-200 active:bg-primary-light active:scale-[0.97] active:border-primary flex flex-col items-center gap-1";
@@ -34,6 +35,47 @@ export const QuizControls = ({
     callback?.();
   };
 
+  if (quizMode === 'solving' && inputMode === 'voice') {
+    const capturing = isVoiceCapturing || isRecording;
+    const label = isVoicePreparing ? '마이크 연결 취소' : isVoiceStopping ? '인식 마무리 중' : capturing ? '듣고 있어요' : '눌러서 말하기';
+    return (
+      <div className="fixed bottom-0 left-0 right-0 z-100 rounded-t-[2rem] bg-white shadow-[0_-8px_32px_rgba(0,0,0,0.06)] md:left-1/2 md:w-[768px] md:-translate-x-1/2 lg:w-[900px]">
+        <div className="grid grid-cols-[1fr_144px_1fr] items-end gap-1 px-3 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+          <div className="flex justify-center" data-onboarding="hint-answer">
+            <button type="button" aria-pressed={showHint} onClick={() => { playEffectSound('select'); onShowFirstLetters?.(); }} className={`flex min-h-16 flex-col items-center justify-center gap-1 rounded-xl px-2 text-xs focus-visible:outline-primary ${showHint ? 'bg-primary-light text-primary-dark' : 'text-text-secondary'}`}>
+              {getIcon('AiOutlineQuestionCircle', { size: '2xl' })}<span>힌트보기</span>
+            </button>
+          </div>
+          <div className="-mt-12 flex flex-col items-center gap-3">
+            <div className={`quiz-mic ${capturing ? 'quiz-mic--recording' : isVoicePreparing || isVoiceStopping ? 'quiz-mic--busy' : 'quiz-mic--ready'}`}>
+              <span className="quiz-mic__wave quiz-mic__wave--first" aria-hidden="true" />
+              <span className="quiz-mic__wave quiz-mic__wave--second" aria-hidden="true" />
+              <button type="button" onClick={onMainAction} disabled={isVoiceStopping} aria-label={capturing ? '말하기 완료 · 녹음 중지' : label} aria-busy={isVoicePreparing || isVoiceStopping} aria-pressed={capturing} aria-describedby="quiz-voice-status" className="quiz-mic__button">
+                {isVoicePreparing || isVoiceStopping ? (
+                  <span aria-hidden="true" className="h-10 w-10 animate-spin rounded-full border-4 border-current border-t-transparent" />
+                ) : capturing ? (
+                  <svg aria-hidden="true" width="44" height="44" viewBox="0 0 48 48" fill="currentColor"><rect x="12" y="12" width="24" height="24" rx="6" /></svg>
+                ) : (
+                  <svg aria-hidden="true" width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="3.8" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="18" y="5" width="12" height="25" rx="6" />
+                    <path d="M11 22v3a13 13 0 0 0 26 0v-3M24 38v6M17 44h14" />
+                  </svg>
+                )}
+              </button>
+            </div>
+            <span className={`quiz-mic__label ${capturing ? 'text-error' : 'text-primary'}`}>{label}</span>
+          </div>
+          <button type="button" aria-pressed={showAnswer} onClick={() => { playEffectSound('select'); onShowFullAnswer?.(); }} className={`flex min-h-16 flex-col items-center justify-center gap-1 rounded-xl px-2 text-xs focus-visible:outline-primary ${showAnswer ? 'bg-primary-light text-primary-dark' : 'text-text-secondary'}`}>
+            {getIcon('AiOutlineCheckCircle', { size: '2xl' })}<span>정답보기</span>
+          </button>
+        </div>
+        <p id="quiz-voice-status" role="status" aria-live="polite" className="sr-only">
+          {isVoicePreparing ? '마이크를 연결하고 있어요. 다시 누르면 취소돼요.' : capturing ? '듣고 있어요. 다 말하면 가운데 버튼을 눌러주세요.' : isVoiceStopping ? '말씀하신 답을 확인하고 있어요.' : ''}
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed bottom-0 left-0 right-0 md:left-1/2 md:-translate-x-1/2 md:w-[768px] lg:w-[900px] bg-white shadow-[0_-2px_8px_rgba(0,0,0,0.08)] z-100">
       <div className="p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] md:p-4 md:pb-[calc(1rem+env(safe-area-inset-bottom))]">
@@ -64,37 +106,31 @@ export const QuizControls = ({
           </div>
         )}
 
-        {/* 컨트롤 버튼들 (채점모드에서만) - 다시듣기 x0.5, x1, 다음문제 */}
+        {/* 컨트롤 버튼들 (채점모드에서만) - 다시 듣기 x0.8, x1.0, 다음 문제 */}
         {quizMode === 'grading' && (
           <div className="flex gap-2 mb-3">
-            <button
-              onClick={() => handleButtonClick('playAudioSlow', onPlayAudioSlow)}
-              className={`flex-1 p-3 border rounded-brand-sm transition-all duration-200 flex flex-col items-center gap-1 ${
-                clickedButton === 'playAudioSlow'
-                  ? 'bg-primary border-primary scale-95 shadow-lg'
-                  : 'bg-white border-gray-border hover:border-primary active:scale-[0.97]'
-              }`}
-            >
-              {getIcon('IoVolumeHigh', {
-                size: 'xl',
-                className: clickedButton === 'playAudioSlow' ? 'text-white animate-pulse' : 'text-gray-600'
-              })}
-              <span className={`${LABEL_STYLE} ${clickedButton === 'playAudioSlow' ? 'text-white font-bold' : ''}`}>다시 듣기 x0.8</span>
-            </button>
-            <button
-              onClick={() => handleButtonClick('playAudio', onPlayAudio)}
-              className={`flex-1 p-3 border rounded-brand-sm transition-all duration-200 flex flex-col items-center gap-1 ${
-                clickedButton === 'playAudio'
-                  ? 'bg-primary border-primary scale-95 shadow-lg'
-                  : 'bg-white border-gray-border hover:border-primary active:scale-[0.97]'
-              }`}
-            >
-              {getIcon('IoVolumeHigh', {
-                size: 'xl',
-                className: clickedButton === 'playAudio' ? 'text-white animate-pulse' : 'text-gray-600'
-              })}
-              <span className={`${LABEL_STYLE} ${clickedButton === 'playAudio' ? 'text-white font-bold' : ''}`}>다시 듣기 x1</span>
-            </button>
+            {[
+              { name: 'playAudioSlow', speed: '0.8', action: onPlayAudioSlow, tone: 'slow' },
+              { name: 'playAudio', speed: '1.0', action: onPlayAudio, tone: 'normal' }
+            ].map(({ name, speed, action, tone }) => (
+              <button
+                key={name}
+                type="button"
+                aria-label={`다시 듣기 ${speed}배속`}
+                onClick={() => handleButtonClick(name, action)}
+                className={`quiz-replay quiz-replay--${tone} ${clickedButton === name ? 'quiz-replay--pressed' : ''}`}
+              >
+                <span className="quiz-replay__icon" aria-hidden="true">
+                  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M11 5 6 9H3v6h3l5 4V5Z" />
+                    <path d="M15 9a5 5 0 0 1 0 6" />
+                    {tone === 'normal' && <path d="M18 6a9 9 0 0 1 0 12" />}
+                  </svg>
+                </span>
+                <span className="quiz-replay__label">다시 듣기</span>
+                <span className="quiz-replay__speed">x{speed}</span>
+              </button>
+            ))}
             <button
               onClick={() => handleButtonClick('skipQuestion', onSkipQuestion)}
               className={`flex-1 p-3 border rounded-brand-sm transition-all duration-200 flex flex-col items-center gap-1 ${

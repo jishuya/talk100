@@ -5,6 +5,8 @@ const STORAGE_KEY = 'talk100-sound-settings';
 const defaults = { enabled: true, volume: 0.35 };
 const sounds = {
   click: 'kenney/click_003.wav',
+  recordingStart: 'kenney/pluck_001.wav',
+  recordingStop: 'kenney/click_001.wav',
   quizStart: 'kenney-jingles/quiz-start.mp3',
   select: 'kenney/select_001.wav',
   favorite: 'rewards/favorite.wav',
@@ -52,7 +54,7 @@ export const updateSoundSettings = (updates) => {
 };
 export const setEffectRecording = (value) => {
   recording = value;
-  if (value) stopEffectSound();
+  if (value && !active?.dataset.recordingCue) stopEffectSound();
 };
 const getAudio = (type) => {
   if (!cache.has(type)) {
@@ -70,14 +72,15 @@ export const preloadEffectSounds = () => {
   Object.keys(sounds).forEach(type => getAudio(type));
 };
 export const playEffectSound = (type) => {
-  if (!sounds[type] || !settings.enabled || settings.volume === 0 || recording) return;
+  const recordingCue = type === 'recordingStart' || type === 'recordingStop';
+  if (!sounds[type] || !settings.enabled || settings.volume === 0 || (recording && !recordingCue)) return;
   const interaction = ['click', 'select', 'favorite', 'quizStart'].includes(type);
   const now = performance.now();
   const priority = priorities[type] || 0;
   if (priority > 0 && priority < rewardPriority && now < rewardUntil) return;
   if (interaction && (now - lastInteraction < 80 || (active && !active.paused && active.dataset.reward))) return;
   if (interaction) lastInteraction = now;
-  else {
+  else if (!recordingCue) {
     rewardPriority = priority;
     rewardUntil = now + 1500;
   }
@@ -85,7 +88,8 @@ export const playEffectSound = (type) => {
   const audio = getAudio(type);
   audio.currentTime = 0;
   audio.volume = settings.volume;
-  audio.dataset.reward = interaction && type !== 'quizStart' ? '' : 'true';
+  audio.dataset.reward = !recordingCue && (!interaction || type === 'quizStart') ? 'true' : '';
+  audio.dataset.recordingCue = recordingCue ? 'true' : '';
   active = audio;
   audio.play().catch(() => { if (active === audio) active = null; });
 };

@@ -11,7 +11,8 @@ import { CategoryQuizProgressBar } from '../components/quiz/CategoryQuizProgress
 import { QuizContent } from '../components/quiz/QuizContent';
 import { QuizControls } from '../components/quiz/QuizControls';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
-import Modal, { ModalBody } from '../components/ui/Modal';
+import Modal from '../components/ui/Modal';
+import './GoalAchievement.css';
 import BadgeModal from '../components/ui/BadgeModal';
 import LevelUpModal from '../components/quiz/LevelUpModal';
 import { WrongAnswerModal } from '../components/quiz/WrongAnswerModal';
@@ -480,6 +481,7 @@ const QuizPage = () => {
     if (isVoiceListening) {
       // 녹음 중지
       stopVoiceListening();
+      playEffectSound('recordingStop');
     } else {
       // 이미 답변이 있고 모든 키워드가 정답이면 grading 모드로 전환 (제출)
       // 부분 정답인 경우는 다시 녹음할 수 있도록 허용
@@ -490,6 +492,7 @@ const QuizPage = () => {
 
       // 녹음 시작 (부분 정답이더라도 다시 시도 가능)
       audioRef.current?.pause();
+      playEffectSound('recordingStart');
       startVoiceListening();
     }
   }, [isVoiceListening, voiceStatus, isVoiceSupported, startVoiceListening, stopVoiceListening, resetVoiceTranscript, userAnswer, gradingResult]);
@@ -1090,6 +1093,7 @@ const QuizPage = () => {
         showHint={showHint}
         showAnswer={showAnswer}
         onMainAction={handleMainAction}
+        onInputModeChange={handleInputModeChange}
         onPlayAudio={handlePlayAudio}
         onPlayAudioSlow={handlePlayAudioSlow}
         onShowFirstLetters={handleShowFirstLetters}
@@ -1098,83 +1102,60 @@ const QuizPage = () => {
         gradingResult={gradingResult}
       />
 
-      {/* 🎉 목표 달성 모달 - 샘플 10 스타일 */}
+      {/* 목표 달성 모달 */}
       <Modal
         isOpen={showGoalAchievedModal}
         onClose={handleGoToHome}
         size="sm"
         closeOnOverlayClick={false}
         showCloseButton={false}
-        className="rounded-2xl overflow-hidden"
+        className="goal-achievement"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="goal-achievement-title"
+        aria-describedby="goal-achievement-description"
       >
-        <div className="bg-gradient-to-br from-primary-light via-primary to-primary-dark py-8 px-6 relative">
-          <div className="text-center relative z-10">
-            <div className="inline-block mb-3 animate-bounce">
-              {getIcon('IoPartyPopper', { size: '5xl' })}
-            </div>
-            <h2 className="text-2xl font-bold text-white drop-shadow-lg">
-              {session?.category === 7 ? '랜덤복습 완료!' : '오늘의 목표 달성!'}
-            </h2>
+        <div className="goal-achievement__hero">
+          <div className="goal-achievement__confetti" aria-hidden="true">
+            <i /><i /><i /><i /><i /><i />
           </div>
-          {/* 장식 효과 */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+          <div className="goal-achievement__celebration" aria-hidden="true">🎉</div>
+          <div className="goal-achievement__badge">✦ 목표 달성</div>
+          <h2 id="goal-achievement-title">
+            {session?.category === 7 ? '랜덤복습 완료!' : '오늘의 목표 달성!'}
+          </h2>
+          <p id="goal-achievement-description">
+            {session?.category === 7 ? '랜덤 문제를 모두 풀었어요. 대단해요!' : '오늘의 학습을 완벽하게 마쳤어요. 대단해요!'}
+          </p>
         </div>
 
-        <ModalBody className="py-6 px-6">
-          <div className="space-y-5">
-            {/* 민트 그라데이션 카드 - 랜덤 퀴즈가 아닌 경우에만 표시 */}
-            {streakInfo && session?.category !== 7 && (
-              <div className="flex gap-3">
-                <div className="flex-1 bg-gradient-to-br from-primary/10 to-primary/20 rounded-xl p-4 border border-primary/30 hover:shadow-lg transition-shadow">
-                  <div className="flex justify-center mb-2">
-                    {getIcon('IoFire', { size: '3xl' })}
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">{streakInfo.current_streak}일</div>
-                    <div className="text-xs text-gray-600 mt-1">연속 학습</div>
-                  </div>
-                </div>
-
-                <div className="flex-1 bg-gradient-to-br from-primary/10 to-primary/20 rounded-xl p-4 border border-primary/30 hover:shadow-lg transition-shadow">
-                  <div className="flex justify-center mb-2">
-                    {getIcon('IoTrophy', { size: '3xl' })}
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">{streakInfo.best_streak}일</div>
-                    <div className="text-xs text-gray-600 mt-1">최고 기록</div>
-                  </div>
-                </div>
+        <div className="goal-achievement__body">
+          {streakInfo && session?.category !== 7 && (
+            <div className="goal-achievement__stats">
+              <div className="goal-achievement__stat goal-achievement__stat--streak">
+                <span className="goal-achievement__stat-icon" aria-hidden="true">🔥</span>
+                <strong>{streakInfo.current_streak}일</strong>
+                <span>연속 학습</span>
               </div>
-            )}
-
-            {/* 질문 */}
-            <p className="text-center text-base text-gray-600 pt-2">
-              {session?.category === 7
-                ? '새로운 랜덤 문제로 계속하시겠습니까?'
-                : '추가 학습을 하시겠습니까?'}
-            </p>
-
-            {/* 버튼 */}
-            <div className="flex gap-3">
-              <Button
-                variant="secondary"
-                onClick={handleGoToHome}
-                className="flex-1 py-2.5 focus:ring-4 focus:ring-gray-300 transition-all"
-              >
-                홈으로
-              </Button>
-              <Button
-                ref={continueButtonRef}
-                variant="primary"
-                onClick={handleContinueAdditionalLearning}
-                className="flex-1 py-2.5 focus:ring-4 focus:ring-primary/50 transition-all"
-              >
-                계속하기
-              </Button>
+              <div className="goal-achievement__stat goal-achievement__stat--best">
+                <span className="goal-achievement__stat-icon" aria-hidden="true">🏆</span>
+                <strong>{streakInfo.best_streak}일</strong>
+                <span>최고 기록</span>
+              </div>
             </div>
+          )}
+          <p className="goal-achievement__question">
+            {session?.category === 7 ? '새로운 랜덤 문제로 계속하시겠습니까?' : '추가 학습을 하시겠습니까?'}
+          </p>
+          <div className="goal-achievement__actions">
+            <Button variant="secondary" onClick={handleGoToHome} className="goal-achievement__home">
+              홈으로
+            </Button>
+            <Button ref={continueButtonRef} variant="primary" onClick={handleContinueAdditionalLearning} className="goal-achievement__continue">
+              계속하기 <span className="goal-achievement__arrow" aria-hidden="true">›</span>
+            </Button>
           </div>
-        </ModalBody>
+        </div>
       </Modal>
 
       {/* 🎊 레벨업 모달 */}

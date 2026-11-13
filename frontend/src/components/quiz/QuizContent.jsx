@@ -68,7 +68,7 @@ export const QuizContent = ({
     );
   }
   return (
-    <main className="flex-1 overflow-y-auto p-3 pb-32 md:p-4 -webkit-overflow-scrolling-touch">
+    <main className={`flex-1 overflow-y-auto p-3 md:p-4 -webkit-overflow-scrolling-touch ${inputMode === 'voice' && quizMode === 'solving' ? 'pb-[calc(16rem+env(safe-area-inset-bottom))] md:pb-[calc(16rem+env(safe-area-inset-bottom))]' : 'pb-32 md:pb-32'}`}>
       {/* 퀴즈 박스 */}
       <div className="bg-white rounded-brand shadow-soft p-3 mb-3 md:p-4 md:mb-4">
         {/* Day, 카테고리, 문제 번호 + 즐겨찾기/틀린 문제 버튼 */}
@@ -289,27 +289,37 @@ export const QuizContent = ({
             <span>내 답변</span>
           </div>
           {/* 입력 모드 토글 - 모바일: inline, 데스크탑: absolute */}
-          <div className="flex bg-background rounded-brand-full p-0.5 md:absolute md:top-3 md:right-3" data-onboarding="input-mode">
+          <div className="flex items-center rounded-xl bg-[#f1f4f8] p-1 md:absolute md:top-3 md:right-3" role="group" aria-label="답변 입력 방식" data-onboarding="input-mode">
             <button
+              type="button"
+              aria-pressed={inputMode === 'voice'}
               onClick={() => onInputModeChange('voice')}
-              className={`px-3 py-1.5 rounded-[18px] text-xs transition-all duration-200 flex items-center gap-1 ${
+              className={`min-h-6 px-2.5 py-1 rounded-lg text-[11px] leading-4 font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 focus-visible:outline-primary ${
                 inputMode === 'voice'
-                  ? 'bg-white text-primary font-semibold shadow-sm'
+                  ? 'bg-white text-[#00a78b] shadow-sm'
                   : 'text-text-secondary'
               }`}
             >
-              <span>🎤</span>
+              <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="9" y="2" width="6" height="12" rx="3" />
+                <path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3M9 22h6" />
+              </svg>
               <span>음성</span>
             </button>
             <button
+              type="button"
+              aria-pressed={inputMode === 'keyboard'}
               onClick={() => onInputModeChange('keyboard')}
-              className={`px-3 py-1.5 rounded-[18px] text-xs transition-all duration-200 flex items-center gap-1 ${
+              className={`min-h-6 px-2.5 py-1 rounded-lg text-[11px] leading-4 font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 focus-visible:outline-primary ${
                 inputMode === 'keyboard'
-                  ? 'bg-white text-primary font-semibold shadow-sm'
+                  ? 'bg-white text-[#00a78b] shadow-sm'
                   : 'text-text-secondary'
               }`}
             >
-              {getIcon('noto:keyboard', { size: 'sm' })}
+              <svg aria-hidden="true" width="14" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="5" width="20" height="14" rx="2" />
+                <path d="M6 9h.01M10 9h.01M14 9h.01M18 9h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M7 16h10" />
+              </svg>
               <span>키보드</span>
             </button>
           </div>
