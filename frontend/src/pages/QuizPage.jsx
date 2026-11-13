@@ -1,4 +1,5 @@
 import { createAnswerStreak } from '../utils/answerStreak';
+import { createQuizAudioPlayer, getQuizAudioError } from '../utils/quizAudio';
 import { getVisibleKeywords } from '../utils/quizKeywords';
 import { containsVoiceKeyword } from '../utils/grading';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
@@ -154,6 +155,8 @@ const QuizPage = () => {
   const [streakInfo, setStreakInfo] = useState(null);
   const [newBadges, setNewBadges] = useState([]);
   const [levelUpInfo, setLevelUpInfo] = useState(null);
+  const [spellingAttempt, setSpellingAttempt] = useState(0);
+  const [submittedSpellingInputs, setSubmittedSpellingInputs] = useState(null);
   const [wrongAnswerFeedback, setWrongAnswerFeedback] = useState(null); // { correctCount, totalCount }
   const [alertModal, setAlertModal] = useState({ isOpen: false, message: '', icon: '' });
 
@@ -165,7 +168,8 @@ const QuizPage = () => {
   // 🎵 음원 재생 관련 상태 및 ref
   const audioRef = useRef(null);
   const [isAudioReady, setIsAudioReady] = useState(false);
-  const [audioError, setAudioError] = useState(false);
+  const [audioError, setAudioError] = useState(null);
+  const audioPlayer = useMemo(() => createQuizAudioPlayer(), []);
 
   // 음원 URL 생성
   const audioUrl = useMemo(() => {
@@ -240,42 +244,40 @@ const QuizPage = () => {
     }
   }, [question?.id]);
 
-  // 🎵 음원 자동재생: 정답을 맞췄을 때 (grading 모드로 전환될 때) 실행
   useEffect(() => {
-    if (quizMode !== 'grading' || isVoiceListening || !audioRef.current || !audioUrl) {
-      return;
-    }
+    setIsAudioReady(false);
+    setAudioError(null);
+    return () => audioPlayer.cancel();
+  }, [audioUrl, audioPlayer]);
 
-    const playAudio = async () => {
-      try {
-        setAudioError(false);
+  const playQuizAudio = useCallback((rate = 1) => {
+    const audio = audioRef.current;
+    if (!audio || !audioUrl) return;
+    return audioPlayer.play(audio, rate, {
+      isCurrent: () => audioRef.current === audio,
+      onReady: () => { setIsAudioReady(true); setAudioError(null); },
+      onError: setAudioError
+    });
+  }, [audioUrl, audioPlayer]);
 
-        // 1배속으로 설정
-        audioRef.current.playbackRate = 1.0;
-        // 음원 로드
-        audioRef.current.load();
+  // Preserve preloading; restarting load() here used to interrupt pending playback.
+  useEffect(() => {
+    if (quizMode !== 'grading' || isVoiceListening || !audioUrl) return;
+    const timer = setTimeout(() => playQuizAudio(1), 700);
+    return () => { clearTimeout(timer); audioPlayer.cancel(); };
+  }, [quizMode, audioUrl, isVoiceListening, playQuizAudio, audioPlayer]);
 
-        // 자동 재생 시도
-        await audioRef.current.play();
-
-      } catch {
-        setAudioError(true);
-      }
-    };
-
-    // 효과음(0.7초) 재생 후 영문 음원 재생
-    const timer = setTimeout(playAudio, 700);
-    return () => clearTimeout(timer);
-  }, [quizMode, audioUrl, isVoiceListening]); // grading 모드로 전환될 때마다 재생
-
-  // 음원 로딩 완료 처리
-  const handleAudioCanPlay = useCallback(() => {
+  const handleAudioCanPlay = useCallback((event) => {
+    if (event.currentTarget !== audioRef.current) return;
     setIsAudioReady(true);
+    setAudioError(null);
   }, []);
 
-  // 음원 에러 처리
-  const handleAudioError = useCallback(() => {
-    setAudioError(true);
+  const handleAudioError = useCallback((event) => {
+    const audio = event.currentTarget;
+    if (audio !== audioRef.current || !audio.error) return;
+    const message = getQuizAudioError(null, audio.error);
+    if (message) setAudioError(message);
   }, []);
 
   // 첫 문제 로드 시 키워드 input에 자동 포커스
@@ -318,8 +320,14 @@ const QuizPage = () => {
     return () => clearTimeout(timer);
   }, [streakMilestone]);
 
+  useEffect(() => {
+    setSpellingAttempt(0);
+    setSubmittedSpellingInputs(null);
+  }, [sessionId, question?.id]);
+
   // 키워드 입력 변경 핸들러
   const handleKeywordInputChange = (keyword, value) => {
+    setSubmittedSpellingInputs(null);
     setKeywordInputs(prev => {
       const newInputs = {
         ...prev,
@@ -431,12 +439,17 @@ const QuizPage = () => {
       // 오답: 피드백 모달 표시
       answerStreak.fail(question?.id);
       playEffectSound('error');
-      setWrongAnswerFeedback({
-        correctCount: result.correctCount,
-        totalCount: result.totalCount
-      });
+      if (inputMode === 'keyboard') {
+        setSpellingAttempt(attempt => attempt + 1);
+        setSubmittedSpellingInputs({ ...keywordInputs });
+        const firstWrong = Object.entries(result.details).find(([, detail]) => !detail.isCorrect)?.[0];
+        const inputs = document.querySelectorAll('input[data-keyword]');
+        [...inputs].find(input => input.dataset.keyword === firstWrong?.toLowerCase().trim())?.focus();
+      } else {
+        setWrongAnswerFeedback({ correctCount: result.correctCount, totalCount: result.totalCount });
+      }
     }
-  }, [keywordInputs, userAnswer, submitAnswer, answerStreak, question?.id]);
+  }, [keywordInputs, userAnswer, submitAnswer, answerStreak, question?.id, inputMode]);
 
   // Only confirmed words count; interim words are displayed without grading.
   useEffect(() => {
@@ -491,11 +504,12 @@ const QuizPage = () => {
       }
 
       // 녹음 시작 (부분 정답이더라도 다시 시도 가능)
+      audioPlayer.cancel();
       audioRef.current?.pause();
       playEffectSound('recordingStart');
       startVoiceListening();
     }
-  }, [isVoiceListening, voiceStatus, isVoiceSupported, startVoiceListening, stopVoiceListening, resetVoiceTranscript, userAnswer, gradingResult]);
+  }, [isVoiceListening, voiceStatus, isVoiceSupported, startVoiceListening, stopVoiceListening, resetVoiceTranscript, userAnswer, gradingResult, audioPlayer]);
 
   // 메인 액션 버튼 핸들러
   const handleMainAction = useCallback(() => {
@@ -757,45 +771,9 @@ const QuizPage = () => {
     return () => window.removeEventListener('keydown', handleModalKeyPress);
   }, [showGoalAchievedModal]);
 
-  // 🔁 수동 음원 재생 (다시 듣기 버튼 - 1배속)
-  const handlePlayAudio = useCallback(async () => {
-    if (!audioRef.current || !audioUrl) {
-      setAlertModal({ isOpen: true, message: '음원을 찾을 수 없습니다.', icon: '🔇' });
-      return;
-    }
-
-    try {
-      // 1배속 설정
-      audioRef.current.playbackRate = 1.0;
-      // 처음부터 재생
-      audioRef.current.currentTime = 0;
-      await audioRef.current.play();
-      setAudioError(false);
-    } catch {
-      setAudioError(true);
-      setAlertModal({ isOpen: true, message: '오디오 재생에 실패했습니다.', icon: '🔇' });
-    }
-  }, [audioUrl]);
-
-  // 🔁 수동 음원 재생 (다시 듣기 버튼 - 0.8배속)
-  const handlePlayAudioSlow = useCallback(async () => {
-    if (!audioRef.current || !audioUrl) {
-      setAlertModal({ isOpen: true, message: '음원을 찾을 수 없습니다.', icon: '🔇' });
-      return;
-    }
-
-    try {
-      // 0.8배속 설정
-      audioRef.current.playbackRate = 0.8;
-      // 처음부터 재생
-      audioRef.current.currentTime = 0;
-      await audioRef.current.play();
-      setAudioError(false);
-    } catch {
-      setAudioError(true);
-      setAlertModal({ isOpen: true, message: '오디오 재생에 실패했습니다.', icon: '🔇' });
-    }
-  }, [audioUrl]);
+  // Manual playback also invalidates any older pending playback result.
+  const handlePlayAudio = useCallback(() => playQuizAudio(1), [playQuizAudio]);
+  const handlePlayAudioSlow = useCallback(() => playQuizAudio(0.8), [playQuizAudio]);
 
   // 힌트 보기 (첫 글자) - 토글 기능
   const handleShowFirstLetters = () => {
@@ -1004,14 +982,17 @@ const QuizPage = () => {
       <QuizOnboarding />
 
       {streakMilestone?.sessionId === sessionId && (
-        <div role="status" className="fixed top-24 left-1/2 -translate-x-1/2 z-[110] rounded-full bg-primary px-5 py-3 text-white font-bold shadow-lg motion-safe:animate-bounce pointer-events-none">
-          ✨ {streakMilestone.count}문제 연속 정답!
+        <div role="status" className="quiz-streak-celebration fixed top-24 left-1/2 -translate-x-1/2 z-[110] pointer-events-none">
+          <span className="quiz-streak-celebration__sparkle" aria-hidden="true">✦</span>
+          <span>{streakMilestone.count}문제 연속 정답!</span>
+          <span className="quiz-streak-celebration__sparkle" aria-hidden="true">✧</span>
         </div>
       )}
 
       {/* 🎵 숨겨진 Audio 엘리먼트 (자동재생용) */}
       {audioUrl && (
         <audio
+          key={audioUrl}
           ref={audioRef}
           src={audioUrl}
           onCanPlay={handleAudioCanPlay}
@@ -1050,7 +1031,8 @@ const QuizPage = () => {
           {audioError && (
             <div className="bg-error/10 backdrop-blur-sm px-3 py-2 rounded-lg shadow-md border border-error/30 flex items-center gap-2">
               {getIcon('IoWarning', { size: 'sm', className: 'text-error' })}
-              <span className="text-xs text-error">음원 로드 실패</span>
+              <span className="text-xs text-error" role="status">{audioError}</span>
+              <button type="button" onClick={handlePlayAudio} className="shrink-0 rounded-md bg-white px-2 py-1 text-xs font-bold text-primary focus-visible:outline-primary">다시 시도</button>
             </div>
           )}
         </div>
@@ -1069,6 +1051,8 @@ const QuizPage = () => {
         showHint={showHint}
         showAnswer={showAnswer}
         keywordInputs={keywordInputs}
+        spellingAttempt={spellingAttempt}
+        submittedSpellingInputs={submittedSpellingInputs}
         isFavorite={isFavorite}
         isStarred={isStarred}
         gradingResult={gradingResult}

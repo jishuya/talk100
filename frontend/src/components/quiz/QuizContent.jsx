@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { IconButton } from '../ui/Button';
 import { getIcon } from '../../utils/iconMap';
+import SpellingFeedback from './SpellingFeedback';
 
 // 카테고리 ID를 이름으로 변환하는 함수
 const getCategoryName = (categoryId) => {
@@ -21,6 +22,8 @@ export const QuizContent = ({
   showHint = false,
   showAnswer = false,
   keywordInputs = {},
+  spellingAttempt = 0,
+  submittedSpellingInputs = null,
   onKeywordInputChange,
   onKeywordKeyDown,
   onInputModeChange,
@@ -52,10 +55,10 @@ export const QuizContent = ({
 
   // 명시적으로 힌트나 정답을 요청했을 때는 문장도 함께 표시합니다.
   useEffect(() => {
-    if (showHint || showAnswer || quizMode === 'grading') {
+    if (showHint || showAnswer || quizMode === 'grading' || spellingAttempt > 0) {
       setIsEnglishVisible(true);
     }
-  }, [showHint, showAnswer, quizMode]);
+  }, [showHint, showAnswer, quizMode, spellingAttempt]);
 
   // userAnswer 변경 로그
   useEffect(() => {
@@ -70,7 +73,7 @@ export const QuizContent = ({
   return (
     <main className={`flex-1 overflow-y-auto p-3 md:p-4 -webkit-overflow-scrolling-touch ${inputMode === 'voice' && quizMode === 'solving' ? 'pb-[calc(16rem+env(safe-area-inset-bottom))] md:pb-[calc(16rem+env(safe-area-inset-bottom))]' : 'pb-32 md:pb-32'}`}>
       {/* 퀴즈 박스 */}
-      <div className="bg-white rounded-brand shadow-soft p-3 mb-3 md:p-4 md:mb-4">
+      <div className={`rounded-brand shadow-soft p-3 mb-3 md:p-4 md:mb-4 transition-colors duration-200 ${inputMode === 'keyboard' && quizMode === 'solving' && submittedSpellingInputs !== null ? 'bg-rose-50 ring-1 ring-rose-100' : 'bg-white'}`}>
         {/* Day, 카테고리, 문제 번호 + 즐겨찾기/틀린 문제 버튼 */}
         <div className="flex items-center justify-between gap-2 mb-3 md:mb-4">
           <div className="flex flex-wrap gap-1.5 md:gap-2">
@@ -177,8 +180,20 @@ export const QuizContent = ({
 
                 return (
                   <span key={index} className="inline-flex items-center">
+                    <span className="relative inline-flex">
+                    <SpellingFeedback
+                      id={`spelling-${index}`}
+                      value={submittedSpellingInputs?.[keywordKey] ?? ''}
+                      answer={cleanWord}
+                      hidden={isShowingHintOrAnswer || submittedSpellingInputs === null}
+                    />
                     <input
                       type="text"
+                      aria-label="빈칸 답변"
+                      aria-describedby={`spelling-${index}`}
+                      autoComplete="off"
+                      autoCorrect="off"
+                      spellCheck={false}
                       value={displayValue}
                       onChange={(e) => onKeywordInputChange?.(keywordKey, e.target.value)}
                       onKeyDown={(e) => onKeywordKeyDown?.(keywordKey, userInput, e)}
@@ -203,6 +218,7 @@ export const QuizContent = ({
                       placeholder=""
                       data-keyword={keywordKey}
                     />
+                    </span>
                     {punctuation && <span className="ml-0.5">{punctuation}</span>}
                   </span>
                 );

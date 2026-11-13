@@ -109,41 +109,59 @@ export const QuizControls = ({
         {/* 컨트롤 버튼들 (채점모드에서만) - 다시 듣기 x0.8, x1.0, 다음 문제 */}
         {quizMode === 'grading' && (
           <div className="flex gap-2 mb-3">
-            {[
-              { name: 'playAudioSlow', speed: '0.8', action: onPlayAudioSlow, tone: 'slow' },
-              { name: 'playAudio', speed: '1.0', action: onPlayAudio, tone: 'normal' }
-            ].map(({ name, speed, action, tone }) => (
-              <button
-                key={name}
-                type="button"
-                aria-label={`다시 듣기 ${speed}배속`}
-                onClick={() => handleButtonClick(name, action)}
-                className={`quiz-replay quiz-replay--${tone} ${clickedButton === name ? 'quiz-replay--pressed' : ''}`}
-              >
-                <span className="quiz-replay__icon" aria-hidden="true">
-                  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M11 5 6 9H3v6h3l5 4V5Z" />
-                    <path d="M15 9a5 5 0 0 1 0 6" />
-                    {tone === 'normal' && <path d="M18 6a9 9 0 0 1 0 12" />}
-                  </svg>
-                </span>
-                <span className="quiz-replay__label">다시 듣기</span>
-                <span className="quiz-replay__speed">x{speed}</span>
-              </button>
-            ))}
             <button
-              onClick={() => handleButtonClick('skipQuestion', onSkipQuestion)}
+              onClick={() => handleButtonClick('playAudioSlow', onPlayAudioSlow)}
               className={`flex-1 p-3 border rounded-brand-sm transition-all duration-200 flex flex-col items-center gap-1 ${
-                clickedButton === 'skipQuestion'
+                clickedButton === 'playAudioSlow'
                   ? 'bg-primary border-primary scale-95 shadow-lg'
                   : 'bg-white border-gray-border hover:border-primary active:scale-[0.97]'
               }`}
             >
+              <span className="quiz-replay-icon quiz-replay-icon--slow" aria-hidden="true">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M11 5 6 9H3v6h3l5 4V5Z" />
+                  <path d="M15 9a5 5 0 0 1 0 6" />
+                  
+                </svg>
+              </span>
+              <span className="flex items-center justify-center gap-1 text-xs">
+                <span className={`font-bold ${clickedButton === 'playAudioSlow' ? 'text-white' : 'text-text-primary'}`}>다시듣기</span>
+                <span className={`font-bold ${clickedButton === 'playAudioSlow' ? 'text-white' : 'text-[#168ca8]'}`}>x0.8</span>
+              </span>
+            </button>
+            <button
+              onClick={() => handleButtonClick('playAudio', onPlayAudio)}
+              className={`flex-1 p-3 border rounded-brand-sm transition-all duration-200 flex flex-col items-center gap-1 ${
+                clickedButton === 'playAudio'
+                  ? 'bg-primary border-primary scale-95 shadow-lg'
+                  : 'bg-white border-gray-border hover:border-primary active:scale-[0.97]'
+              }`}
+            >
+              <span className="quiz-replay-icon quiz-replay-icon--normal" aria-hidden="true">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M11 5 6 9H3v6h3l5 4V5Z" />
+                  <path d="M15 9a5 5 0 0 1 0 6" />
+                  <path d="M18 6a9 9 0 0 1 0 12" />
+                </svg>
+              </span>
+              <span className="flex items-center justify-center gap-1 text-xs">
+                <span className={`font-bold ${clickedButton === 'playAudio' ? 'text-white' : 'text-text-primary'}`}>다시듣기</span>
+                <span className={`font-bold ${clickedButton === 'playAudio' ? 'text-white' : 'text-[#168d80]'}`}>x1</span>
+              </span>
+            </button>
+            <button
+              onClick={() => handleButtonClick('skipQuestion', onSkipQuestion)}
+              className={`quiz-next-button flex-1 p-3 border rounded-brand-sm transition-all duration-200 flex flex-col items-center gap-1 ${
+                clickedButton === 'skipQuestion'
+                  ? 'bg-primary border-primary scale-95 shadow-lg'
+                  : 'bg-primary border-primary hover:bg-primary-dark active:scale-[0.97]'
+              }`}
+            >
               {getIcon('IoPlayForward', {
                 size: 'xl',
-                className: clickedButton === 'skipQuestion' ? 'text-white animate-pulse' : 'text-gray-600'
+                className: clickedButton === 'skipQuestion' ? 'text-white animate-pulse' : 'text-white'
               })}
-              <span className={`${LABEL_STYLE} ${clickedButton === 'skipQuestion' ? 'text-white font-bold' : ''}`}>다음 문제</span>
+              <span className="text-xs font-bold text-white">다음 문제</span>
             </button>
           </div>
         )}
